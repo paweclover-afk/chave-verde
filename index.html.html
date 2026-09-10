@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chave Verde — Aluguel para brasileiros na Irlanda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A1E;
+    --paper:#F6F1E4;
+    --paper-2:#EFE7D3;
+    --pine:#1F4D3A;
+    --pine-dark:#153529;
+    --sun:#E8A33D;
+    --teal:#3E6B6E;
+    --clay:#C1502E;
+    --line: rgba(27,42,30,0.14);
+    --max: 1120px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    line-height:1.08;
+    margin:0;
+    color:var(--pine-dark);
+  }
+  p{margin:0;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 28px;}
+  img{max-width:100%; display:block;}
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible{
+    outline:3px solid var(--teal);
+    outline-offset:3px;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(246,241,228,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 0;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.25rem;
+    color:var(--pine-dark); text-decoration:none;
+  }
+  .brand svg{width:26px; height:26px;}
+  .nav-links{display:flex; align-items:center; gap:28px;}
+  .nav-links a{font-size:0.95rem; text-decoration:none; color:var(--ink); opacity:0.85;}
+  .nav-links a:hover{opacity:1;}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:12px 22px; border-radius:6px;
+    font-size:0.95rem; font-weight:600;
+    text-decoration:none; border:1px solid transparent;
+    cursor:pointer;
+  }
+  .btn-primary{background:var(--pine); color:var(--paper);}
+  .btn-primary:hover{background:var(--pine-dark);}
+  .btn-ghost{background:transparent; color:var(--pine-dark); border-color:var(--pine-dark);}
+  .btn-ghost:hover{background:var(--pine-dark); color:var(--paper);}
+  .btn-sun{background:var(--sun); color:var(--pine-dark);}
+  .btn-sun:hover{filter:brightness(0.95);}
+
+  /* ---------- hero ---------- */
+  .hero{padding:76px 0 96px;}
+  .hero-grid{
+    display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;
+  }
+  .eyebrow-hero{
+    font-size:0.95rem; color:var(--teal); font-weight:600; margin-bottom:14px;
+  }
+  .hero h1{font-size:clamp(2.1rem, 4vw, 3.15rem); max-width:11.5ch;}
+  .hero .lede{
+    margin-top:22px; font-size:1.12rem; max-width:46ch; color:#3A3A32;
+  }
+  .hero-ctas{display:flex; gap:14px; margin-top:34px; flex-wrap:wrap;}
+  .hero-note{margin-top:18px; font-size:0.88rem; color:#5C5C50;}
+
+  /* postcard mock */
+  .postcard{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow: 6px 6px 0 var(--pine-dark);
+    padding:22px;
+    transform:rotate(-1.4deg);
+    max-width:390px; margin:0 auto;
+  }
+  .postcard-photo{
+    height:170px; border-radius:3px;
+    background: linear-gradient(135deg, #E9CE9B 0%, #DCA85C 45%, #4C7A63 100%);
+    position:relative; overflow:hidden;
+  }
+  .postcard-photo::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.25), transparent 40%),
+      radial-gradient(circle at 80% 75%, rgba(0,0,0,0.15), transparent 45%);
+  }
+  .badge-verified{
+    position:absolute; top:10px; left:10px;
+    background:var(--pine-dark); color:var(--paper);
+    font-size:0.72rem; font-weight:600;
+    padding:5px 10px; border-radius:20px;
+    display:flex; align-items:center; gap:5px;
+    z-index:2;
+  }
+  .badge-verified svg{width:11px; height:11px;}
+  .postcard-body{padding-top:16px;}
+  .postcard-title{font-family:'Fraunces', serif; font-size:1.15rem; font-weight:600; color:var(--pine-dark);}
+  .postcard-meta{font-size:0.88rem; color:#5C5C50; margin-top:4px;}
+  .postcard-foot{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:16px; padding-top:14px; border-top:1px dashed var(--line);
+  }
+  .postcard-price{font-family:'Fraunces', serif; font-weight:600; font-size:1.2rem; color:var(--pine-dark);}
+  .postcard-price span{font-family:'Work Sans',sans-serif; font-weight:500; font-size:0.78rem; color:#5C5C50;}
+  .postcard-tag{
+    font-size:0.78rem; background:var(--paper-2); padding:4px 10px; border-radius:20px; color:#5C5C50;
+  }
+
+  /* ---------- section shells ---------- */
+  section{padding:88px 0;}
+  .section-head{max-width:640px; margin-bottom:52px;}
+  .section-head h2{font-size:clamp(1.6rem, 2.6vw, 2.15rem);}
+  .section-head p{margin-top:16px; font-size:1.05rem; color:#3A3A32;}
+
+  /* ---------- problem / compare ---------- */
+  .problem{background:var(--pine-dark); color:var(--paper);}
+  .problem .section-head h2{color:var(--paper);}
+  .problem .section-head p{color:#D8DDC9;}
+  .compare{
+    display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:stretch;
+  }
+  .compare-col{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:6px; padding:28px;
+  }
+  .compare-col h3{
+    font-family:'Work Sans', sans-serif; font-weight:600; font-size:0.95rem;
+    color:var(--paper); margin-bottom:18px; display:flex; align-items:center; gap:8px;
+  }
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .dot-bad{background:#D9694F;}
+  .dot-good{background:var(--sun);}
+  .chat-bubble{
+    background:rgba(255,255,255,0.07); border-radius:10px;
+    padding:10px 14px; font-size:0.9rem; margin-bottom:10px; max-width:88%;
+    color:#EDEADC;
+  }
+  .chat-bubble.right{margin-left:auto; background:rgba(255,255,255,0.13);}
+  .clear-list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:14px;}
+  .clear-list li{
+    display:flex; gap:12px; align-items:flex-start; font-size:0.95rem; color:#EDEADC;
+  }
+  .clear-list svg{flex-shrink:0; margin-top:3px; width:17px; height:17px; color:var(--sun);}
+
+  /* ---------- how it works ---------- */
+  .steps{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:36px;
+  }
+  .step{border-top:2px solid var(--pine-dark); padding-top:20px;}
+  .step-num{font-family:'Fraunces', serif; font-size:1.6rem; color:var(--sun); font-weight:600;}
+  .step h3{font-size:1.15rem; margin-top:10px;}
+  .step p{margin-top:10px; color:#3A3A32; font-size:0.98rem;}
+
+  /* ---------- listings ---------- */
+  .listings{background:var(--paper-2);}
+  .listing-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:26px;
+  }
+  .listing-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:6px;
+    overflow:hidden;
+  }
+  .listing-photo{
+    height:150px; position:relative;
+  }
+  .listing-photo.p1{background:linear-gradient(135deg,#DCA85C,#4C7A63);}
+  .listing-photo.p2{background:linear-gradient(135deg,#8FA6A0,#2E4B44);}
+  .listing-photo.p3{background:linear-gradient(135deg,#E7C27D,#7A4B3A);}
+  .listing-info{padding:18px;}
+  .listing-city{font-size:0.82rem; color:var(--teal); font-weight:600;}
+  .listing-title{font-family:'Fraunces', serif; font-weight:600; font-size:1.08rem; margin-top:6px; color:var(--pine-dark);}
+  .listing-meta{font-size:0.87rem; color:#5C5C50; margin-top:8px;}
+  .listing-foot{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:16px; padding-top:14px; border-top:1px dashed var(--line);
+  }
+  .listing-price{font-weight:600; color:var(--pine-dark);}
+  .listings-cta{margin-top:32px; text-align:center;}
+  .listing-embed-frame{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px;
+    box-shadow: 4px 4px 0 var(--pine-dark);
+    overflow:hidden;
+  }
+  .listing-embed-frame iframe{
+    border-radius:6px;
+    display:block;
+  }
+
+  /* ---------- advertiser cta ---------- */
+  .advertiser{
+    background:var(--sun);
+  }
+  .advertiser-grid{
+    display:grid; grid-template-columns:1.2fr 0.8fr; gap:40px; align-items:center;
+  }
+  .advertiser h2{font-size:clamp(1.6rem, 2.6vw, 2.1rem); color:var(--pine-dark); max-width:16ch;}
+  .advertiser p{margin-top:16px; font-size:1.02rem; color:#4A3B1C; max-width:48ch;}
+  .advertiser-price{
+    background:var(--pine-dark); color:var(--paper); border-radius:6px; padding:30px;
+  }
+  .advertiser-price .amount{font-family:'Fraunces', serif; font-size:2.4rem; font-weight:600;}
+  .advertiser-price .amount span{font-size:1rem; font-family:'Work Sans',sans-serif; font-weight:500; color:#C9D3C2;}
+  .advertiser-price ul{list-style:none; padding:0; margin:18px 0 24px; display:flex; flex-direction:column; gap:10px; font-size:0.92rem;}
+  .advertiser-price li{display:flex; gap:8px;}
+
+  /* ---------- faq ---------- */
+  .faq-list{display:flex; flex-direction:column; border-top:1px solid var(--line);}
+  .faq-item{border-bottom:1px solid var(--line);}
+  .faq-q{
+    width:100%; text-align:left; background:none; border:none; cursor:pointer;
+    padding:22px 0; display:flex; justify-content:space-between; align-items:center;
+    font-family:'Fraunces', serif; font-size:1.08rem; font-weight:500; color:var(--pine-dark);
+  }
+  .faq-q .icon{
+    width:22px; height:22px; flex-shrink:0; position:relative; margin-left:20px;
+  }
+  .faq-q .icon::before, .faq-q .icon::after{
+    content:""; position:absolute; background:var(--pine-dark);
+    top:50%; left:50%; transform:translate(-50%,-50%);
+  }
+  .faq-q .icon::before{width:14px; height:2px;}
+  .faq-q .icon::after{width:2px; height:14px; transition:transform 0.2s ease;}
+  .faq-item.open .faq-q .icon::after{transform:translate(-50%,-50%) rotate(90deg) scale(0);}
+  .faq-a{
+    max-height:0; overflow:hidden; transition:max-height 0.25s ease;
+  }
+  .faq-item.open .faq-a{max-height:200px;}
+  .faq-a p{padding:0 0 22px; max-width:60ch; color:#3A3A32; font-size:0.98rem;}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--pine-dark); color:#C9D3C2; padding:56px 0 32px;}
+  .foot-grid{
+    display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px;
+  }
+  .foot-brand{font-family:'Fraunces', serif; font-weight:600; font-size:1.2rem; color:var(--paper);}
+  .foot-brand-sub{margin-top:12px; font-size:0.92rem; max-width:32ch; color:#A9B7A0;}
+  footer h4{font-family:'Work Sans',sans-serif; font-size:0.85rem; color:var(--paper); margin-bottom:14px;}
+  footer ul{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px;}
+  footer a{text-decoration:none; font-size:0.92rem; color:#A9B7A0;}
+  footer a:hover{color:var(--paper);}
+  .foot-bottom{
+    margin-top:48px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.12);
+    font-size:0.85rem; color:#8AA083; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+
+  @media (max-width: 880px){
+    .hero-grid, .compare, .advertiser-grid, .foot-grid{grid-template-columns:1fr;}
+    .steps, .listing-grid{grid-template-columns:1fr;}
+    .nav-links{display:none;}
+    .hero{padding:52px 0 64px;}
+    section{padding:64px 0;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{transition:none !important;}
+  }
+
+  /* ---------- auth modal ---------- */
+  .auth-overlay{
+    display:none;
+    position:fixed; inset:0; z-index:100;
+    background:rgba(27,42,30,0.55);
+    align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .auth-overlay.open{display:flex;}
+  .auth-modal{
+    background:var(--paper);
+    border-radius:10px;
+    max-width:400px; width:100%;
+    padding:32px 28px;
+    position:relative;
+    box-shadow: 8px 8px 0 var(--pine-dark);
+  }
+  .auth-close{
+    position:absolute; top:14px; right:16px;
+    background:none; border:none; font-size:1.6rem; line-height:1;
+    color:var(--ink); cursor:pointer; opacity:0.6;
+  }
+  .auth-close:hover{opacity:1;}
+  .auth-tabs{
+    display:flex; gap:8px; margin-bottom:24px;
+    border-bottom:1px solid var(--line);
+  }
+  .auth-tab{
+    flex:1; background:none; border:none; cursor:pointer;
+    padding:10px 0; font-family:'Work Sans',sans-serif; font-weight:600; font-size:0.98rem;
+    color:#8a8a7c; border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .auth-tab.active{color:var(--pine-dark); border-bottom-color:var(--pine);}
+  .auth-form{display:flex; flex-direction:column; gap:16px;}
+  .auth-form label{
+    display:flex; flex-direction:column; gap:6px;
+    font-size:0.88rem; font-weight:600; color:var(--pine-dark);
+  }
+  .auth-form input{
+    font-family:'Work Sans',sans-serif; font-size:0.98rem;
+    padding:11px 12px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; color:var(--ink);
+  }
+  .auth-form input:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  .auth-error{color:#B33A2E; font-size:0.85rem; margin:0; min-height:1em;}
+  .auth-note{margin-top:18px; font-size:0.82rem; color:#5C5C50; text-align:center;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#topo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L3 9V21H21V9L12 2Z" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M9 21V13H15V21" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+      Chave Verde
+    </a>
+    <nav class="nav-links">
+      <a href="#anuncios">Anúncios</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#painel">Meus anúncios</a>
+      <a href="#duvidas">Dúvidas</a>
+    </nav>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <a class="btn btn-ghost" href="#" id="openAuthBtn" onclick="openAuth('login'); return false;">Entrar</a>
+      <a class="btn btn-primary" href="#" onclick="openAuth('signup'); return false;">Anunciar meu quarto</a>
+    </div>
+  </div>
+</header>
+
+<!-- MODAL DE LOGIN / CADASTRO -->
+<div id="authOverlay" class="auth-overlay" onclick="if(event.target===this) closeAuth()">
+  <div class="auth-modal">
+    <button class="auth-close" onclick="closeAuth()" aria-label="Fechar">&times;</button>
+    <div class="auth-tabs" style="display:none;">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Entrar</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Cadastrar</button>
+    </div>
+
+    <form id="loginForm" class="auth-form" onsubmit="return handleLogin(event)">
+      <label>Email
+        <input type="email" id="loginEmail" required placeholder="seu@email.com">
+      </label>
+      <label>Senha
+        <input type="password" id="loginPassword" required placeholder="Sua senha">
+      </label>
+      <p class="auth-error" id="loginError"></p>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Entrar</button>
+      <p class="auth-note" style="margin-top:4px;">Ainda não anuncia com a gente? <a href="#" onclick="switchTab('signup'); return false;" style="text-decoration:underline; color:var(--pine-dark);">Cadastre-se</a></p>
+    </form>
+
+    <form id="signupForm" class="auth-form" style="display:none;" onsubmit="return handleSignup(event)">
+      <label>Nome
+        <input type="text" id="signupNome" required placeholder="Seu nome">
+      </label>
+      <label>WhatsApp
+        <input type="text" id="signupWhatsapp" required placeholder="+353 ...">
+      </label>
+      <label>Email
+        <input type="email" id="signupEmail" required placeholder="seu@email.com">
+      </label>
+      <label>Senha
+        <input type="password" id="signupPassword" required placeholder="Crie uma senha" minlength="6">
+      </label>
+      <p class="auth-error" id="signupError"></p>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Criar conta</button>
+      <p class="auth-note" style="margin-top:4px;">Já tem uma conta? <a href="#" onclick="switchTab('login'); return false;" style="text-decoration:underline; color:var(--pine-dark);">Entrar</a></p>
+    </form>
+
+    <p class="auth-note">Depois de entrar, você poderá publicar e gerenciar seus próprios anúncios.</p>
+  </div>
+</div>
+
+<main id="topo">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow-hero">Feito por brasileiros, pra brasileiros na Irlanda</p>
+        <h1>Ache seu quarto na Irlanda sem enrolação e sem julgamento.</h1>
+        <p class="lede">Chega de rolar grupo de WhatsApp lotado de anúncio repetido e gente pedindo depósito antes de mostrar a casa. Aqui são só anúncios verificados, em português, direto ao ponto.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#anuncios">Ver anúncios disponíveis</a>
+          <a class="btn btn-ghost" href="#" onclick="openAuth('signup'); return false;">Anunciar meu quarto</a>
+        </div>
+        <p class="hero-note">Sem "proof of income"? Sem problema — filtramos quem já aceita esse perfil.</p>
+      </div>
+      <div>
+        <div class="postcard">
+          <div class="postcard-photo">
+            <span class="badge-verified">
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10.5L8 14.5L16 5.5" stroke="#F6F1E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Verificado
+            </span>
+          </div>
+          <div class="postcard-body">
+            <p class="postcard-title">Quarto individual em Rathmines</p>
+            <p class="postcard-meta">Dublin 6 · Casa compartilhada com 2 brasileiros</p>
+            <div class="postcard-foot">
+              <span class="postcard-price">€680 <span>/mês</span></span>
+              <span class="postcard-tag">Aceita sem PPS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEMA -->
+  <section class="problem">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>O grupo de WhatsApp virou um segundo emprego</h2>
+        <p>Você já sabe como é: rola a tela por 40 minutos, manda mensagem pra três anúncios diferentes e nenhum responde. A gente resolveu construir algo mais simples.</p>
+      </div>
+      <div class="compare">
+        <div class="compare-col">
+          <h3><span class="dot dot-bad"></span>Do jeito antigo</h3>
+          <div class="chat-bubble">quarto disponível!! chama no privado</div>
+          <div class="chat-bubble right">oi ainda tá disponível?</div>
+          <div class="chat-bubble">precisa ter proof of income e referência</div>
+          <div class="chat-bubble right">gente alguém sabe se isso é golpe??</div>
+        </div>
+        <div class="compare-col">
+          <h3><span class="dot dot-good"></span>No Chave Verde</h3>
+          <ul class="clear-list">
+            <li>
+              <svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Anúncios com dono e endereço confirmados
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Filtro por quem aceita sem comprovante de renda
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Contato direto, sem intermediário escondido
+            </li>
+            <li>
+              <svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Tudo em português, do jeito que dá pra entender
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Como funciona</h2>
+        <p>Três passos, sem cadastro complicado.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <h3>Filtre pela sua realidade</h3>
+          <p>Cidade, faixa de preço e se precisa aceitar quem ainda não tem comprovante de renda.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <h3>Fale direto com quem anuncia</h3>
+          <p>Sem chat interno perdido — você recebe o WhatsApp de quem publicou o anúncio verificado.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <h3>Combine e mude de vida</h3>
+          <p>Marque a visita, combine o valor e feche o quarto sem depender de sorte no grupo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANUNCIOS -->
+  <section id="anuncios" class="listings">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Anúncios disponíveis agora</h2>
+        <p>Lista ao vivo, atualizada assim que um anúncio novo é verificado.</p>
+      </div>
+      <div id="publicListingsStatus" style="text-align:center; color:#5C5C50; padding:24px 0;">Carregando anúncios...</div>
+      <div id="publicListingsGrid" class="listing-grid"></div>
+    </div>
+  </section>
+
+  <!-- MEUS ANUNCIOS (painel) -->
+  <section id="painel" class="listings" style="background:var(--paper);">
+    <div class="wrap" style="max-width:760px;">
+      <div class="section-head">
+        <h2>Meus anúncios</h2>
+        <p>Publique um anúncio novo ou gerencie os que você já tem.</p>
+      </div>
+
+      <div id="painelLoggedOut">
+        <p style="margin-bottom:18px; color:#3A3A32;">Você precisa entrar ou criar uma conta pra publicar e gerenciar seus anúncios.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#" onclick="openAuth('signup'); return false;">Criar conta</a>
+          <a class="btn btn-ghost" href="#" onclick="openAuth('login'); return false;">Já tenho conta</a>
+        </div>
+      </div>
+
+      <div id="painelLoggedIn" style="display:none;">
+        <form id="novoAnuncioForm" class="auth-form" onsubmit="return handleNovoAnuncio(event)" style="background:var(--paper-2); padding:24px; border-radius:8px; margin-bottom:36px;">
+          <h3 style="font-size:1.05rem; margin-bottom:6px;">Publicar novo anúncio</h3>
+          <label>Título do anúncio
+            <input type="text" id="f_titulo" required placeholder="Ex: Quarto individual em Rathmines">
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <label>Cidade
+              <select id="f_cidade" required>
+                <option value="">Selecione</option>
+                <option>Dublin</option>
+                <option>Cork</option>
+                <option>Galway</option>
+                <option>Limerick</option>
+                <option>Outra</option>
+              </select>
+            </label>
+            <label>Eircode
+              <input type="text" id="f_eircode" placeholder="Ex: D06 XY12">
+            </label>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <label>Tipo de quarto
+              <select id="f_tipo_quarto" required>
+                <option value="">Selecione</option>
+                <option>Individual</option>
+                <option>Compartilhado</option>
+                <option>Studio</option>
+              </select>
+            </label>
+            <label>Preço mensal (€)
+              <input type="number" id="f_valor" required min="0" placeholder="Ex: 650">
+            </label>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <label>Gênero
+              <select id="f_genero">
+                <option value="">Sem preferência</option>
+                <option>Só mulheres</option>
+                <option>Só homens</option>
+              </select>
+            </label>
+            <label style="flex-direction:row; align-items:center; gap:8px; margin-top:22px;">
+              <input type="checkbox" id="f_aceita_sem_pps" style="width:auto;">
+              Aceita sem PPS
+            </label>
+          </div>
+          <label>Link de uma foto (opcional)
+            <input type="text" id="f_fotos_url" placeholder="Cole o link de uma imagem">
+          </label>
+          <label>Descrição
+            <textarea id="f_descricao" rows="3" style="font-family:'Work Sans',sans-serif; padding:11px 12px; border-radius:6px; border:1px solid var(--line);"></textarea>
+          </label>
+          <label>Seu WhatsApp
+            <input type="text" id="f_whatsapp" required placeholder="+353...">
+          </label>
+          <p class="auth-error" id="novoAnuncioError"></p>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Publicar anúncio</button>
+        </form>
+
+        <h3 style="font-size:1.05rem; margin-bottom:16px;">Seus anúncios</h3>
+        <div id="myListingsStatus" style="color:#5C5C50;">Carregando...</div>
+        <div id="myListingsList" style="display:flex; flex-direction:column; gap:14px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANUNCIANTE -->
+  <section id="anunciar" class="advertiser">
+    <div class="wrap advertiser-grid">
+      <div>
+        <h2>Tem um quarto pra alugar? Apareça pra quem já procura.</h2>
+        <p>Publique seu anúncio de graça. Se quiser aparecer no topo da lista e receber mais contato, ative o destaque por uma taxa única.</p>
+        <div class="hero-ctas" style="margin-top:28px;">
+          <a class="btn" style="background:var(--pine-dark); color:var(--paper);" href="#painel">Publicar anúncio grátis</a>
+        </div>
+      </div>
+      <div class="advertiser-price">
+        <p style="font-size:0.85rem; color:#C9D3C2; font-weight:600;">Destaque do anúncio</p>
+        <p class="amount">€15 <span>/ 2 semanas</span></p>
+        <ul>
+          <li>· Topo da lista de busca</li>
+          <li>· Selo de destaque no card</li>
+          <li>· Renovação com um clique</li>
+        </ul>
+        <a class="btn btn-sun" href="#painel" style="width:100%;">Publicar e pedir destaque</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="duvidas">
+    <div class="wrap" style="max-width:760px;">
+      <div class="section-head">
+        <h2>Perguntas frequentes</h2>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item open">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            O que significa um anúncio "Verificado"?
+            <span class="icon"></span>
+          </button>
+          <div class="faq-a"><p>Confirmamos que quem publicou é de fato o responsável pelo quarto ou pela casa, e que as fotos correspondem ao imóvel anunciado. Não é uma garantia legal, mas reduz muito o risco de golpe.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Preciso ter comprovante de renda pra alugar?
+            <span class="icon"></span>
+          </button>
+          <div class="faq-a"><p>Depende do anunciante. Por isso deixamos claro no próprio card quando o anúncio aceita candidatos sem "proof of income" — assim você não perde tempo com quem exige o que você ainda não tem.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Quanto custa usar o site pra procurar quarto?
+            <span class="icon"></span>
+          </button>
+          <div class="faq-a"><p>Nada. A busca é sempre gratuita. Só cobramos de quem anuncia e quer destaque na lista.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Vocês têm anúncios fora de Dublin?
+            <span class="icon"></span>
+          </button>
+          <div class="faq-a"><p>Sim. Começamos com Dublin, Cork, Galway e Limerick, e vamos adicionar novas cidades conforme mais gente for anunciando.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <p class="foot-brand">Chave Verde</p>
+      <p class="foot-brand-sub">Anúncios de aluguel verificados para brasileiros na Irlanda. Sem grupo bagunçado, sem julgamento.</p>
+    </div>
+    <div>
+      <h4>Navegação</h4>
+      <ul>
+        <li><a href="#anuncios">Anúncios</a></li>
+        <li><a href="#como-funciona">Como funciona</a></li>
+        <li><a href="#anunciar">Anunciar quarto</a></li>
+        <li><a href="#duvidas">Dúvidas</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <ul>
+        <li><a href="mailto:oi@chaveverde.ie">oi@chaveverde.ie</a></li>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">WhatsApp da comunidade</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap foot-bottom">
+    <span>© 2026 Chave Verde. Feito com carinho em Dublin.</span>
+    <span>Site em fase de validação — feedback é bem-vindo.</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ======= CONFIGURAÇÃO DO SUPABASE =======
+  // Troque pelos valores do seu projeto: Supabase → Project Settings → API
+  const SUPABASE_URL = 'https://jvsnugopxyjblwptgzlj.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2c251Z29weHlqYmx3cHRnemxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5ODYxNDEsImV4cCI6MjEwNDU2MjE0MX0.V1QJuEke7TPlNlk9fbDyJQhFUZf8TJ6PtP3JVhlp2Ew';
+  // =========================================
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function openAuth(tab){
+    document.getElementById('authOverlay').classList.add('open');
+    switchTab(tab || 'login');
+  }
+  function closeAuth(){
+    document.getElementById('authOverlay').classList.remove('open');
+  }
+  function switchTab(tab){
+    const isLogin = tab === 'login';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+    document.getElementById('loginForm').style.display = isLogin ? 'flex' : 'none';
+    document.getElementById('signupForm').style.display = isLogin ? 'none' : 'flex';
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('signupError').textContent = '';
+  }
+
+  async function handleLogin(event){
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginError');
+    errorEl.textContent = '';
+
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      errorEl.textContent = 'Email ou senha incorretos.';
+      return false;
+    }
+    closeAuth();
+    await updateAuthUI();
+    return false;
+  }
+
+  async function handleSignup(event){
+    event.preventDefault();
+    const nome = document.getElementById('signupNome').value;
+    const whatsapp = document.getElementById('signupWhatsapp').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const errorEl = document.getElementById('signupError');
+    errorEl.textContent = '';
+
+    const { error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: { data: { nome: nome, whatsapp: whatsapp } }
+    });
+    if (error) {
+      errorEl.textContent = 'Não foi possível criar a conta: ' + error.message;
+      return false;
+    }
+    closeAuth();
+    await updateAuthUI();
+    document.getElementById('painel').scrollIntoView({ behavior: 'smooth' });
+    return false;
+  }
+
+  async function handleLogout(){
+    await supabaseClient.auth.signOut();
+    updateAuthUI();
+  }
+
+  async function updateAuthUI(){
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const btn = document.getElementById('openAuthBtn');
+    if (session) {
+      btn.textContent = 'Sair';
+      btn.onclick = function(e){ e.preventDefault(); handleLogout(); };
+      document.getElementById('painelLoggedOut').style.display = 'none';
+      document.getElementById('painelLoggedIn').style.display = 'block';
+      loadMyListings();
+    } else {
+      btn.textContent = 'Entrar';
+      btn.onclick = function(e){ e.preventDefault(); openAuth('login'); };
+      document.getElementById('painelLoggedOut').style.display = 'block';
+      document.getElementById('painelLoggedIn').style.display = 'none';
+    }
+  }
+
+  // ======= LISTA PÚBLICA =======
+  function renderPublicCard(item){
+    const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem PPS</span>' : '';
+    const genero = item.genero ? `<span class="postcard-tag">${item.genero}</span>` : '';
+    return `
+      <article class="listing-card">
+        <div class="listing-photo" style="background:${item.fotos_url ? `url('${item.fotos_url}') center/cover` : 'linear-gradient(135deg,#DCA85C,#4C7A63)'};"></div>
+        <div class="listing-info">
+          <p class="listing-city">${item.cidade || ''}${item.eircode ? ' · ' + item.eircode : ''}</p>
+          <h3 class="listing-title">${item.titulo || ''}</h3>
+          <p class="listing-meta">${item.tipo_quarto || ''}${item.descricao ? ' · ' + item.descricao : ''}</p>
+          <div class="listing-foot">
+            <span class="listing-price">€${item.valor || 0}/mês</span>
+            ${badge}${genero}
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  async function loadPublicListings(){
+    const statusEl = document.getElementById('publicListingsStatus');
+    const grid = document.getElementById('publicListingsGrid');
+    const { data, error } = await supabaseClient
+      .from('quartos')
+      .select('*')
+      .eq('status', 'Ativo')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      statusEl.textContent = 'Não foi possível carregar os anúncios agora.';
+      return;
+    }
+    if (!data || data.length === 0) {
+      statusEl.textContent = 'Nenhum anúncio disponível no momento — volte em breve.';
+      grid.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = '';
+    grid.innerHTML = data.map(renderPublicCard).join('');
+  }
+
+  // ======= PAINEL "MEUS ANÚNCIOS" =======
+  async function handleNovoAnuncio(event){
+    event.preventDefault();
+    const errorEl = document.getElementById('novoAnuncioError');
+    errorEl.textContent = '';
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      errorEl.textContent = 'Sessão expirada, entre novamente.';
+      return false;
+    }
+
+    const payload = {
+      user_id: user.id,
+      nome: user.user_metadata?.nome || '',
+      whatsapp: document.getElementById('f_whatsapp').value,
+      cidade: document.getElementById('f_cidade').value,
+      titulo: document.getElementById('f_titulo').value,
+      tipo_quarto: document.getElementById('f_tipo_quarto').value,
+      valor: parseFloat(document.getElementById('f_valor').value) || 0,
+      eircode: document.getElementById('f_eircode').value,
+      genero: document.getElementById('f_genero').value,
+      aceita_sem_pps: document.getElementById('f_aceita_sem_pps').checked,
+      fotos_url: document.getElementById('f_fotos_url').value,
+      descricao: document.getElementById('f_descricao').value,
+      status: 'Pendente'
+    };
+
+    const { error } = await supabaseClient.from('quartos').insert([payload]);
+    if (error) {
+      errorEl.textContent = 'Erro ao publicar: ' + error.message;
+      return false;
+    }
+    document.getElementById('novoAnuncioForm').reset();
+    loadMyListings();
+    return false;
+  }
+
+  function renderMyListing(item){
+    const statusLabel = {
+      'Ativo': 'Ativo',
+      'Pausado': 'Pausado',
+      'Alugado': 'Alugado',
+      'Pendente': 'Aguardando verificação'
+    }[item.status] || item.status;
+
+    return `
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+          <div>
+            <p style="font-weight:600; color:var(--pine-dark);">${item.titulo}</p>
+            <p style="font-size:0.85rem; color:#5C5C50;">${item.cidade} · €${item.valor}/mês · <strong>${statusLabel}</strong></p>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+          ${item.status !== 'Pausado' ? `<button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem;" onclick="setListingStatus(${item.id}, 'Pausado')">Pausar</button>` : ''}
+          ${item.status === 'Pausado' ? `<button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem;" onclick="setListingStatus(${item.id}, 'Ativo')">Reativar</button>` : ''}
+          ${item.status !== 'Alugado' ? `<button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem;" onclick="setListingStatus(${item.id}, 'Alugado')">Marcar como alugado</button>` : ''}
+          <button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem; border-color:#B33A2E; color:#B33A2E;" onclick="deleteListing(${item.id})">Apagar</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadMyListings(){
+    const statusEl = document.getElementById('myListingsStatus');
+    const listEl = document.getElementById('myListingsList');
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabaseClient
+      .from('quartos')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      statusEl.textContent = 'Não foi possível carregar seus anúncios.';
+      return;
+    }
+    if (!data || data.length === 0) {
+      statusEl.textContent = 'Você ainda não publicou nenhum anúncio.';
+      listEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = '';
+    listEl.innerHTML = data.map(renderMyListing).join('');
+  }
+
+  async function setListingStatus(id, novoStatus){
+    const { error } = await supabaseClient.from('quartos').update({ status: novoStatus }).eq('id', id);
+    if (!error) { loadMyListings(); loadPublicListings(); }
+  }
+
+  async function deleteListing(id){
+    if (!confirm('Tem certeza que quer apagar esse anúncio?')) return;
+    const { error } = await supabaseClient.from('quartos').delete().eq('id', id);
+    if (!error) { loadMyListings(); loadPublicListings(); }
+  }
+
+  updateAuthUI();
+  loadPublicListings();
+</script>
+
+<script>
+  function toggleFaq(btn){
+    const item = btn.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if(!wasOpen){ item.classList.add('open'); }
+  }
+</script>
+
+</body>
+</html>
