@@ -646,7 +646,7 @@
               Aceita sem PPS
             </label>
           </div>
-          <label>Fotos (opcional, até 6 fotos)
+          <label>Fotos (até 6 grátis — dá pra desbloquear mais depois)
             <input type="file" id="f_fotos" accept="image/*" multiple>
           </label>
           <label>Descrição
@@ -1071,6 +1071,19 @@
       'Pendente': 'Aguardando verificação'
     }[item.status] || item.status;
 
+    const fotosCount = getFotosArray(item).length;
+    let fotosBtn = '';
+    if (fotosCount >= 20) {
+      fotosBtn = '';
+    } else if (item.fotos_extra_pagas || fotosCount < 6) {
+      fotosBtn = `<label class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem; cursor:pointer;">
+        + Fotos (${fotosCount}/${item.fotos_extra_pagas ? 20 : 6})
+        <input type="file" accept="image/*" multiple style="display:none" onchange="adicionarFotosExtra(${item.id}, this.files)">
+      </label>`;
+    } else {
+      fotosBtn = `<button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem;" onclick="startExtraFotosCheckout(${item.id})">Desbloquear mais fotos (€5)</button>`;
+    }
+
     return `
       <div style="background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:16px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
@@ -1083,10 +1096,84 @@
           ${item.status !== 'Pausado' ? `<button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem;" onclick="setListingStatus(${item.id}, 'Pausado')">Pausar</button>` : ''}
           ${item.status === 'Pausado' ? `<button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem;" onclick="setListingStatus(${item.id}, 'Ativo')">Reativar</button>` : ''}
           ${item.status !== 'Alugado' ? `<button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem;" onclick="setListingStatus(${item.id}, 'Alugado')">Marcar como alugado</button>` : ''}
+          ${fotosBtn}
           <button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem; border-color:#B33A2E; color:#B33A2E;" onclick="deleteListing(${item.id})">Apagar</button>
         </div>
       </div>
     `;
+  }
+
+  async function startExtraFotosCheckout(anuncioId){
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anuncio_id: anuncioId })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Não foi possível iniciar o pagamento: ' + (data.error || ''));
+      }
+    } catch (err) {
+      alert('Erro ao iniciar pagamento: ' + err.message);
+    }
+  }
+
+  async function adicionarFotosExtra(anuncioId, fileList){
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+
+    const { data: current, error: fetchErr } = await supabaseClient
+      .from('quartos').select('fotos_url, fotos_extra_pagas').eq('id', anuncioId).single();
+    if (fetchErr || !current) { alert('Não foi possível carregar o anúncio.'); return; }
+
+    const existentes = getFotosArray(current);
+    const limite = current.fotos_extra_pagas ? 20 : 6;
+    const espacoLivre = limite - existentes.length;
+    if (espacoLivre <= 0) {
+      alert(current.fotos_extra_pagas ? 'Esse anúncio já está com 20 fotos.' : 'Você já usou as 7 fotos grátis. Desbloqueie mais fotos por €5.');
+      return;
+    }
+
+    const aUsar = files.slice(0, espacoLivre);
+    try {
+      const novasUrls = await uploadFotos(aUsar, user.id);
+      const fotosFinal = existentes.concat(novasUrls).join('\n');
+      const { error } = await supabaseClient.from('quartos').update({ fotos_url: fotosFinal, status: 'Pendente' }).eq('id', anuncioId);
+      if (error) throw error;
+      alert('Fotos adicionadas! O anúncio volta a "Aguardando verificação" até ser conferido de novo.');
+      loadMyListings();
+    } catch (err) {
+      alert('Erro ao enviar fotos: ' + err.message);
+    }
+  }
+
+  async function checkPaymentReturn(){
+    const params = new URLSearchParams(window.location.search);
+    const anuncioPago = params.get('anuncio_pago');
+    const sessionId = params.get('session_id');
+    if (!anuncioPago || !sessionId) return;
+    try {
+      const res = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, anuncio_id: anuncioPago })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert('Pagamento confirmado! Agora você pode adicionar até 20 fotos nesse anúncio.');
+      } else {
+        alert('Não foi possível confirmar o pagamento: ' + (data.error || ''));
+      }
+    } catch (err) {
+      alert('Erro ao confirmar pagamento: ' + err.message);
+    }
+    history.replaceState({}, '', window.location.pathname + '#painel');
+    loadMyListings();
   }
 
   async function loadMyListings(){
@@ -1127,6 +1214,7 @@
 
   updateAuthUI();
   loadPublicListings();
+  checkPaymentReturn();
 </script>
 
 <script>
