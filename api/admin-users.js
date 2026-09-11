@@ -29,6 +29,31 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'GET') {
+      if (req.query?.scope === 'admins') {
+        const { data: adminRows, error: adminErr } = await supabaseAdmin
+          .from('admins')
+          .select('user_id, criado_em')
+          .order('criado_em', { ascending: false });
+        if (adminErr) throw adminErr;
+
+        const { data: usersData, error: usersErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+        if (usersErr) throw usersErr;
+        const userMap = {};
+        usersData.users.forEach(u => { userMap[u.id] = u; });
+
+        const admins = adminRows.map(row => {
+          const u = userMap[row.user_id];
+          return {
+            user_id: row.user_id,
+            email: u?.email || '(conta não encontrada)',
+            nome: u?.user_metadata?.nome || '',
+            criado_em: row.criado_em
+          };
+        });
+        res.status(200).json({ admins });
+        return;
+      }
+
       const { data, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
       if (error) throw error;
       const users = data.users.map(u => ({
@@ -43,7 +68,41 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { action, user_id, email, nome, whatsapp } = req.body || {};
+      const { action, user_id, email, nome, whatsapp, password } = req.body || {};
+
+      if (action === 'create_admin') {
+        if (!email || !password) {
+          res.status(400).json({ error: 'Email e senha são obrigatórios' });
+          return;
+        }
+        const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { nome: nome || '', whatsapp: whatsapp || '' }
+        });
+        if (createErr) throw createErr;
+
+        const { error: insertErr } = await supabaseAdmin
+          .from('admins')
+          .insert({ user_id: created.user.id });
+        if (insertErr) throw insertErr;
+
+        res.status(200).json({ ok: true, user_id: created.user.id });
+        return;
+      }
+
+      if (action === 'remove_admin') {
+        if (!user_id) {
+          res.status(400).json({ error: 'user_id é obrigatório' });
+          return;
+        }
+        const { error } = await supabaseAdmin.from('admins').delete().eq('user_id', user_id);
+        if (error) throw error;
+        res.status(200).json({ ok: true });
+        return;
+      }
+
       if (!user_id) {
         res.status(400).json({ error: 'user_id é obrigatório' });
         return;
