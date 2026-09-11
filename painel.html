@@ -537,6 +537,10 @@
     return false;
   }
 
+  function isDestacado(item){
+    return !!item.destaque_ate && new Date(item.destaque_ate) > new Date();
+  }
+
   function renderMyListing(item){
     const statusLabel = {
       'Ativo': 'Ativo',
@@ -549,12 +553,19 @@
     const limiteFotos = item.fotos_extra_pagas ? 20 : 10;
     const fotosBtn = `<button class="btn btn-ghost btn-small" onclick="openEditFotos(${item.id})">Editar fotos (${fotosCount}/${limiteFotos})</button>`;
 
+    const destacado = isDestacado(item);
+    const destaqueLabel = destacado ? 'Renovar destaque' : 'Destacar';
+    const destaqueBtn = `<button class="btn btn-sun btn-small" onclick="startDestaqueCheckout(${item.id})">${destaqueLabel} (€15/2 sem)</button>`;
+    const destaqueInfo = destacado
+      ? ` · <strong style="color:#C1502E;">★ Destaque até ${new Date(item.destaque_ate).toLocaleDateString('pt-BR')}</strong>`
+      : '';
+
     return `
       <div class="card">
         <div class="listing-card">
           <div>
             <p style="font-weight:600; color:var(--pine-dark);">${item.titulo}</p>
-            <p class="listing-status">${item.cidade} · €${item.valor}/mês · <strong>${statusLabel}</strong></p>
+            <p class="listing-status">${item.cidade} · €${item.valor}/mês · <strong>${statusLabel}</strong>${destaqueInfo}</p>
           </div>
         </div>
         <div class="listing-actions">
@@ -562,18 +573,19 @@
           ${item.status === 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Ativo')">Reativar</button>` : ''}
           ${item.status !== 'Alugado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Alugado')">Marcar como alugado</button>` : ''}
           ${fotosBtn}
+          ${destaqueBtn}
           <button class="btn btn-ghost btn-small btn-danger" onclick="deleteListing(${item.id})">Apagar</button>
         </div>
       </div>
     `;
   }
 
-  async function startExtraFotosCheckout(anuncioId){
+  async function startCheckout(anuncioId, tipo){
     try {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ anuncio_id: anuncioId })
+        body: JSON.stringify({ anuncio_id: anuncioId, tipo })
       });
       const data = await res.json();
       if (data.url) {
@@ -584,6 +596,14 @@
     } catch (err) {
       alert('Erro ao iniciar pagamento: ' + err.message);
     }
+  }
+
+  async function startExtraFotosCheckout(anuncioId){
+    return startCheckout(anuncioId, 'fotos');
+  }
+
+  async function startDestaqueCheckout(anuncioId){
+    return startCheckout(anuncioId, 'destaque');
   }
 
   // ======= EDITAR FOTOS (apagar, reordenar, adicionar) =======
@@ -703,7 +723,11 @@
       });
       const data = await res.json();
       if (data.ok) {
-        alert('Pagamento confirmado! Agora você pode adicionar até 20 fotos nesse anúncio.');
+        if (data.tipo === 'destaque') {
+          alert('Destaque ativado! Seu anúncio vai aparecer no topo da lista da sua cidade por 2 semanas.');
+        } else {
+          alert('Pagamento confirmado! Agora você pode adicionar até 20 fotos nesse anúncio.');
+        }
       } else {
         alert('Não foi possível confirmar o pagamento: ' + (data.error || ''));
       }
