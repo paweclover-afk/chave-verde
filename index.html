@@ -204,7 +204,7 @@
     overflow:hidden;
   }
   .listing-photo{
-    aspect-ratio:4/3; position:relative; overflow:hidden; background:#141B14;
+    aspect-ratio:1/1; position:relative; overflow:hidden; background:#141B14;
     cursor:pointer; touch-action:pan-y; user-select:none;
   }
   .carousel-track{
@@ -212,11 +212,11 @@
     transition:transform 0.45s ease;
   }
   .carousel-slide{
-    position:relative; min-width:100%; height:100%; overflow:hidden; flex-shrink:0;
+    position:relative; width:100%; flex:0 0 100%; height:100%; overflow:hidden;
   }
   .carousel-slide img{
     position:relative; z-index:1; width:100%; height:100%;
-    object-fit:cover; object-position:center; display:block; pointer-events:none;
+    object-fit:contain; object-position:center; display:block; pointer-events:none;
   }
   .carousel-dots{
     position:absolute; bottom:10px; left:0; right:0; z-index:2;
@@ -272,11 +272,11 @@
     display:grid; grid-template-columns:1.2fr 0.8fr; gap:44px; align-items:start;
   }
   .detail-gallery-main{
-    aspect-ratio:4/3; border-radius:8px; overflow:hidden; position:relative;
+    aspect-ratio:1/1; border-radius:8px; overflow:hidden; position:relative;
     background:#141B14;
   }
   .detail-gallery-main img{
-    width:100%; height:100%; object-fit:cover; object-position:center;
+    width:100%; height:100%; object-fit:contain; object-position:center;
     display:block; cursor:zoom-in;
   }
   .detail-photo-count{
@@ -513,7 +513,12 @@
 
   .city-bar{
     display:flex; align-items:center; justify-content:center;
-    margin-bottom:36px;
+    margin-bottom:36px; gap:10px; flex-wrap:wrap;
+  }
+  .distrito-select{
+    background:var(--paper); border:1px solid var(--line); border-radius:24px;
+    padding:10px 16px; font-size:0.88rem; font-weight:600; color:var(--pine-dark);
+    font-family:'Work Sans',sans-serif; cursor:pointer;
   }
   .city-pill{
     display:inline-flex; align-items:center; gap:10px;
@@ -662,7 +667,7 @@
       <div>
         <p class="eyebrow-hero">Feito por brasileiros, pra brasileiros na Irlanda</p>
         <h1>Ache seu quarto na Irlanda sem enrolação e sem julgamento.</h1>
-        <p class="lede">Chega de rolar grupo de WhatsApp lotado de anúncio repetido e gente pedindo depósito antes de mostrar a casa. Aqui são só anúncios verificados, em português, direto ao ponto.</p>
+        <p class="lede">Chega de rolar grupo de WhatsApp lotado de anúncio repetido e gente pedindo depósito antes de mostrar a casa. Aqui são só anúncios revisados pela nossa equipe, em português, direto ao ponto.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="#anuncios">Ver anúncios disponíveis</a>
           <a class="btn btn-ghost" href="#" onclick="openAuth('signup'); return false;">Anunciar meu quarto</a>
@@ -674,7 +679,7 @@
           <div class="postcard-photo">
             <span class="badge-verified">
               <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10.5L8 14.5L16 5.5" stroke="#F6F1E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Verificado
+              Revisado
             </span>
           </div>
           <div class="postcard-body">
@@ -710,7 +715,7 @@
           <ul class="clear-list">
             <li>
               <svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Anúncios com dono e endereço confirmados
+              Anúncios revisados e anunciante contatado por telefone
             </li>
             <li>
               <svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5L8 14.5L16 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -746,7 +751,7 @@
         <div class="step">
           <span class="step-num">02</span>
           <h3>Fale direto com quem anuncia</h3>
-          <p>Sem chat interno perdido — você recebe o WhatsApp de quem publicou o anúncio verificado.</p>
+          <p>Sem chat interno perdido — você recebe o WhatsApp de quem publicou o anúncio revisado.</p>
         </div>
         <div class="step">
           <span class="step-num">03</span>
@@ -762,7 +767,7 @@
     <div class="wrap">
       <div class="section-head">
         <h2>Anúncios disponíveis agora</h2>
-        <p>Lista ao vivo, atualizada assim que um anúncio novo é verificado.</p>
+        <p>Lista ao vivo, atualizada assim que um anúncio novo é aprovado.</p>
       </div>
       <div class="city-bar">
         <span class="city-pill">
@@ -770,6 +775,9 @@
           Mostrando: <strong id="cityPillLabel">Todas as cidades</strong>
           <button type="button" onclick="openCitySelector()">Trocar cidade</button>
         </span>
+        <select id="distritoFilter" class="distrito-select" style="display:none;" onchange="applyDistritoFilter(this.value)">
+          <option value="">Todos os distritos</option>
+        </select>
       </div>
       <div id="publicListingsStatus" style="text-align:center; color:#5C5C50; padding:24px 0;">Carregando anúncios...</div>
       <div id="publicListingsGrid" class="listing-grid"></div>
@@ -821,10 +829,10 @@
       <div class="faq-list">
         <div class="faq-item open">
           <button class="faq-q" onclick="toggleFaq(this)">
-            O que significa um anúncio "Verificado"?
+            O que significa um anúncio "Revisado"?
             <span class="icon"></span>
           </button>
-          <div class="faq-a"><p>Confirmamos que quem publicou é de fato o responsável pelo quarto ou pela casa, e que as fotos correspondem ao imóvel anunciado. Não é uma garantia legal, mas reduz muito o risco de golpe.</p></div>
+          <div class="faq-a"><p>Antes de publicar, nossa equipe confere as informações do anúncio e liga pra quem publicou pra confirmar que é uma pessoa real e que os dados fazem sentido. A gente não visita o imóvel pessoalmente — então sempre combine uma visita e veja o lugar com seus próprios olhos antes de fechar qualquer negócio ou fazer qualquer pagamento.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-q" onclick="toggleFaq(this)">
@@ -857,7 +865,7 @@
   <div class="wrap foot-grid">
     <div>
       <p class="foot-brand">Chave Verde</p>
-      <p class="foot-brand-sub">Anúncios de aluguel verificados para brasileiros na Irlanda. Sem grupo bagunçado, sem julgamento.</p>
+      <p class="foot-brand-sub">Anúncios de aluguel revisados para brasileiros na Irlanda. Sem grupo bagunçado, sem julgamento.</p>
     </div>
     <div>
       <h4>Navegação</h4>
@@ -1081,7 +1089,7 @@
       <article class="listing-card">
         ${renderCardPhotoArea(item, fotos)}
         <div class="listing-info">
-          <p class="listing-city">${item.cidade || ''}${item.eircode ? ' · ' + item.eircode : ''}</p>
+          <p class="listing-city">${item.cidade || ''}${item.distrito ? ' ' + item.distrito : ''}${item.eircode ? ' · ' + item.eircode : ''}</p>
           <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${item.titulo || ''}</h3>
           <p class="listing-meta">${item.tipo_quarto || ''}${item.descricao ? ' · ' + item.descricao : ''}</p>
           <div class="listing-foot">
@@ -1164,6 +1172,10 @@
     });
   }
 
+  let currentCityListings = [];
+  let currentCityLabel = '';
+  let currentDistritoFilter = '';
+
   async function loadPublicListings(cidade){
     const statusEl = document.getElementById('publicListingsStatus');
     const grid = document.getElementById('publicListingsGrid');
@@ -1179,13 +1191,63 @@
       statusEl.textContent = 'Não foi possível carregar os anúncios agora.';
       return;
     }
-    if (!data || data.length === 0) {
-      statusEl.textContent = cidade
-        ? `Nenhum anúncio em ${cidade} no momento — volte em breve ou veja outras cidades.`
+
+    currentCityListings = data || [];
+    currentCityLabel = cidade || '';
+    currentDistritoFilter = '';
+    populateDistritoFilter();
+    renderFilteredListings();
+    initCardCarousels();
+
+    // se a URL já pede um anúncio específico (link direto/compartilhado), abre ele
+    const params = new URLSearchParams(window.location.search);
+    const anuncioId = params.get('anuncio');
+    if (anuncioId) openListingDetail(Number(anuncioId), false);
+  }
+
+  function populateDistritoFilter(){
+    const select = document.getElementById('distritoFilter');
+    const distritos = Array.from(new Set(
+      currentCityListings.map(item => (item.distrito || '').trim()).filter(Boolean)
+    )).sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+
+    if (distritos.length === 0) {
+      select.style.display = 'none';
+      select.innerHTML = '<option value="">Todos os distritos</option>';
+      return;
+    }
+    select.style.display = 'inline-block';
+    select.innerHTML = '<option value="">Todos os distritos</option>' +
+      distritos.map(d => `<option value="${d}">${currentCityLabel || ''} ${d}</option>`).join('');
+    select.value = '';
+  }
+
+  function applyDistritoFilter(distrito){
+    currentDistritoFilter = distrito;
+    renderFilteredListings();
+    initCardCarousels();
+  }
+
+  function renderFilteredListings(){
+    const statusEl = document.getElementById('publicListingsStatus');
+    const grid = document.getElementById('publicListingsGrid');
+
+    let data = currentCityListings;
+    if (currentDistritoFilter) {
+      data = data.filter(item => (item.distrito || '').trim() === currentDistritoFilter);
+    }
+
+    if (data.length === 0) {
+      const ondeTexto = currentDistritoFilter
+        ? `em ${currentCityLabel} ${currentDistritoFilter}`
+        : (currentCityLabel ? `em ${currentCityLabel}` : '');
+      statusEl.textContent = ondeTexto
+        ? `Nenhum anúncio ${ondeTexto} no momento — volte em breve ou veja outra região.`
         : 'Nenhum anúncio disponível no momento — volte em breve.';
       grid.innerHTML = '';
       return;
     }
+
     statusEl.textContent = '';
     const destacados = data
       .filter(isDestacado)
@@ -1193,12 +1255,6 @@
     const normais = data.filter(item => !isDestacado(item));
     const ordenados = destacados.concat(normais);
     grid.innerHTML = ordenados.map(renderPublicCard).join('');
-    initCardCarousels();
-
-    // se a URL já pede um anúncio específico (link direto/compartilhado), abre ele
-    const params = new URLSearchParams(window.location.search);
-    const anuncioId = params.get('anuncio');
-    if (anuncioId) openListingDetail(Number(anuncioId), false);
   }
 
   // ======= PÁGINA DE DETALHES DO ANÚNCIO =======
@@ -1234,7 +1290,7 @@
         ${fotos.length > 1 ? `<div class="detail-thumbs">${thumbs}</div>` : ''}
       </div>
       <div>
-        <p class="detail-city">${item.cidade || ''}${item.eircode ? ' · ' + item.eircode : ''}</p>
+        <p class="detail-city">${item.cidade || ''}${item.distrito ? ' ' + item.distrito : ''}${item.eircode ? ' · ' + item.eircode : ''}</p>
         <h2 class="detail-title">${item.titulo || ''}</h2>
         <p class="detail-meta">${item.tipo_quarto || ''}</p>
         <div class="detail-tags">${badge}${genero}</div>
