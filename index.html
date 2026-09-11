@@ -208,14 +208,9 @@
   .carousel-slide{
     position:relative; min-width:100%; height:100%; overflow:hidden; flex-shrink:0;
   }
-  .carousel-slide .slide-bg{
-    position:absolute; inset:-12px;
-    background-size:cover; background-position:center;
-    filter:blur(18px) brightness(0.6); transform:scale(1.15);
-  }
   .carousel-slide img{
     position:relative; z-index:1; width:100%; height:100%;
-    object-fit:contain; display:block; pointer-events:none;
+    object-fit:cover; object-position:center; display:block; pointer-events:none;
   }
   .carousel-dots{
     position:absolute; bottom:10px; left:0; right:0; z-index:2;
@@ -910,7 +905,6 @@
     }
     const slides = fotos.map(url => `
       <div class="carousel-slide">
-        <div class="slide-bg" style="background-image:url('${url}')"></div>
         <img src="${url}" loading="lazy" alt="">
       </div>
     `).join('');
@@ -999,6 +993,7 @@
       let startX = 0, startY = 0, dragging = false, moved = false;
 
       el.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('.carousel-arrow')) { dragging = false; return; }
         startX = e.clientX; startY = e.clientY; dragging = true; moved = false;
       });
       el.addEventListener('pointermove', (e) => {
@@ -1006,6 +1001,7 @@
         if (Math.abs(e.clientX - startX) > 8) moved = true;
       });
       el.addEventListener('pointerup', (e) => {
+        if (e.target.closest('.carousel-arrow')) { dragging = false; return; }
         if (!dragging) return;
         dragging = false;
         const deltaX = e.clientX - startX;
@@ -1335,7 +1331,12 @@
   async function deleteListing(id){
     if (!confirm('Tem certeza que quer apagar esse anúncio?')) return;
     const { error } = await supabaseClient.from('quartos').delete().eq('id', id);
-    if (!error) { loadMyListings(); loadPublicListings(); }
+    if (!error) {
+      loadMyListings();
+      loadPublicListings();
+    } else {
+      alert('Não foi possível apagar o anúncio: ' + error.message);
+    }
   }
 
   updateAuthUI();
