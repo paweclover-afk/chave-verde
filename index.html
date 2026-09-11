@@ -778,6 +778,12 @@
         <select id="distritoFilter" class="distrito-select" style="display:none;" onchange="applyDistritoFilter(this.value)">
           <option value="">Todos os distritos</option>
         </select>
+        <select id="generoFilter" class="distrito-select" onchange="applyGeneroFilter(this.value)">
+          <option value="">Compartilhar com: todos</option>
+          <option value="Misto">Misto</option>
+          <option value="Só mulheres">Só mulheres</option>
+          <option value="Só homens">Só homens</option>
+        </select>
       </div>
       <div id="publicListingsStatus" style="text-align:center; color:#5C5C50; padding:24px 0;">Carregando anúncios...</div>
       <div id="publicListingsGrid" class="listing-grid"></div>
@@ -1175,6 +1181,7 @@
   let currentCityListings = [];
   let currentCityLabel = '';
   let currentDistritoFilter = '';
+  let currentGeneroFilter = '';
 
   async function loadPublicListings(cidade){
     const statusEl = document.getElementById('publicListingsStatus');
@@ -1195,6 +1202,8 @@
     currentCityListings = data || [];
     currentCityLabel = cidade || '';
     currentDistritoFilter = '';
+    currentGeneroFilter = '';
+    document.getElementById('generoFilter').value = '';
     populateDistritoFilter();
     renderFilteredListings();
     initCardCarousels();
@@ -1228,6 +1237,12 @@
     initCardCarousels();
   }
 
+  function applyGeneroFilter(genero){
+    currentGeneroFilter = genero;
+    renderFilteredListings();
+    initCardCarousels();
+  }
+
   function renderFilteredListings(){
     const statusEl = document.getElementById('publicListingsStatus');
     const grid = document.getElementById('publicListingsGrid');
@@ -1236,13 +1251,17 @@
     if (currentDistritoFilter) {
       data = data.filter(item => (item.distrito || '').trim() === currentDistritoFilter);
     }
+    if (currentGeneroFilter) {
+      data = data.filter(item => (item.genero || 'Misto') === currentGeneroFilter);
+    }
 
     if (data.length === 0) {
-      const ondeTexto = currentDistritoFilter
-        ? `em ${currentCityLabel} ${currentDistritoFilter}`
-        : (currentCityLabel ? `em ${currentCityLabel}` : '');
+      const partes = [];
+      if (currentCityLabel) partes.push(currentDistritoFilter ? `${currentCityLabel} ${currentDistritoFilter}` : currentCityLabel);
+      if (currentGeneroFilter) partes.push(currentGeneroFilter);
+      const ondeTexto = partes.length ? `em ${partes.join(' · ')}` : '';
       statusEl.textContent = ondeTexto
-        ? `Nenhum anúncio ${ondeTexto} no momento — volte em breve ou veja outra região.`
+        ? `Nenhum anúncio ${ondeTexto} no momento — volte em breve ou veja outros filtros.`
         : 'Nenhum anúncio disponível no momento — volte em breve.';
       grid.innerHTML = '';
       return;

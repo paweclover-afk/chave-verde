@@ -376,7 +376,7 @@
       </label>
       <div class="form-row">
         <label>Cidade
-          <select id="el_cidade">
+          <select id="el_cidade" onchange="toggleDistritoField('el')">
             <option>Dublin</option>
             <option>Cork</option>
             <option>Galway</option>
@@ -384,9 +384,38 @@
             <option>Outra</option>
           </select>
         </label>
-        <label>Distrito
-          <input type="text" id="el_distrito" placeholder="Ex: 1, 6W, Rathmines...">
-        </label>
+        <div>
+          <label id="el_distrito_dublin_wrap" style="display:none;">Distrito
+            <select id="el_distrito_dublin">
+              <option value="">Selecione o distrito</option>
+              <option value="1">Dublin 1</option>
+              <option value="2">Dublin 2</option>
+              <option value="3">Dublin 3</option>
+              <option value="4">Dublin 4</option>
+              <option value="5">Dublin 5</option>
+              <option value="6">Dublin 6</option>
+              <option value="6W">Dublin 6W</option>
+              <option value="7">Dublin 7</option>
+              <option value="8">Dublin 8</option>
+              <option value="9">Dublin 9</option>
+              <option value="10">Dublin 10</option>
+              <option value="11">Dublin 11</option>
+              <option value="12">Dublin 12</option>
+              <option value="13">Dublin 13</option>
+              <option value="14">Dublin 14</option>
+              <option value="15">Dublin 15</option>
+              <option value="16">Dublin 16</option>
+              <option value="17">Dublin 17</option>
+              <option value="18">Dublin 18</option>
+              <option value="20">Dublin 20</option>
+              <option value="22">Dublin 22</option>
+              <option value="24">Dublin 24</option>
+            </select>
+          </label>
+          <label id="el_distrito_outro_wrap">Distrito / bairro
+            <input type="text" id="el_distrito_outro" placeholder="Ex: Rathmines, Ballincollig...">
+          </label>
+        </div>
       </div>
       <div class="form-row">
         <label>Eircode
@@ -409,7 +438,8 @@
       <div class="form-row">
         <label>Gênero
           <select id="el_genero">
-            <option value="">Sem preferência</option>
+            <option value="">Não definido</option>
+            <option>Misto</option>
             <option>Só mulheres</option>
             <option>Só homens</option>
           </select>
@@ -695,13 +725,36 @@
   // ======= EDITAR ANÚNCIO =======
   let editingListingRecordId = null;
 
+  function toggleDistritoField(prefix){
+    const cidade = document.getElementById(prefix + '_cidade').value;
+    const isDublin = cidade === 'Dublin';
+    document.getElementById(prefix + '_distrito_dublin_wrap').style.display = isDublin ? 'flex' : 'none';
+    document.getElementById(prefix + '_distrito_outro_wrap').style.display = isDublin ? 'none' : 'flex';
+  }
+
+  function getDistritoValue(prefix){
+    const cidade = document.getElementById(prefix + '_cidade').value;
+    return cidade === 'Dublin'
+      ? document.getElementById(prefix + '_distrito_dublin').value
+      : document.getElementById(prefix + '_distrito_outro').value;
+  }
+
+  function setDistritoValue(prefix, cidade, distrito){
+    if (cidade === 'Dublin') {
+      document.getElementById(prefix + '_distrito_dublin').value = distrito || '';
+    } else {
+      document.getElementById(prefix + '_distrito_outro').value = distrito || '';
+    }
+  }
+
   function openEditListing(id){
     const item = allAnuncios.find(a => a.id === id);
     if (!item) return;
     editingListingRecordId = id;
     document.getElementById('el_titulo').value = item.titulo || '';
     document.getElementById('el_cidade').value = item.cidade || 'Dublin';
-    document.getElementById('el_distrito').value = item.distrito || '';
+    toggleDistritoField('el');
+    setDistritoValue('el', item.cidade || 'Dublin', item.distrito);
     document.getElementById('el_eircode').value = item.eircode || '';
     document.getElementById('el_tipo_quarto').value = item.tipo_quarto || 'Individual';
     document.getElementById('el_valor').value = item.valor || 0;
@@ -728,7 +781,7 @@
     const payload = {
       titulo: document.getElementById('el_titulo').value,
       cidade: document.getElementById('el_cidade').value,
-      distrito: document.getElementById('el_distrito').value,
+      distrito: getDistritoValue('el'),
       eircode: document.getElementById('el_eircode').value,
       tipo_quarto: document.getElementById('el_tipo_quarto').value,
       valor: parseFloat(document.getElementById('el_valor').value) || 0,
