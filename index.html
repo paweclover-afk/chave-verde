@@ -266,9 +266,17 @@
     display:grid; grid-template-columns:1.2fr 0.8fr; gap:44px; align-items:start;
   }
   .detail-gallery-main{
-    height:360px; border-radius:8px; overflow:hidden;
-    background:linear-gradient(135deg,#DCA85C,#4C7A63);
+    height:360px; border-radius:8px; overflow:hidden; position:relative;
+    background:#141B14;
+  }
+  .detail-gallery-main .detail-main-bg{
+    position:absolute; inset:-14px;
     background-size:cover; background-position:center;
+    filter:blur(20px) brightness(0.55); transform:scale(1.15);
+  }
+  .detail-gallery-main .detail-main-img{
+    position:relative; z-index:1; width:100%; height:100%;
+    object-fit:contain; display:block;
   }
   .detail-thumbs{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
   .detail-thumb{
@@ -1046,9 +1054,17 @@
 
   // ======= PÁGINA DE DETALHES DO ANÚNCIO =======
   function setDetailMainPhoto(url){
-    document.getElementById('detailMainPhoto').style.background = url
-      ? `url('${url}') center/cover`
-      : 'linear-gradient(135deg,#DCA85C,#4C7A63)';
+    const el = document.getElementById('detailMainPhoto');
+    if (!url) {
+      el.innerHTML = '';
+      el.style.background = 'linear-gradient(135deg,#DCA85C,#4C7A63)';
+      return;
+    }
+    el.style.background = '';
+    el.innerHTML = `
+      <div class="detail-main-bg" style="background-image:url('${url}')"></div>
+      <img class="detail-main-img" src="${url}" alt="">
+    `;
   }
 
   function renderListingDetail(item){
@@ -1146,7 +1162,12 @@
     }
 
     const fileInput = document.getElementById('f_fotos');
-    const files = Array.from(fileInput.files || []).slice(0, 10);
+    const allFiles = Array.from(fileInput.files || []);
+    if (allFiles.length > 10) {
+      errorEl.textContent = 'Você selecionou ' + allFiles.length + ' fotos, mas o limite grátis é de 10. Publique com até 10 fotos agora — depois, no painel "Meus anúncios", você pode desbloquear até 20 fotos por €5.';
+      return false;
+    }
+    const files = allFiles;
     let fotosUrls = [];
     if (files.length > 0) {
       errorEl.textContent = 'Enviando fotos...';
@@ -1257,7 +1278,7 @@
     const limite = current.fotos_extra_pagas ? 20 : 10;
     const espacoLivre = limite - existentes.length;
     if (espacoLivre <= 0) {
-      alert(current.fotos_extra_pagas ? 'Esse anúncio já está com 20 fotos.' : 'Você já usou as 7 fotos grátis. Desbloqueie mais fotos por €5.');
+      alert(current.fotos_extra_pagas ? 'Esse anúncio já está com 20 fotos.' : 'Você já usou as 10 fotos grátis. Desbloqueie mais fotos por €5.');
       return;
     }
 
