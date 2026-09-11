@@ -410,8 +410,18 @@
           <textarea id="f_descricao" rows="3"></textarea>
         </label>
         <label>Seu WhatsApp
-          <input type="text" id="f_whatsapp" required placeholder="+353...">
+          <div style="display:flex; gap:8px;">
+            <select id="f_whatsapp_pais" style="flex:0 0 120px;">
+              <option value="+353">🇮🇪 +353</option>
+              <option value="+55">🇧🇷 +55</option>
+              <option value="+351">🇵🇹 +351</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="">Outro</option>
+            </select>
+            <input type="text" id="f_whatsapp_numero" required placeholder="Ex: 851234567" style="flex:1;">
+          </div>
         </label>
+        <p style="font-size:0.78rem; color:#5C5C50; margin-top:-8px;">Escolha o país e digite o DDD + número, sem o 0 na frente. Ex: Irlanda 851234567 · Brasil 31999998888. Se escolher "Outro", digite o número completo com código do país.</p>
         <p class="auth-error" id="novoAnuncioError"></p>
         <button type="submit" class="btn btn-primary" style="width:100%;">Publicar anúncio</button>
       </form>
@@ -554,8 +564,18 @@
         <textarea id="el_descricao" rows="3"></textarea>
       </label>
       <label>Seu WhatsApp
-        <input type="text" id="el_whatsapp" required>
+        <div style="display:flex; gap:8px;">
+          <select id="el_whatsapp_pais" style="flex:0 0 120px;">
+            <option value="+353">🇮🇪 +353</option>
+            <option value="+55">🇧🇷 +55</option>
+            <option value="+351">🇵🇹 +351</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="">Outro</option>
+          </select>
+          <input type="text" id="el_whatsapp_numero" required placeholder="Ex: 851234567" style="flex:1;">
+        </div>
       </label>
+      <p style="font-size:0.78rem; color:#5C5C50; margin-top:-8px;">Escolha o país e digite o DDD + número, sem o 0 na frente.</p>
       <p class="auth-error" id="editListingError"></p>
       <button type="submit" class="btn btn-primary" style="width:100%;">Salvar alterações</button>
     </form>
@@ -753,6 +773,27 @@
     }
   }
 
+  function getWhatsappValue(prefix){
+    const pais = document.getElementById(prefix + '_whatsapp_pais').value;
+    const numero = document.getElementById(prefix + '_whatsapp_numero').value.replace(/\D/g, '');
+    return pais + numero;
+  }
+
+  function setWhatsappValue(prefix, whatsapp){
+    const digits = (whatsapp || '').replace(/\D/g, '');
+    const knownCodes = ['353', '55', '351', '44'];
+    const matched = knownCodes.find(c => digits.startsWith(c));
+    const paisSelect = document.getElementById(prefix + '_whatsapp_pais');
+    const numeroInput = document.getElementById(prefix + '_whatsapp_numero');
+    if (matched) {
+      paisSelect.value = '+' + matched;
+      numeroInput.value = digits.slice(matched.length);
+    } else {
+      paisSelect.value = '';
+      numeroInput.value = whatsapp || '';
+    }
+  }
+
   toggleDistritoField('f');
 
   async function handleNovoAnuncio(event){
@@ -787,7 +828,7 @@
     const payload = {
       user_id: user.id,
       nome: user.user_metadata?.nome || '',
-      whatsapp: document.getElementById('f_whatsapp').value,
+      whatsapp: getWhatsappValue('f'),
       cidade: document.getElementById('f_cidade').value,
       distrito: getDistritoValue('f'),
       titulo: document.getElementById('f_titulo').value,
@@ -1064,7 +1105,7 @@
     document.getElementById('el_genero').value = item.genero || '';
     document.getElementById('el_aceita_sem_pps').checked = !!item.aceita_sem_pps;
     document.getElementById('el_descricao').value = item.descricao || '';
-    document.getElementById('el_whatsapp').value = item.whatsapp || '';
+    setWhatsappValue('el', item.whatsapp);
     document.getElementById('editListingError').textContent = '';
     document.getElementById('editListingOverlay').classList.add('open');
   }
@@ -1088,7 +1129,7 @@
       genero: document.getElementById('el_genero').value,
       aceita_sem_pps: document.getElementById('el_aceita_sem_pps').checked,
       descricao: document.getElementById('el_descricao').value,
-      whatsapp: document.getElementById('el_whatsapp').value
+      whatsapp: getWhatsappValue('el')
     };
     const { error } = await supabaseClient.from('quartos').update(payload).eq('id', editingListingRecordId);
     if (error) {
