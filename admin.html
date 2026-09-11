@@ -413,7 +413,7 @@
             </select>
           </label>
           <label id="el_distrito_outro_wrap">Distrito / bairro
-            <input type="text" id="el_distrito_outro" placeholder="Ex: Rathmines, Ballincollig...">
+            <input type="text" id="el_distrito_outro" placeholder="Ex: Dublin 2, Ballincollig...">
           </label>
         </div>
       </div>
@@ -432,7 +432,7 @@
           </select>
         </label>
         <label>Preço mensal (€)
-          <input type="number" id="el_valor" min="0">
+          <input type="number" id="el_valor" min="0" step="0.01">
         </label>
       </div>
       <div class="form-row">
@@ -626,6 +626,10 @@
       .filter(Boolean);
   }
 
+  function formatEuro(valor){
+    return (Number(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   // ======= ANÚNCIOS =======
   let allAnuncios = [];
   let statusFilter = 'Pendente';
@@ -690,7 +694,7 @@
             <span class="status-badge status-${item.status}">${item.status}</span>
             <div class="admin-card-title">${item.titulo || '(sem título)'}</div>
             <div class="admin-card-meta">
-              ${item.cidade || ''}${item.distrito ? ' ' + item.distrito : ''} · €${item.valor || 0}/mês · ${fotosCount} foto(s)
+              ${item.cidade || ''}${item.distrito ? ' ' + item.distrito : ''} · €${formatEuro(item.valor)}/mês · ${fotosCount} foto(s)
               ${item.fotos_extra_pagas ? '<span class="fotos-pagas-tag">· fotos extras pagas</span>' : ''}
             </div>
             <div class="admin-card-meta">${item.nome || 'sem nome'} · ${item.whatsapp || 'sem WhatsApp'} · publicado em ${criado}</div>

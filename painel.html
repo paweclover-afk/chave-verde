@@ -306,35 +306,64 @@
             </select>
           </label>
           <div>
-            <label id="f_distrito_dublin_wrap" style="display:none;">Distrito
-              <select id="f_distrito_dublin">
-                <option value="">Selecione o distrito</option>
-                <option value="1">Dublin 1</option>
-                <option value="2">Dublin 2</option>
-                <option value="3">Dublin 3</option>
-                <option value="4">Dublin 4</option>
-                <option value="5">Dublin 5</option>
-                <option value="6">Dublin 6</option>
-                <option value="6W">Dublin 6W</option>
-                <option value="7">Dublin 7</option>
-                <option value="8">Dublin 8</option>
-                <option value="9">Dublin 9</option>
-                <option value="10">Dublin 10</option>
-                <option value="11">Dublin 11</option>
-                <option value="12">Dublin 12</option>
-                <option value="13">Dublin 13</option>
-                <option value="14">Dublin 14</option>
-                <option value="15">Dublin 15</option>
-                <option value="16">Dublin 16</option>
-                <option value="17">Dublin 17</option>
-                <option value="18">Dublin 18</option>
-                <option value="20">Dublin 20</option>
-                <option value="22">Dublin 22</option>
-                <option value="24">Dublin 24</option>
-              </select>
-            </label>
+            <div id="f_distrito_dublin_wrap" style="display:none;">
+              <label>Distrito
+                <select id="f_distrito_dublin">
+                  <option value="">Selecione o distrito</option>
+                  <option value="1">Dublin 1</option>
+                  <option value="2">Dublin 2</option>
+                  <option value="3">Dublin 3</option>
+                  <option value="4">Dublin 4</option>
+                  <option value="5">Dublin 5</option>
+                  <option value="6">Dublin 6</option>
+                  <option value="6W">Dublin 6W</option>
+                  <option value="7">Dublin 7</option>
+                  <option value="8">Dublin 8</option>
+                  <option value="9">Dublin 9</option>
+                  <option value="10">Dublin 10</option>
+                  <option value="11">Dublin 11</option>
+                  <option value="12">Dublin 12</option>
+                  <option value="13">Dublin 13</option>
+                  <option value="14">Dublin 14</option>
+                  <option value="15">Dublin 15</option>
+                  <option value="16">Dublin 16</option>
+                  <option value="17">Dublin 17</option>
+                  <option value="18">Dublin 18</option>
+                  <option value="20">Dublin 20</option>
+                  <option value="22">Dublin 22</option>
+                  <option value="24">Dublin 24</option>
+                </select>
+              </label>
+              <details style="margin-top:6px;">
+                <summary style="cursor:pointer; font-size:0.8rem; color:var(--teal); font-weight:600;">Não sabe seu distrito? Veja exemplos de bairros</summary>
+                <div style="font-size:0.76rem; color:#5C5C50; margin-top:8px; line-height:1.7; max-height:170px; overflow-y:auto; padding-right:4px;">
+                  <strong>D1:</strong> Abbey, Henry, Capel, O'Connell, Talbot St, Mountjoy, Parnell Sq, Northwall<br>
+                  <strong>D2:</strong> Grafton, Dame, Pearse, Nassau, Leeson, Dawson, St. Stephen's Green, Trinity College, Temple Bar<br>
+                  <strong>D3:</strong> Dollymount, Clonliffe, Clontarf, Eastwall, Fairview, Marino<br>
+                  <strong>D4:</strong> Irishtown, Ringsend, Ballsbridge, Donnybrook, Merrion, Pembroke, Sandymount<br>
+                  <strong>D5:</strong> Artane, Harmonstown, Raheny, Coolock, Killester<br>
+                  <strong>D6:</strong> Ranelagh, Rathmines, Rathgar, Milltown<br>
+                  <strong>D6W:</strong> Kimmage, Harold's Cross, Templeogue<br>
+                  <strong>D7:</strong> Arbour Hill, Cabra, Phibsborough, Ashtown<br>
+                  <strong>D8:</strong> Inchicore, Kilmainham, Dolphin's Barn, Portobello<br>
+                  <strong>D9:</strong> Drumcondra, Santry, Beaumont, Ballymun<br>
+                  <strong>D10:</strong> Ballyfermot, Cherry Orchard, Sarsfield Rd<br>
+                  <strong>D11:</strong> Finglas, Ballymun, Glasnevin, Jamestown<br>
+                  <strong>D12:</strong> Bluebell, Crumlin, Walkinstown, Drimnagh<br>
+                  <strong>D13:</strong> Howth, Baldoyle, Baily, Donaghmede, Sutton<br>
+                  <strong>D14:</strong> Dundrum, Churchtown, Clonskeagh, Rathfarnham<br>
+                  <strong>D15:</strong> Blanchardstown, Castleknock, Clonsilla, Ashtown, Ongar<br>
+                  <strong>D16:</strong> Ballinteer, Ballyboden, Whitechurch<br>
+                  <strong>D17:</strong> Balgriffin, Coolock, Belcamp, Clonshaugh<br>
+                  <strong>D18:</strong> Carrickmines, Foxrock, Sandyford, Shankill, Leopardstown<br>
+                  <strong>D20:</strong> Chapelizod, Palmerstown<br>
+                  <strong>D22:</strong> Clondalkin, Bawnogue, Neilstown, Newcastle<br>
+                  <strong>D24:</strong> Tallaght, Firhouse, Jobstown, Kilnamanagh, Ballymount
+                </div>
+              </details>
+            </div>
             <label id="f_distrito_outro_wrap">Distrito / bairro
-              <input type="text" id="f_distrito_outro" placeholder="Ex: Rathmines, Ballincollig...">
+              <input type="text" id="f_distrito_outro" placeholder="Ex: Dublin 2, Ballincollig...">
             </label>
           </div>
         </div>
@@ -354,7 +383,7 @@
             </select>
           </label>
           <label>Preço mensal (€)
-            <input type="number" id="f_valor" required min="0" placeholder="Ex: 650">
+            <input type="number" id="f_valor" required min="0" step="0.01" placeholder="Ex: 650">
           </label>
         </div>
         <div class="form-row">
@@ -425,35 +454,64 @@
           </select>
         </label>
         <div>
-          <label id="el_distrito_dublin_wrap" style="display:none;">Distrito
-            <select id="el_distrito_dublin">
-              <option value="">Selecione o distrito</option>
-              <option value="1">Dublin 1</option>
-              <option value="2">Dublin 2</option>
-              <option value="3">Dublin 3</option>
-              <option value="4">Dublin 4</option>
-              <option value="5">Dublin 5</option>
-              <option value="6">Dublin 6</option>
-              <option value="6W">Dublin 6W</option>
-              <option value="7">Dublin 7</option>
-              <option value="8">Dublin 8</option>
-              <option value="9">Dublin 9</option>
-              <option value="10">Dublin 10</option>
-              <option value="11">Dublin 11</option>
-              <option value="12">Dublin 12</option>
-              <option value="13">Dublin 13</option>
-              <option value="14">Dublin 14</option>
-              <option value="15">Dublin 15</option>
-              <option value="16">Dublin 16</option>
-              <option value="17">Dublin 17</option>
-              <option value="18">Dublin 18</option>
-              <option value="20">Dublin 20</option>
-              <option value="22">Dublin 22</option>
-              <option value="24">Dublin 24</option>
-            </select>
-          </label>
+          <div id="el_distrito_dublin_wrap" style="display:none;">
+            <label>Distrito
+              <select id="el_distrito_dublin">
+                <option value="">Selecione o distrito</option>
+                <option value="1">Dublin 1</option>
+                <option value="2">Dublin 2</option>
+                <option value="3">Dublin 3</option>
+                <option value="4">Dublin 4</option>
+                <option value="5">Dublin 5</option>
+                <option value="6">Dublin 6</option>
+                <option value="6W">Dublin 6W</option>
+                <option value="7">Dublin 7</option>
+                <option value="8">Dublin 8</option>
+                <option value="9">Dublin 9</option>
+                <option value="10">Dublin 10</option>
+                <option value="11">Dublin 11</option>
+                <option value="12">Dublin 12</option>
+                <option value="13">Dublin 13</option>
+                <option value="14">Dublin 14</option>
+                <option value="15">Dublin 15</option>
+                <option value="16">Dublin 16</option>
+                <option value="17">Dublin 17</option>
+                <option value="18">Dublin 18</option>
+                <option value="20">Dublin 20</option>
+                <option value="22">Dublin 22</option>
+                <option value="24">Dublin 24</option>
+              </select>
+            </label>
+            <details style="margin-top:6px;">
+              <summary style="cursor:pointer; font-size:0.8rem; color:var(--teal); font-weight:600;">Não sabe seu distrito? Veja exemplos de bairros</summary>
+              <div style="font-size:0.76rem; color:#5C5C50; margin-top:8px; line-height:1.7; max-height:170px; overflow-y:auto; padding-right:4px;">
+                <strong>D1:</strong> Abbey, Henry, Capel, O'Connell, Talbot St, Mountjoy, Parnell Sq, Northwall<br>
+                <strong>D2:</strong> Grafton, Dame, Pearse, Nassau, Leeson, Dawson, St. Stephen's Green, Trinity College, Temple Bar<br>
+                <strong>D3:</strong> Dollymount, Clonliffe, Clontarf, Eastwall, Fairview, Marino<br>
+                <strong>D4:</strong> Irishtown, Ringsend, Ballsbridge, Donnybrook, Merrion, Pembroke, Sandymount<br>
+                <strong>D5:</strong> Artane, Harmonstown, Raheny, Coolock, Killester<br>
+                <strong>D6:</strong> Ranelagh, Rathmines, Rathgar, Milltown<br>
+                <strong>D6W:</strong> Kimmage, Harold's Cross, Templeogue<br>
+                <strong>D7:</strong> Arbour Hill, Cabra, Phibsborough, Ashtown<br>
+                <strong>D8:</strong> Inchicore, Kilmainham, Dolphin's Barn, Portobello<br>
+                <strong>D9:</strong> Drumcondra, Santry, Beaumont, Ballymun<br>
+                <strong>D10:</strong> Ballyfermot, Cherry Orchard, Sarsfield Rd<br>
+                <strong>D11:</strong> Finglas, Ballymun, Glasnevin, Jamestown<br>
+                <strong>D12:</strong> Bluebell, Crumlin, Walkinstown, Drimnagh<br>
+                <strong>D13:</strong> Howth, Baldoyle, Baily, Donaghmede, Sutton<br>
+                <strong>D14:</strong> Dundrum, Churchtown, Clonskeagh, Rathfarnham<br>
+                <strong>D15:</strong> Blanchardstown, Castleknock, Clonsilla, Ashtown, Ongar<br>
+                <strong>D16:</strong> Ballinteer, Ballyboden, Whitechurch<br>
+                <strong>D17:</strong> Balgriffin, Coolock, Belcamp, Clonshaugh<br>
+                <strong>D18:</strong> Carrickmines, Foxrock, Sandyford, Shankill, Leopardstown<br>
+                <strong>D20:</strong> Chapelizod, Palmerstown<br>
+                <strong>D22:</strong> Clondalkin, Bawnogue, Neilstown, Newcastle<br>
+                <strong>D24:</strong> Tallaght, Firhouse, Jobstown, Kilnamanagh, Ballymount
+              </div>
+            </details>
+          </div>
           <label id="el_distrito_outro_wrap">Distrito / bairro
-            <input type="text" id="el_distrito_outro" placeholder="Ex: Rathmines, Ballincollig...">
+            <input type="text" id="el_distrito_outro" placeholder="Ex: Dublin 2, Ballincollig...">
           </label>
         </div>
       </div>
@@ -472,7 +530,7 @@
           </select>
         </label>
         <label>Preço mensal (€)
-          <input type="number" id="el_valor" required min="0">
+          <input type="number" id="el_valor" required min="0" step="0.01">
         </label>
       </div>
       <div class="form-row">
@@ -643,6 +701,10 @@
       .filter(Boolean);
   }
 
+  function formatEuro(valor){
+    return (Number(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   async function uploadFotos(files, userId){
     const urls = [];
     for (const file of files) {
@@ -663,7 +725,7 @@
     const dublinSelect = document.getElementById(prefix + '_distrito_dublin');
     const outroInput = document.getElementById(prefix + '_distrito_outro');
 
-    dublinWrap.style.display = isDublin ? 'flex' : 'none';
+    dublinWrap.style.display = isDublin ? 'block' : 'none';
     outroWrap.style.display = isDublin ? 'none' : 'flex';
     if (isDublin) {
       dublinSelect.setAttribute('required', 'required');
@@ -778,7 +840,7 @@
         <div class="listing-card">
           <div>
             <p style="font-weight:600; color:var(--pine-dark);">${item.titulo}</p>
-            <p class="listing-status">${item.cidade}${item.distrito ? ' ' + item.distrito : ''} · €${item.valor}/mês · <strong>${statusLabel}</strong>${destaqueInfo}</p>
+            <p class="listing-status">${item.cidade}${item.distrito ? ' ' + item.distrito : ''} · €${formatEuro(item.valor)}/mês · <strong>${statusLabel}</strong>${destaqueInfo}</p>
           </div>
         </div>
         <div class="listing-actions">

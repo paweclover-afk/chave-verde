@@ -1045,6 +1045,10 @@
       .filter(Boolean);
   }
 
+  function formatEuro(valor){
+    return (Number(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   function whatsappLink(item){
     const digits = (item.whatsapp || '').replace(/\D/g, '');
     const msg = encodeURIComponent(`Oi! Vi seu anúncio "${item.titulo || ''}" no Chave Verde e queria saber mais informações.`);
@@ -1099,7 +1103,7 @@
           <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${item.titulo || ''}</h3>
           <p class="listing-meta">${item.tipo_quarto || ''}${item.descricao ? ' · ' + item.descricao : ''}</p>
           <div class="listing-foot">
-            <span class="listing-price">€${item.valor || 0}/mês</span>
+            <span class="listing-price">€${formatEuro(item.valor)}/mês</span>
             ${badge}${genero}
           </div>
           <a class="listing-whats-btn" href="${whatsappLink(item)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
@@ -1214,8 +1218,22 @@
     if (anuncioId) openListingDetail(Number(anuncioId), false);
   }
 
+  const DUBLIN_DISTRITOS = ['1','2','3','4','5','6','6W','7','8','9','10','11','12','13','14','15','16','17','18','20','22','24'];
+
   function populateDistritoFilter(){
     const select = document.getElementById('distritoFilter');
+
+    // Dublin tem uma lista oficial de distritos — mostra todos, mesmo os que ainda não têm anúncio,
+    // pra pessoa poder ir trocando (Dublin 1, Dublin 2, Dublin 3...) até achar o que procura.
+    if (currentCityLabel === 'Dublin') {
+      select.style.display = 'inline-block';
+      select.innerHTML = '<option value="">Todos os distritos</option>' +
+        DUBLIN_DISTRITOS.map(d => `<option value="${d}">Dublin ${d}</option>`).join('');
+      select.value = '';
+      return;
+    }
+
+    // Outras cidades não têm uma lista oficial — mostra só os distritos/bairros que já existem nos anúncios.
     const distritos = Array.from(new Set(
       currentCityListings.map(item => (item.distrito || '').trim()).filter(Boolean)
     )).sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
@@ -1314,7 +1332,7 @@
         <p class="detail-meta">${item.tipo_quarto || ''}</p>
         <div class="detail-tags">${badge}${genero}</div>
         ${item.descricao ? `<p class="detail-desc">${item.descricao}</p>` : ''}
-        <p class="detail-price">€${item.valor || 0} <span>/mês</span></p>
+        <p class="detail-price">€${formatEuro(item.valor)} <span>/mês</span></p>
         <a class="btn btn-primary listing-whats-btn" style="background:#25D366; margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener">
           ${whatsIconSvg()} Falar no WhatsApp
         </a>
