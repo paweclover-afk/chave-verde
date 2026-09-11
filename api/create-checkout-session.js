@@ -8,12 +8,19 @@ module.exports = async (req, res) => {
 
   try {
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-    const { anuncio_id } = req.body || {};
+    const { anuncio_id, tipo } = req.body || {};
 
     if (!anuncio_id) {
       res.status(400).json({ error: 'anuncio_id é obrigatório' });
       return;
     }
+
+    const tipoFinal = tipo === 'destaque' ? 'destaque' : 'fotos';
+    const produtos = {
+      fotos: { name: 'Fotos extras no anúncio (até 20 fotos)', unit_amount: 500 },
+      destaque: { name: 'Destaque do anúncio (2 semanas no topo da cidade)', unit_amount: 1500 },
+    };
+    const produto = produtos[tipoFinal];
 
     const siteUrl = process.env.SITE_URL || 'https://chave-verde.vercel.app';
 
@@ -24,13 +31,13 @@ module.exports = async (req, res) => {
         {
           price_data: {
             currency: 'eur',
-            product_data: { name: 'Fotos extras no anúncio (até 20 fotos)' },
-            unit_amount: 500,
+            product_data: { name: produto.name },
+            unit_amount: produto.unit_amount,
           },
           quantity: 1,
         },
       ],
-      metadata: { anuncio_id: String(anuncio_id) },
+      metadata: { anuncio_id: String(anuncio_id), tipo: tipoFinal },
       success_url: `${siteUrl}/painel.html?anuncio_pago=${anuncio_id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/painel.html?anuncio_cancelado=${anuncio_id}`,
     });

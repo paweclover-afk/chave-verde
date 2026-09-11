@@ -29,14 +29,19 @@ module.exports = async (req, res) => {
       return;
     }
 
+    const tipo = session.metadata.tipo === 'destaque' ? 'destaque' : 'fotos';
+    const updatePayload = tipo === 'destaque'
+      ? { destaque_ate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() }
+      : { fotos_extra_pagas: true };
+
     const { error } = await supabaseAdmin
       .from('quartos')
-      .update({ fotos_extra_pagas: true })
+      .update(updatePayload)
       .eq('id', anuncio_id);
 
     if (error) throw error;
 
-    res.status(200).json({ ok: true });
+    res.status(200).json({ ok: true, tipo });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
