@@ -31,8 +31,8 @@ module.exports = async (req, res) => {
         },
       ],
       metadata: { anuncio_id: String(anuncio_id) },
-      success_url: `${siteUrl}/?anuncio_pago=${anuncio_id}&session_id={CHECKOUT_SESSION_ID}#painel`,
-      cancel_url: `${siteUrl}/?anuncio_cancelado=${anuncio_id}#painel`,
+      success_url: `${siteUrl}/painel.html?anuncio_pago=${anuncio_id}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/painel.html?anuncio_cancelado=${anuncio_id}`,
     });
 
     res.status(200).json({ url: session.url });
