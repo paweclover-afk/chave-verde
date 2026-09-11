@@ -366,10 +366,13 @@
               <option>Só homens</option>
             </select>
           </label>
-          <label style="flex-direction:row; align-items:center; gap:8px; margin-top:22px;">
-            <input type="checkbox" id="f_aceita_sem_pps" style="width:auto;">
-            Aceita sem PPS
-          </label>
+          <div>
+            <label style="flex-direction:row; align-items:center; gap:8px; margin-top:22px;">
+              <input type="checkbox" id="f_aceita_sem_pps" style="width:auto;">
+              Aceita sem PPS
+            </label>
+            <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse quarto.</p>
+          </div>
         </div>
         <label>Fotos (até 5 grátis — dá pra desbloquear mais depois)
           <input type="file" id="f_fotos" accept="image/*" multiple>
@@ -383,6 +386,16 @@
         <p class="auth-error" id="novoAnuncioError"></p>
         <button type="submit" class="btn btn-primary" style="width:100%;">Publicar anúncio</button>
       </form>
+
+      <div class="card" style="background:var(--paper-2); margin-bottom:36px;">
+        <h3 style="font-size:0.98rem; margin-bottom:12px;">Como deixar seu anúncio com mais chance de alugar</h3>
+        <p style="font-size:0.9rem; color:#3A3A32; margin-bottom:10px;">
+          <strong>Mais fotos — €5:</strong> todo anúncio já sai com até 5 fotos grátis. Se quiser mostrar mais cômodos e ângulos da casa, pague €5 uma única vez e desbloqueie mais 15 fotos (até 20 no total).
+        </p>
+        <p style="font-size:0.9rem; color:#3A3A32;">
+          <strong>Destacar anúncio — €15:</strong> coloca seu anúncio no topo da lista da sua cidade por 2 semanas, na frente dos outros anúncios normais — assim mais gente vê e você recebe contato mais rápido.
+        </p>
+      </div>
 
       <h3 style="font-size:1.05rem; margin-bottom:16px;">Seus anúncios</h3>
       <div id="myListingsStatus" style="color:#5C5C50;">Carregando...</div>
@@ -471,10 +484,13 @@
             <option>Só homens</option>
           </select>
         </label>
-        <label style="flex-direction:row; align-items:center; gap:8px; margin-top:22px;">
-          <input type="checkbox" id="el_aceita_sem_pps" style="width:auto;">
-          Aceita sem PPS
-        </label>
+        <div>
+          <label style="flex-direction:row; align-items:center; gap:8px; margin-top:22px;">
+            <input type="checkbox" id="el_aceita_sem_pps" style="width:auto;">
+            Aceita sem PPS
+          </label>
+          <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse quarto.</p>
+        </div>
       </div>
       <label>Descrição
         <textarea id="el_descricao" rows="3"></textarea>
@@ -501,7 +517,7 @@
         + Adicionar fotos
         <input type="file" accept="image/*" multiple style="display:none" id="editFotosInput" onchange="addFotosToEdit(this.files)">
       </label>
-      <button class="btn btn-sun" id="editFotosUnlockBtn" style="display:none;" onclick="startExtraFotosCheckout(editingListingId)">Desbloquear mais fotos (€5)</button>
+      <button class="btn btn-sun" id="editFotosUnlockBtn" style="display:none;" onclick="startExtraFotosCheckout(editingListingId)">Pague €5 para desbloquear mais 15 fotos (até 20 no total)</button>
     </div>
     <p class="auth-error" id="editFotosError"></p>
   </div>
