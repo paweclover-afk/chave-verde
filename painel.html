@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu painel — Chave Verde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A1E;
+    --paper:#F6F1E4;
+    --paper-2:#EFE7D3;
+    --pine:#1F4D3A;
+    --pine-dark:#153529;
+    --sun:#E8A33D;
+    --teal:#3E6B6E;
+    --clay:#C1502E;
+    --line: rgba(27,42,30,0.14);
+    --max: 1120px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    line-height:1.08;
+    margin:0;
+    color:var(--pine-dark);
+  }
+  p{margin:0;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 28px;}
+
+  a:focus-visible, button:focus-visible{
+    outline:3px solid var(--teal);
+    outline-offset:3px;
+  }
+
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(246,241,228,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 0;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.25rem;
+    color:var(--pine-dark); text-decoration:none;
+  }
+  .brand svg{width:26px; height:26px;}
+  .nav-links{display:flex; align-items:center; gap:12px;}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:12px 22px; border-radius:6px;
+    font-size:0.95rem; font-weight:600;
+    text-decoration:none; border:1px solid transparent;
+    cursor:pointer;
+  }
+  .btn-primary{background:var(--pine); color:var(--paper);}
+  .btn-primary:hover{background:var(--pine-dark);}
+  .btn-ghost{background:transparent; color:var(--pine-dark); border-color:var(--pine-dark);}
+  .btn-ghost:hover{background:var(--pine-dark); color:var(--paper);}
+  .btn-sun{background:var(--sun); color:var(--pine-dark);}
+  .btn-sun:hover{filter:brightness(0.95);}
+  .btn-small{padding:8px 14px; font-size:0.85rem;}
+  .btn-danger{border-color:#B33A2E; color:#B33A2E;}
+
+  main{padding:56px 0 96px;}
+  .page-head{max-width:640px; margin-bottom:40px;}
+  .page-head p{margin-top:12px; font-size:1.02rem; color:#3A3A32;}
+
+  .auth-form{display:flex; flex-direction:column; gap:16px;}
+  .auth-form label{
+    display:flex; flex-direction:column; gap:6px;
+    font-size:0.88rem; font-weight:600; color:var(--pine-dark);
+  }
+  .auth-form input, .auth-form select, .auth-form textarea{
+    font-family:'Work Sans',sans-serif; font-size:0.98rem;
+    padding:11px 12px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; color:var(--ink);
+  }
+  .auth-form input:focus, .auth-form select:focus, .auth-form textarea:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  .auth-error{color:#B33A2E; font-size:0.85rem; margin:0; min-height:1em;}
+  .auth-success{color:var(--pine-dark); font-weight:600; font-size:0.88rem; margin:0; min-height:1em;}
+  .auth-note{margin-top:4px; font-size:0.85rem; color:#5C5C50;}
+
+  .auth-gate{
+    max-width:420px; margin:0 auto;
+    background:var(--paper-2); border-radius:10px; padding:32px 28px;
+  }
+  .auth-tabs{
+    display:flex; gap:8px; margin-bottom:22px;
+    border-bottom:1px solid var(--line);
+  }
+  .auth-tab{
+    flex:1; background:none; border:none; cursor:pointer;
+    padding:10px 0; font-family:'Work Sans',sans-serif; font-weight:600; font-size:0.98rem;
+    color:#8a8a7c; border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .auth-tab.active{color:var(--pine-dark); border-bottom-color:var(--pine);}
+
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:16px;
+  }
+  .listing-card{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+  }
+  .listing-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .listing-status{font-size:0.85rem; color:#5C5C50;}
+
+  .form-card{
+    background:var(--paper-2); padding:24px; border-radius:8px; margin-bottom:40px;
+  }
+  .form-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:600px){ .form-row{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L3 9V21H21V9L12 2Z" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M9 21V13H15V21" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+      Chave Verde
+    </a>
+    <div class="nav-links">
+      <a class="btn btn-ghost" href="index.html">Ver anúncios</a>
+      <a class="btn btn-ghost" href="#" id="logoutBtn" style="display:none;" onclick="handleLogout(); return false;">Sair</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- ACESSO (mostrado se não estiver logado) -->
+    <div id="authGate" style="display:none;">
+      <div class="auth-gate">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Entrar</button>
+          <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Cadastrar</button>
+        </div>
+
+        <form id="loginForm" class="auth-form" onsubmit="return handleLogin(event)">
+          <label>Email
+            <input type="email" id="loginEmail" required placeholder="seu@email.com">
+          </label>
+          <label>Senha
+            <input type="password" id="loginPassword" required placeholder="Sua senha">
+          </label>
+          <p class="auth-error" id="loginError"></p>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Entrar</button>
+          <p class="auth-note"><a href="#" onclick="switchTab('forgot'); return false;" style="text-decoration:underline; color:var(--pine-dark);">Esqueceu sua senha?</a></p>
+        </form>
+
+        <form id="signupForm" class="auth-form" style="display:none;" onsubmit="return handleSignup(event)">
+          <label>Nome
+            <input type="text" id="signupNome" required placeholder="Seu nome">
+          </label>
+          <label>WhatsApp
+            <input type="text" id="signupWhatsapp" required placeholder="+353 ...">
+          </label>
+          <label>Email
+            <input type="email" id="signupEmail" required placeholder="seu@email.com">
+          </label>
+          <label>Senha
+            <input type="password" id="signupPassword" required placeholder="Crie uma senha" minlength="6">
+          </label>
+          <p class="auth-error" id="signupError"></p>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Criar conta</button>
+        </form>
+
+        <form id="forgotForm" class="auth-form" style="display:none;" onsubmit="return handleForgotPassword(event)">
+          <p style="font-size:0.9rem; color:#3A3A32;">Digite seu email e enviamos um link pra você criar uma senha nova.</p>
+          <label>Email
+            <input type="email" id="forgotEmail" required placeholder="seu@email.com">
+          </label>
+          <p class="auth-error" id="forgotError"></p>
+          <p class="auth-success" id="forgotSuccess"></p>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Enviar link de redefinição</button>
+          <p class="auth-note"><a href="#" onclick="switchTab('login'); return false;" style="text-decoration:underline; color:var(--pine-dark);">Voltar para o login</a></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- PAINEL (mostrado se estiver logado) -->
+    <div id="dashboard" style="display:none;">
+      <div class="page-head">
+        <h1>Meu painel</h1>
+        <p>Publique um anúncio novo ou gerencie os que você já tem: pause, reative, marque como alugado ou apague.</p>
+      </div>
+
+      <form id="novoAnuncioForm" class="auth-form form-card" onsubmit="return handleNovoAnuncio(event)">
+        <h3 style="font-size:1.05rem; margin-bottom:6px;">Publicar novo anúncio</h3>
+        <label>Título do anúncio
+          <input type="text" id="f_titulo" required placeholder="Ex: Quarto individual em Rathmines">
+        </label>
+        <div class="form-row">
+          <label>Cidade
+            <select id="f_cidade" required>
+              <option value="">Selecione</option>
+              <option>Dublin</option>
+              <option>Cork</option>
+              <option>Galway</option>
+              <option>Limerick</option>
+              <option>Outra</option>
+            </select>
+          </label>
+          <label>Eircode
+            <input type="text" id="f_eircode" placeholder="Ex: D06 XY12">
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Tipo de quarto
+            <select id="f_tipo_quarto" required>
+              <option value="">Selecione</option>
+              <option>Individual</option>
+              <option>Compartilhado</option>
+              <option>Studio</option>
+            </select>
+          </label>
+          <label>Preço mensal (€)
+            <input type="number" id="f_valor" required min="0" placeholder="Ex: 650">
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Gênero
+            <select id="f_genero">
+              <option value="">Sem preferência</option>
+              <option>Só mulheres</option>
+              <option>Só homens</option>
+            </select>
+          </label>
+          <label style="flex-direction:row; align-items:center; gap:8px; margin-top:22px;">
+            <input type="checkbox" id="f_aceita_sem_pps" style="width:auto;">
+            Aceita sem PPS
+          </label>
+        </div>
+        <label>Fotos (até 10 grátis — dá pra desbloquear mais depois)
+          <input type="file" id="f_fotos" accept="image/*" multiple>
+        </label>
+        <label>Descrição
+          <textarea id="f_descricao" rows="3"></textarea>
+        </label>
+        <label>Seu WhatsApp
+          <input type="text" id="f_whatsapp" required placeholder="+353...">
+        </label>
+        <p class="auth-error" id="novoAnuncioError"></p>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Publicar anúncio</button>
+      </form>
+
+      <h3 style="font-size:1.05rem; margin-bottom:16px;">Seus anúncios</h3>
+      <div id="myListingsStatus" style="color:#5C5C50;">Carregando...</div>
+      <div id="myListingsList" style="display:flex; flex-direction:column; gap:14px;"></div>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ======= CONFIGURAÇÃO DO SUPABASE =======
+  const SUPABASE_URL = 'https://jvsnugopxyjblwptgzlj.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2c251Z29weHlqYmx3cHRnemxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5ODYxNDEsImV4cCI6MjEwNDU2MjE0MX0.V1QJuEke7TPlNlk9fbDyJQhFUZf8TJ6PtP3JVhlp2Ew';
+  // =========================================
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function switchTab(tab){
+    const isLogin = tab === 'login';
+    const isSignup = tab === 'signup';
+    const isForgot = tab === 'forgot';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabSignup').classList.toggle('active', isSignup);
+    document.getElementById('loginForm').style.display = isLogin ? 'flex' : 'none';
+    document.getElementById('signupForm').style.display = isSignup ? 'flex' : 'none';
+    document.getElementById('forgotForm').style.display = isForgot ? 'flex' : 'none';
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('signupError').textContent = '';
+    document.getElementById('forgotError').textContent = '';
+    document.getElementById('forgotSuccess').textContent = '';
+  }
+
+  async function handleLogin(event){
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginError');
+    errorEl.textContent = '';
+
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      errorEl.textContent = 'Email ou senha incorretos. Se não lembra a senha, use "Esqueceu sua senha?" acima.';
+      return false;
+    }
+    await refreshAuthState();
+    return false;
+  }
+
+  async function handleSignup(event){
+    event.preventDefault();
+    const nome = document.getElementById('signupNome').value;
+    const whatsapp = document.getElementById('signupWhatsapp').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const errorEl = document.getElementById('signupError');
+    errorEl.textContent = '';
+
+    const { error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: { data: { nome: nome, whatsapp: whatsapp } }
+    });
+    if (error) {
+      errorEl.textContent = 'Não foi possível criar a conta: ' + error.message;
+      return false;
+    }
+    await refreshAuthState();
+    return false;
+  }
+
+  async function handleForgotPassword(event){
+    event.preventDefault();
+    const email = document.getElementById('forgotEmail').value;
+    const errorEl = document.getElementById('forgotError');
+    const successEl = document.getElementById('forgotSuccess');
+    errorEl.textContent = '';
+    successEl.textContent = '';
+
+    const redirectTo = window.location.origin + '/redefinir-senha.html';
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) {
+      errorEl.textContent = 'Não foi possível enviar o email: ' + error.message;
+      return false;
+    }
+    successEl.textContent = 'Email enviado! Verifique sua caixa de entrada (e o spam).';
+    return false;
+  }
+
+  async function handleLogout(){
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  async function refreshAuthState(){
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (session) {
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      logoutBtn.style.display = 'inline-flex';
+      loadMyListings();
+      checkPaymentReturn();
+    } else {
+      document.getElementById('authGate').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+      logoutBtn.style.display = 'none';
+      switchTab('login');
+    }
+  }
+
+  // ======= PUBLICAR E GERENCIAR ANÚNCIOS =======
+  const FOTOS_BUCKET = 'fotos-quartos';
+
+  function getFotosArray(item){
+    return (item.fotos_url || '')
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  async function uploadFotos(files, userId){
+    const urls = [];
+    for (const file of files) {
+      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+      const { error: upErr } = await supabaseClient.storage.from(FOTOS_BUCKET).upload(path, file);
+      if (upErr) throw upErr;
+      const { data } = supabaseClient.storage.from(FOTOS_BUCKET).getPublicUrl(path);
+      urls.push(data.publicUrl);
+    }
+    return urls;
+  }
+
+  async function handleNovoAnuncio(event){
+    event.preventDefault();
+    const errorEl = document.getElementById('novoAnuncioError');
+    errorEl.textContent = '';
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      errorEl.textContent = 'Sessão expirada, entre novamente.';
+      return false;
+    }
+
+    const fileInput = document.getElementById('f_fotos');
+    const allFiles = Array.from(fileInput.files || []);
+    if (allFiles.length > 10) {
+      errorEl.textContent = 'Você selecionou ' + allFiles.length + ' fotos, mas o limite grátis é de 10. Publique com até 10 fotos agora — depois você pode desbloquear até 20 fotos por €5.';
+      return false;
+    }
+    let fotosUrls = [];
+    if (allFiles.length > 0) {
+      errorEl.textContent = 'Enviando fotos...';
+      try {
+        fotosUrls = await uploadFotos(allFiles, user.id);
+      } catch (err) {
+        errorEl.textContent = 'Erro ao enviar fotos: ' + err.message;
+        return false;
+      }
+      errorEl.textContent = '';
+    }
+
+    const payload = {
+      user_id: user.id,
+      nome: user.user_metadata?.nome || '',
+      whatsapp: document.getElementById('f_whatsapp').value,
+      cidade: document.getElementById('f_cidade').value,
+      titulo: document.getElementById('f_titulo').value,
+      tipo_quarto: document.getElementById('f_tipo_quarto').value,
+      valor: parseFloat(document.getElementById('f_valor').value) || 0,
+      eircode: document.getElementById('f_eircode').value,
+      genero: document.getElementById('f_genero').value,
+      aceita_sem_pps: document.getElementById('f_aceita_sem_pps').checked,
+      fotos_url: fotosUrls.join('\n'),
+      descricao: document.getElementById('f_descricao').value,
+      status: 'Pendente'
+    };
+
+    const { error } = await supabaseClient.from('quartos').insert([payload]);
+    if (error) {
+      errorEl.textContent = 'Erro ao publicar: ' + error.message;
+      return false;
+    }
+    document.getElementById('novoAnuncioForm').reset();
+    loadMyListings();
+    return false;
+  }
+
+  function renderMyListing(item){
+    const statusLabel = {
+      'Ativo': 'Ativo',
+      'Pausado': 'Pausado',
+      'Alugado': 'Alugado',
+      'Pendente': 'Aguardando verificação'
+    }[item.status] || item.status;
+
+    const fotosCount = getFotosArray(item).length;
+    let fotosBtn = '';
+    if (fotosCount >= 20) {
+      fotosBtn = '';
+    } else if (item.fotos_extra_pagas || fotosCount < 10) {
+      fotosBtn = `<label class="btn btn-ghost btn-small" style="cursor:pointer;">
+        + Fotos (${fotosCount}/${item.fotos_extra_pagas ? 20 : 10})
+        <input type="file" accept="image/*" multiple style="display:none" onchange="adicionarFotosExtra(${item.id}, this.files)">
+      </label>`;
+    } else {
+      fotosBtn = `<button class="btn btn-ghost btn-small" onclick="startExtraFotosCheckout(${item.id})">Desbloquear mais fotos (€5)</button>`;
+    }
+
+    return `
+      <div class="card">
+        <div class="listing-card">
+          <div>
+            <p style="font-weight:600; color:var(--pine-dark);">${item.titulo}</p>
+            <p class="listing-status">${item.cidade} · €${item.valor}/mês · <strong>${statusLabel}</strong></p>
+          </div>
+        </div>
+        <div class="listing-actions">
+          ${item.status !== 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Pausado')">Pausar</button>` : ''}
+          ${item.status === 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Ativo')">Reativar</button>` : ''}
+          ${item.status !== 'Alugado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Alugado')">Marcar como alugado</button>` : ''}
+          ${fotosBtn}
+          <button class="btn btn-ghost btn-small btn-danger" onclick="deleteListing(${item.id})">Apagar</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function startExtraFotosCheckout(anuncioId){
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anuncio_id: anuncioId })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Não foi possível iniciar o pagamento: ' + (data.error || ''));
+      }
+    } catch (err) {
+      alert('Erro ao iniciar pagamento: ' + err.message);
+    }
+  }
+
+  async function adicionarFotosExtra(anuncioId, fileList){
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+
+    const { data: current, error: fetchErr } = await supabaseClient
+      .from('quartos').select('fotos_url, fotos_extra_pagas').eq('id', anuncioId).single();
+    if (fetchErr || !current) { alert('Não foi possível carregar o anúncio.'); return; }
+
+    const existentes = getFotosArray(current);
+    const limite = current.fotos_extra_pagas ? 20 : 10;
+    const espacoLivre = limite - existentes.length;
+    if (espacoLivre <= 0) {
+      alert(current.fotos_extra_pagas ? 'Esse anúncio já está com 20 fotos.' : 'Você já usou as 10 fotos grátis. Desbloqueie mais fotos por €5.');
+      return;
+    }
+
+    const aUsar = files.slice(0, espacoLivre);
+    try {
+      const novasUrls = await uploadFotos(aUsar, user.id);
+      const fotosFinal = existentes.concat(novasUrls).join('\n');
+      const { error } = await supabaseClient.from('quartos').update({ fotos_url: fotosFinal, status: 'Pendente' }).eq('id', anuncioId);
+      if (error) throw error;
+      alert('Fotos adicionadas! O anúncio volta a "Aguardando verificação" até ser conferido de novo.');
+      loadMyListings();
+    } catch (err) {
+      alert('Erro ao enviar fotos: ' + err.message);
+    }
+  }
+
+  async function checkPaymentReturn(){
+    const params = new URLSearchParams(window.location.search);
+    const anuncioPago = params.get('anuncio_pago');
+    const sessionId = params.get('session_id');
+    if (!anuncioPago || !sessionId) return;
+    try {
+      const res = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, anuncio_id: anuncioPago })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert('Pagamento confirmado! Agora você pode adicionar até 20 fotos nesse anúncio.');
+      } else {
+        alert('Não foi possível confirmar o pagamento: ' + (data.error || ''));
+      }
+    } catch (err) {
+      alert('Erro ao confirmar pagamento: ' + err.message);
+    }
+    history.replaceState({}, '', window.location.pathname);
+    loadMyListings();
+  }
+
+  async function loadMyListings(){
+    const statusEl = document.getElementById('myListingsStatus');
+    const listEl = document.getElementById('myListingsList');
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabaseClient
+      .from('quartos')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      statusEl.textContent = 'Não foi possível carregar seus anúncios.';
+      return;
+    }
+    if (!data || data.length === 0) {
+      statusEl.textContent = 'Você ainda não publicou nenhum anúncio.';
+      listEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = '';
+    listEl.innerHTML = data.map(renderMyListing).join('');
+  }
+
+  async function setListingStatus(id, novoStatus){
+    const { error } = await supabaseClient.from('quartos').update({ status: novoStatus }).eq('id', id);
+    if (!error) { loadMyListings(); }
+  }
+
+  async function deleteListing(id){
+    if (!confirm('Tem certeza que quer apagar esse anúncio?')) return;
+    const { error } = await supabaseClient.from('quartos').delete().eq('id', id);
+    if (!error) {
+      loadMyListings();
+    } else {
+      alert('Não foi possível apagar o anúncio: ' + error.message);
+    }
+  }
+
+  supabaseClient.auth.onAuthStateChange(() => refreshAuthState());
+  refreshAuthState();
+</script>
+
+</body>
+</html>

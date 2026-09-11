@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redefinir senha — Chave Verde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A1E;
+    --paper:#F6F1E4;
+    --paper-2:#EFE7D3;
+    --pine:#1F4D3A;
+    --pine-dark:#153529;
+    --line: rgba(27,42,30,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--paper); color:var(--ink);
+    font-family:'Work Sans', sans-serif; font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:20px;
+  }
+  h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.6rem;
+    color:var(--pine-dark); margin:0 0 10px;
+  }
+  p{margin:0;}
+  a{color:inherit;}
+  .card{
+    background:var(--paper-2); border-radius:10px; padding:32px 28px;
+    max-width:400px; width:100%;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.1rem;
+    color:var(--pine-dark); text-decoration:none; margin-bottom:22px;
+  }
+  .brand svg{width:22px; height:22px;}
+  .auth-form{display:flex; flex-direction:column; gap:16px; margin-top:18px;}
+  .auth-form label{
+    display:flex; flex-direction:column; gap:6px;
+    font-size:0.88rem; font-weight:600; color:var(--pine-dark);
+  }
+  .auth-form input{
+    font-family:'Work Sans',sans-serif; font-size:0.98rem;
+    padding:11px 12px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; color:var(--ink);
+  }
+  .auth-form input:focus{outline:2px solid var(--pine); outline-offset:1px;}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:12px 22px; border-radius:6px;
+    font-size:0.95rem; font-weight:600;
+    text-decoration:none; border:1px solid transparent;
+    cursor:pointer; background:var(--pine); color:var(--paper); width:100%;
+  }
+  .btn:hover{background:var(--pine-dark);}
+  .btn:disabled{opacity:0.6; cursor:default;}
+  .auth-error{color:#B33A2E; font-size:0.85rem; margin:0; min-height:1em;}
+  .auth-success{color:var(--pine-dark); font-weight:600; font-size:0.92rem;}
+  .muted{color:#5C5C50; font-size:0.92rem; margin-top:16px;}
+  .muted a{text-decoration:underline; color:var(--pine-dark);}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L3 9V21H21V9L12 2Z" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M9 21V13H15V21" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
+    </svg>
+    Chave Verde
+  </a>
+
+  <div id="loadingState">
+    <h1>Verificando seu link...</h1>
+    <p class="muted">Só um instante.</p>
+  </div>
+
+  <div id="formState" style="display:none;">
+    <h1>Defina sua nova senha</h1>
+    <form id="resetForm" class="auth-form" onsubmit="return handleReset(event)">
+      <label>Nova senha
+        <input type="password" id="novaSenha" required minlength="6" placeholder="Mínimo 6 caracteres">
+      </label>
+      <label>Confirme a nova senha
+        <input type="password" id="confirmaSenha" required minlength="6" placeholder="Repita a senha">
+      </label>
+      <p class="auth-error" id="resetError"></p>
+      <button type="submit" class="btn" id="resetBtn">Salvar nova senha</button>
+    </form>
+  </div>
+
+  <div id="successState" style="display:none;">
+    <h1>Senha atualizada!</h1>
+    <p class="auth-success">Sua senha foi redefinida com sucesso.</p>
+    <p class="muted">Redirecionando pro seu painel...</p>
+  </div>
+
+  <div id="invalidState" style="display:none;">
+    <h1>Link inválido ou expirado</h1>
+    <p class="muted">Esse link de redefinição não é mais válido. Volte pra página inicial e peça um novo link em "Esqueceu sua senha?".</p>
+    <p class="muted"><a href="index.html">Voltar para o Chave Verde</a></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://jvsnugopxyjblwptgzlj.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2c251Z29weHlqYmx3cHRnemxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5ODYxNDEsImV4cCI6MjEwNDU2MjE0MX0.V1QJuEke7TPlNlk9fbDyJQhFUZf8TJ6PtP3JVhlp2Ew';
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function showState(id){
+    ['loadingState', 'formState', 'successState', 'invalidState'].forEach(s => {
+      document.getElementById(s).style.display = s === id ? 'block' : 'none';
+    });
+  }
+
+  let recoveryReady = false;
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY' && session) {
+      recoveryReady = true;
+      showState('formState');
+    }
+  });
+
+  // Se o link já foi processado antes do listener acima ser registrado,
+  // uma sessão válida vinda do hash da URL também libera o formulário.
+  (async () => {
+    await new Promise(r => setTimeout(r, 400));
+    if (recoveryReady) return;
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const hash = window.location.hash || '';
+    if (session && hash.includes('type=recovery')) {
+      showState('formState');
+    } else if (!hash.includes('access_token')) {
+      showState('invalidState');
+    }
+  })();
+
+  async function handleReset(event){
+    event.preventDefault();
+    const novaSenha = document.getElementById('novaSenha').value;
+    const confirmaSenha = document.getElementById('confirmaSenha').value;
+    const errorEl = document.getElementById('resetError');
+    const btn = document.getElementById('resetBtn');
+    errorEl.textContent = '';
+
+    if (novaSenha !== confirmaSenha) {
+      errorEl.textContent = 'As senhas não coincidem.';
+      return false;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    const { error } = await supabaseClient.auth.updateUser({ password: novaSenha });
+
+    if (error) {
+      errorEl.textContent = 'Não foi possível salvar a nova senha: ' + error.message;
+      btn.disabled = false;
+      btn.textContent = 'Salvar nova senha';
+      return false;
+    }
+
+    showState('successState');
+    setTimeout(() => { window.location.href = 'painel.html'; }, 1800);
+    return false;
+  }
+</script>
+
+</body>
+</html>
