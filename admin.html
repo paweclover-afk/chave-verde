@@ -293,6 +293,7 @@
       <div class="admin-tabs">
         <button class="admin-tab active" id="tabAnuncios" onclick="switchAdminTab('anuncios')">Anúncios</button>
         <button class="admin-tab" id="tabUsuarios" onclick="switchAdminTab('usuarios')">Usuários</button>
+        <button class="admin-tab" id="tabAdmins" onclick="switchAdminTab('admins')">Administradores</button>
       </div>
 
       <!-- PAINEL ANÚNCIOS -->
@@ -321,6 +322,41 @@
               <tr><th>Nome</th><th>Email</th><th>WhatsApp</th><th>Criado em</th><th>Ações</th></tr>
             </thead>
             <tbody id="usuariosTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PAINEL ADMINISTRADORES -->
+      <div id="panelAdmins" style="display:none;">
+        <form class="auth-form" style="background:var(--paper-2); padding:22px; border-radius:8px; margin-bottom:28px; max-width:480px;" onsubmit="return handleCreateAdmin(event)">
+          <h3 style="font-size:1.02rem; margin-bottom:4px;">Criar novo administrador</h3>
+          <p style="font-size:0.86rem; color:#5C5C50;">Cria uma conta nova já com acesso ao painel admin — separado do cadastro público de anunciantes.</p>
+          <label>Nome
+            <input type="text" id="ca_nome" required placeholder="Nome da pessoa">
+          </label>
+          <label>Email
+            <input type="email" id="ca_email" required placeholder="email@exemplo.com">
+          </label>
+          <label>WhatsApp
+            <input type="text" id="ca_whatsapp" placeholder="+353...">
+          </label>
+          <label>Senha temporária
+            <input type="text" id="ca_senha" required minlength="6" placeholder="Mínimo 6 caracteres">
+          </label>
+          <p class="auth-note" style="margin-top:0;">Anote essa senha e passe pra pessoa — ela pode trocar depois em "Esqueceu sua senha?".</p>
+          <p class="auth-error" id="createAdminError"></p>
+          <p class="auth-success" id="createAdminSuccess"></p>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Criar administrador</button>
+        </form>
+
+        <h3 style="font-size:1.02rem; margin-bottom:14px;">Administradores atuais</h3>
+        <div id="adminsStatus" class="empty-state">Carregando...</div>
+        <div class="table-wrap" id="adminsTableWrap" style="display:none;">
+          <table>
+            <thead>
+              <tr><th>Nome</th><th>Email</th><th>Admin desde</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="adminsTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -537,12 +573,14 @@
   }
 
   function switchAdminTab(tab){
-    const isAnuncios = tab === 'anuncios';
-    document.getElementById('tabAnuncios').classList.toggle('active', isAnuncios);
-    document.getElementById('tabUsuarios').classList.toggle('active', !isAnuncios);
-    document.getElementById('panelAnuncios').style.display = isAnuncios ? 'block' : 'none';
-    document.getElementById('panelUsuarios').style.display = isAnuncios ? 'none' : 'block';
-    if (!isAnuncios && !usuariosLoaded) loadUsuarios();
+    document.getElementById('tabAnuncios').classList.toggle('active', tab === 'anuncios');
+    document.getElementById('tabUsuarios').classList.toggle('active', tab === 'usuarios');
+    document.getElementById('tabAdmins').classList.toggle('active', tab === 'admins');
+    document.getElementById('panelAnuncios').style.display = tab === 'anuncios' ? 'block' : 'none';
+    document.getElementById('panelUsuarios').style.display = tab === 'usuarios' ? 'block' : 'none';
+    document.getElementById('panelAdmins').style.display = tab === 'admins' ? 'block' : 'none';
+    if (tab === 'usuarios' && !usuariosLoaded) loadUsuarios();
+    if (tab === 'admins') loadAdmins();
   }
 
   function getFotosArray(item){
@@ -911,6 +949,91 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro ao remover');
       loadUsuarios();
+    } catch (err) {
+      alert('Não foi possível remover: ' + err.message);
+    }
+  }
+
+  // ======= ADMINISTRADORES =======
+  async function handleCreateAdmin(event){
+    event.preventDefault();
+    const errorEl = document.getElementById('createAdminError');
+    const successEl = document.getElementById('createAdminSuccess');
+    errorEl.textContent = '';
+    successEl.textContent = '';
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch('/api/admin-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({
+          action: 'create_admin',
+          nome: document.getElementById('ca_nome').value,
+          email: document.getElementById('ca_email').value,
+          whatsapp: document.getElementById('ca_whatsapp').value,
+          password: document.getElementById('ca_senha').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao criar administrador');
+      successEl.textContent = 'Administrador criado! Passe o email e a senha pra pessoa.';
+      document.getElementById('ca_nome').value = '';
+      document.getElementById('ca_email').value = '';
+      document.getElementById('ca_whatsapp').value = '';
+      document.getElementById('ca_senha').value = '';
+      loadAdmins();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+    return false;
+  }
+
+  async function loadAdmins(){
+    const statusEl = document.getElementById('adminsStatus');
+    const tableWrap = document.getElementById('adminsTableWrap');
+    statusEl.textContent = 'Carregando...';
+    tableWrap.style.display = 'none';
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch('/api/admin-users?scope=admins', {
+        headers: { Authorization: 'Bearer ' + session.access_token }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao carregar administradores');
+      const admins = data.admins || [];
+      if (admins.length === 0) {
+        statusEl.textContent = 'Nenhum administrador encontrado.';
+        return;
+      }
+      statusEl.textContent = '';
+      tableWrap.style.display = 'block';
+      document.getElementById('adminsTableBody').innerHTML = admins.map(a => `
+        <tr>
+          <td>${a.nome || '—'}</td>
+          <td>${a.email}</td>
+          <td>${a.criado_em ? new Date(a.criado_em).toLocaleDateString('pt-BR') : '—'}</td>
+          <td class="actions-cell">
+            <button class="btn btn-ghost btn-small btn-danger" onclick="removeAdminRole('${a.user_id}')">Remover admin</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      statusEl.textContent = 'Não foi possível carregar os administradores: ' + err.message;
+    }
+  }
+
+  async function removeAdminRole(user_id){
+    if (!confirm('Remover o acesso de administrador dessa pessoa? A conta dela continua existindo, só perde o acesso ao painel admin.')) return;
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch('/api/admin-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({ action: 'remove_admin', user_id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao remover');
+      loadAdmins();
     } catch (err) {
       alert('Não foi possível remover: ' + err.message);
     }
