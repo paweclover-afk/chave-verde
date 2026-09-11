@@ -198,6 +198,7 @@
     </a>
     <div class="nav-links">
       <a class="btn btn-ghost" href="index.html">Ver anúncios</a>
+      <a class="btn btn-ghost" href="admin.html" id="adminLink" style="display:none;">Painel admin</a>
       <a class="btn btn-ghost" href="#" id="logoutBtn" style="display:none;" onclick="handleLogout(); return false;">Sair</a>
     </div>
   </div>
@@ -437,16 +438,24 @@
   async function refreshAuthState(){
     const { data: { session } } = await supabaseClient.auth.getSession();
     const logoutBtn = document.getElementById('logoutBtn');
+    const adminLink = document.getElementById('adminLink');
     if (session) {
       document.getElementById('authGate').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       logoutBtn.style.display = 'inline-flex';
       loadMyListings();
       checkPaymentReturn();
+      const { data: adminRow } = await supabaseClient
+        .from('admins')
+        .select('user_id')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+      adminLink.style.display = adminRow ? 'inline-flex' : 'none';
     } else {
       document.getElementById('authGate').style.display = 'block';
       document.getElementById('dashboard').style.display = 'none';
       logoutBtn.style.display = 'none';
+      adminLink.style.display = 'none';
       switchTab('login');
     }
   }

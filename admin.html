@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel administrativo — Chave Verde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A1E;
+    --paper:#F6F1E4;
+    --paper-2:#EFE7D3;
+    --pine:#1F4D3A;
+    --pine-dark:#153529;
+    --sun:#E8A33D;
+    --teal:#3E6B6E;
+    --clay:#C1502E;
+    --line: rgba(27,42,30,0.14);
+    --max: 1200px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    line-height:1.08;
+    margin:0;
+    color:var(--pine-dark);
+  }
+  p{margin:0;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 28px;}
+
+  a:focus-visible, button:focus-visible{
+    outline:3px solid var(--teal);
+    outline-offset:3px;
+  }
+
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(246,241,228,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 0;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.25rem;
+    color:var(--pine-dark); text-decoration:none;
+  }
+  .brand svg{width:26px; height:26px;}
+  .brand-tag{
+    font-family:'Work Sans',sans-serif; font-size:0.7rem; font-weight:600;
+    background:var(--pine-dark); color:var(--paper); padding:3px 8px; border-radius:10px;
+    margin-left:2px; letter-spacing:0.03em;
+  }
+  .nav-links{display:flex; align-items:center; gap:12px;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:12px 22px; border-radius:6px;
+    font-size:0.95rem; font-weight:600;
+    text-decoration:none; border:1px solid transparent;
+    cursor:pointer; font-family:'Work Sans',sans-serif;
+  }
+  .btn-primary{background:var(--pine); color:var(--paper);}
+  .btn-primary:hover{background:var(--pine-dark);}
+  .btn-ghost{background:transparent; color:var(--pine-dark); border-color:var(--pine-dark);}
+  .btn-ghost:hover{background:var(--pine-dark); color:var(--paper);}
+  .btn-sun{background:var(--sun); color:var(--pine-dark);}
+  .btn-small{padding:7px 12px; font-size:0.82rem;}
+  .btn-danger{border-color:#B33A2E; color:#B33A2E;}
+  .btn-danger:hover{background:#B33A2E; color:#fff;}
+  .btn:disabled{opacity:0.5; cursor:default;}
+
+  main{padding:48px 0 96px;}
+  .page-head{margin-bottom:32px;}
+  .page-head p{margin-top:10px; font-size:1.02rem; color:#3A3A32;}
+
+  .auth-form{display:flex; flex-direction:column; gap:16px;}
+  .auth-form label{
+    display:flex; flex-direction:column; gap:6px;
+    font-size:0.88rem; font-weight:600; color:var(--pine-dark);
+  }
+  .auth-form input, .auth-form select, .auth-form textarea{
+    font-family:'Work Sans',sans-serif; font-size:0.98rem;
+    padding:11px 12px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; color:var(--ink); width:100%;
+  }
+  .auth-form input:focus, .auth-form select:focus, .auth-form textarea:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  .auth-error{color:#B33A2E; font-size:0.85rem; margin:0; min-height:1em;}
+  .auth-success{color:var(--pine-dark); font-weight:600; font-size:0.88rem; margin:0; min-height:1em;}
+  .auth-note{margin-top:4px; font-size:0.85rem; color:#5C5C50;}
+
+  .auth-gate{
+    max-width:400px; margin:60px auto 0;
+    background:var(--paper-2); border-radius:10px; padding:32px 28px;
+  }
+  .denied-box{
+    max-width:460px; margin:60px auto 0; text-align:center;
+    background:var(--paper-2); border-radius:10px; padding:36px 28px;
+  }
+
+  /* ---------- tabs ---------- */
+  .admin-tabs{
+    display:flex; gap:8px; border-bottom:1px solid var(--line); margin-bottom:28px;
+  }
+  .admin-tab{
+    background:none; border:none; cursor:pointer;
+    padding:10px 4px; margin-right:22px; font-family:'Work Sans',sans-serif; font-weight:600; font-size:1rem;
+    color:#8a8a7c; border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .admin-tab.active{color:var(--pine-dark); border-bottom-color:var(--pine);}
+
+  /* ---------- filtros ---------- */
+  .filter-bar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:24px;}
+  .pill-btn{
+    background:var(--paper); border:1px solid var(--line); border-radius:20px;
+    padding:7px 16px; font-size:0.86rem; font-weight:600; color:var(--pine-dark); cursor:pointer;
+  }
+  .pill-btn.active{background:var(--pine-dark); color:var(--paper); border-color:var(--pine-dark);}
+  .search-input{
+    margin-left:auto; min-width:220px; flex-grow:1; max-width:320px;
+    padding:9px 14px; border-radius:20px; border:1px solid var(--line);
+    font-family:'Work Sans',sans-serif; font-size:0.9rem; background:#fff;
+  }
+
+  /* ---------- listagem de anúncios ---------- */
+  .admin-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:16px 18px;
+    margin-bottom:12px;
+  }
+  .admin-card-top{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .admin-card-title{font-weight:600; color:var(--pine-dark); font-size:1.02rem;}
+  .admin-card-meta{font-size:0.86rem; color:#5C5C50; margin-top:4px;}
+  .status-badge{
+    display:inline-block; font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:12px;
+    text-transform:uppercase; letter-spacing:0.02em;
+  }
+  .status-Ativo{background:#DCEBD8; color:#1F4D3A;}
+  .status-Pausado{background:#EFE2C4; color:#8a6414;}
+  .status-Alugado{background:#DCE0E8; color:#39445E;}
+  .status-Pendente{background:#F4D9CE; color:#93381C;}
+  .admin-card-actions{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;}
+  .fotos-pagas-tag{font-size:0.76rem; color:var(--teal); font-weight:600;}
+
+  /* ---------- tabela de usuários ---------- */
+  .table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--paper);}
+  table{width:100%; border-collapse:collapse; font-size:0.9rem;}
+  th, td{text-align:left; padding:12px 14px; border-bottom:1px solid var(--line); white-space:nowrap;}
+  th{font-size:0.76rem; text-transform:uppercase; letter-spacing:0.03em; color:#5C5C50; background:var(--paper-2);}
+  tr:last-child td{border-bottom:none;}
+  td.actions-cell{display:flex; gap:8px;}
+
+  /* ---------- modais genéricos ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0; z-index:100;
+    background:rgba(27,42,30,0.55);
+    align-items:center; justify-content:center;
+    padding:20px; overflow-y:auto;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--paper);
+    border-radius:10px;
+    max-width:560px; width:100%;
+    max-height:88vh; overflow-y:auto;
+    padding:30px;
+    position:relative;
+    box-shadow: 8px 8px 0 var(--pine-dark);
+  }
+  .modal-close{
+    position:absolute; top:14px; right:16px;
+    background:none; border:none; font-size:1.6rem; line-height:1;
+    color:var(--ink); cursor:pointer; opacity:0.6;
+  }
+  .modal-close:hover{opacity:1;}
+  .form-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:600px){ .form-row{grid-template-columns:1fr;} }
+
+  /* ---------- editar fotos (reaproveitado do painel do usuário) ---------- */
+  .edit-fotos-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(110px,1fr)); gap:12px;
+    margin-top:16px;
+  }
+  .edit-fotos-item{
+    position:relative; border-radius:6px; overflow:hidden;
+    border:2px solid var(--line); background:#141B14; aspect-ratio:4/3;
+  }
+  .edit-fotos-item img{width:100%; height:100%; object-fit:cover; display:block;}
+  .edit-fotos-cover-badge{
+    position:absolute; top:6px; left:6px;
+    background:var(--pine-dark); color:var(--paper);
+    font-size:0.66rem; font-weight:600; padding:3px 7px; border-radius:20px;
+  }
+  .edit-fotos-actions{
+    position:absolute; bottom:0; left:0; right:0;
+    display:flex; justify-content:space-between;
+    background:rgba(0,0,0,0.55); padding:4px;
+  }
+  .edit-fotos-actions button{
+    background:none; border:none; color:#fff; cursor:pointer;
+    font-size:1rem; padding:4px 8px; line-height:1; border-radius:4px;
+  }
+  .edit-fotos-actions button:hover{background:rgba(255,255,255,0.25);}
+  .edit-fotos-actions button:disabled{opacity:0.3; cursor:default;}
+  .edit-fotos-remove{color:#F4A9A9 !important;}
+  .edit-fotos-empty{color:#5C5C50; font-size:0.9rem; margin-top:14px;}
+  .edit-fotos-add{margin-top:18px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+
+  .empty-state{color:#5C5C50; padding:20px 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L3 9V21H21V9L12 2Z" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M9 21V13H15V21" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+      Chave Verde <span class="brand-tag">ADMIN</span>
+    </a>
+    <div class="nav-links">
+      <a class="btn btn-ghost" href="index.html">Ver site</a>
+      <a class="btn btn-ghost" href="#" id="logoutBtn" style="display:none;" onclick="handleLogout(); return false;">Sair</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- LOGIN -->
+    <div id="authGate" style="display:none;">
+      <div class="auth-gate">
+        <h2 style="font-size:1.2rem; margin-bottom:20px;">Entrar no painel admin</h2>
+        <form id="loginForm" class="auth-form" onsubmit="return handleLogin(event)">
+          <label>Email
+            <input type="email" id="loginEmail" required placeholder="seu@email.com">
+          </label>
+          <label>Senha
+            <input type="password" id="loginPassword" required placeholder="Sua senha">
+          </label>
+          <p class="auth-error" id="loginError"></p>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Entrar</button>
+          <p class="auth-note"><a href="#" onclick="switchTab('forgot'); return false;" style="text-decoration:underline; color:var(--pine-dark);">Esqueceu sua senha?</a></p>
+        </form>
+        <form id="forgotForm" class="auth-form" style="display:none;" onsubmit="return handleForgotPassword(event)">
+          <p style="font-size:0.9rem; color:#3A3A32;">Digite seu email e enviamos um link pra criar uma senha nova.</p>
+          <label>Email
+            <input type="email" id="forgotEmail" required placeholder="seu@email.com">
+          </label>
+          <p class="auth-error" id="forgotError"></p>
+          <p class="auth-success" id="forgotSuccess"></p>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Enviar link de redefinição</button>
+          <p class="auth-note"><a href="#" onclick="switchTab('login'); return false;" style="text-decoration:underline; color:var(--pine-dark);">Voltar para o login</a></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- ACESSO NEGADO -->
+    <div id="deniedState" style="display:none;">
+      <div class="denied-box">
+        <h2 style="font-size:1.2rem;">Acesso restrito</h2>
+        <p style="margin-top:10px; color:#3A3A32;">Essa conta está logada, mas não tem permissão de administrador nesse site.</p>
+        <button class="btn btn-ghost" style="margin-top:20px;" onclick="handleLogout()">Sair e tentar com outra conta</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" style="display:none;">
+      <div class="page-head">
+        <h1>Painel administrativo</h1>
+        <p>Aprove, edite e gerencie os anúncios e as contas de usuários do Chave Verde.</p>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" id="tabAnuncios" onclick="switchAdminTab('anuncios')">Anúncios</button>
+        <button class="admin-tab" id="tabUsuarios" onclick="switchAdminTab('usuarios')">Usuários</button>
+      </div>
+
+      <!-- PAINEL ANÚNCIOS -->
+      <div id="panelAnuncios">
+        <div class="filter-bar">
+          <button class="pill-btn active" data-status="Pendente" onclick="setStatusFilter('Pendente')">Pendentes <span id="countPendente"></span></button>
+          <button class="pill-btn" data-status="Ativo" onclick="setStatusFilter('Ativo')">Ativos</button>
+          <button class="pill-btn" data-status="Pausado" onclick="setStatusFilter('Pausado')">Pausados</button>
+          <button class="pill-btn" data-status="Alugado" onclick="setStatusFilter('Alugado')">Alugados</button>
+          <button class="pill-btn" data-status="" onclick="setStatusFilter('')">Todos</button>
+          <input type="text" class="search-input" id="anunciosSearch" placeholder="Buscar por título, cidade ou WhatsApp..." oninput="renderAnunciosList()">
+        </div>
+        <div id="anunciosStatus" class="empty-state">Carregando...</div>
+        <div id="anunciosList"></div>
+      </div>
+
+      <!-- PAINEL USUÁRIOS -->
+      <div id="panelUsuarios" style="display:none;">
+        <div class="filter-bar">
+          <input type="text" class="search-input" id="usuariosSearch" placeholder="Buscar por nome, email ou WhatsApp..." oninput="renderUsuariosList()" style="margin-left:0;">
+        </div>
+        <div id="usuariosStatus" class="empty-state">Carregando...</div>
+        <div class="table-wrap" id="usuariosTableWrap" style="display:none;">
+          <table>
+            <thead>
+              <tr><th>Nome</th><th>Email</th><th>WhatsApp</th><th>Criado em</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="usuariosTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- EDITAR ANÚNCIO -->
+<div id="editListingOverlay" class="modal-overlay" onclick="if(event.target===this) closeEditListing()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEditListing()" aria-label="Fechar">&times;</button>
+    <h3 style="font-size:1.1rem; margin-bottom:18px;">Editar anúncio</h3>
+    <form class="auth-form" onsubmit="return saveEditListing(event)">
+      <label>Título
+        <input type="text" id="el_titulo">
+      </label>
+      <div class="form-row">
+        <label>Cidade
+          <select id="el_cidade">
+            <option>Dublin</option>
+            <option>Cork</option>
+            <option>Galway</option>
+            <option>Limerick</option>
+            <option>Outra</option>
+          </select>
+        </label>
+        <label>Eircode
+          <input type="text" id="el_eircode">
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Tipo de quarto
+          <select id="el_tipo_quarto">
+            <option>Individual</option>
+            <option>Compartilhado</option>
+            <option>Studio</option>
+          </select>
+        </label>
+        <label>Preço mensal (€)
+          <input type="number" id="el_valor" min="0">
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Gênero
+          <select id="el_genero">
+            <option value="">Sem preferência</option>
+            <option>Só mulheres</option>
+            <option>Só homens</option>
+          </select>
+        </label>
+        <label>Status
+          <select id="el_status">
+            <option>Pendente</option>
+            <option>Ativo</option>
+            <option>Pausado</option>
+            <option>Alugado</option>
+          </select>
+        </label>
+      </div>
+      <label style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="el_aceita_sem_pps" style="width:auto;">
+        Aceita sem PPS
+      </label>
+      <label style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="el_fotos_extra_pagas" style="width:auto;">
+        Fotos extras liberadas (pago manualmente)
+      </label>
+      <label>Nome do anunciante
+        <input type="text" id="el_nome">
+      </label>
+      <label>WhatsApp do anunciante
+        <input type="text" id="el_whatsapp">
+      </label>
+      <label>Descrição
+        <textarea id="el_descricao" rows="3"></textarea>
+      </label>
+      <p class="auth-error" id="editListingError"></p>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Salvar alterações</button>
+    </form>
+  </div>
+</div>
+
+<!-- EDITAR FOTOS -->
+<div id="editFotosOverlay" class="modal-overlay" onclick="if(event.target===this) closeEditFotos()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEditFotos()" aria-label="Fechar">&times;</button>
+    <h3 style="font-size:1.1rem;">Fotos do anúncio</h3>
+    <p style="font-size:0.88rem; color:#5C5C50; margin-top:4px;">A primeira foto é a capa. Use as setas pra reordenar e a lixeira pra apagar.</p>
+    <div id="editFotosGrid" class="edit-fotos-grid"></div>
+    <p class="edit-fotos-empty" id="editFotosEmpty" style="display:none;">Esse anúncio ainda não tem fotos.</p>
+    <div class="edit-fotos-add">
+      <label class="btn btn-primary" style="cursor:pointer;" id="editFotosAddLabel">
+        + Adicionar fotos
+        <input type="file" accept="image/*" multiple style="display:none" id="editFotosInput" onchange="addFotosToEdit(this.files)">
+      </label>
+    </div>
+    <p class="auth-error" id="editFotosError"></p>
+  </div>
+</div>
+
+<!-- EDITAR USUÁRIO -->
+<div id="editUserOverlay" class="modal-overlay" onclick="if(event.target===this) closeEditUser()">
+  <div class="modal-box" style="max-width:420px;">
+    <button class="modal-close" onclick="closeEditUser()" aria-label="Fechar">&times;</button>
+    <h3 style="font-size:1.1rem; margin-bottom:18px;">Editar usuário</h3>
+    <form class="auth-form" onsubmit="return saveEditUser(event)">
+      <label>Nome
+        <input type="text" id="eu_nome">
+      </label>
+      <label>Email de login
+        <input type="email" id="eu_email" required>
+      </label>
+      <label>WhatsApp
+        <input type="text" id="eu_whatsapp">
+      </label>
+      <p class="auth-error" id="editUserError"></p>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Salvar alterações</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ======= CONFIGURAÇÃO DO SUPABASE =======
+  const SUPABASE_URL = 'https://jvsnugopxyjblwptgzlj.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2c251Z29weHlqYmx3cHRnemxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5ODYxNDEsImV4cCI6MjEwNDU2MjE0MX0.V1QJuEke7TPlNlk9fbDyJQhFUZf8TJ6PtP3JVhlp2Ew';
+  // =========================================
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function switchTab(tab){
+    const isLogin = tab === 'login';
+    document.getElementById('loginForm').style.display = isLogin ? 'flex' : 'none';
+    document.getElementById('forgotForm').style.display = isLogin ? 'none' : 'flex';
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('forgotError').textContent = '';
+    document.getElementById('forgotSuccess').textContent = '';
+  }
+
+  async function handleLogin(event){
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginError');
+    errorEl.textContent = '';
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      errorEl.textContent = 'Email ou senha incorretos.';
+      return false;
+    }
+    await refreshAuthState();
+    return false;
+  }
+
+  async function handleForgotPassword(event){
+    event.preventDefault();
+    const email = document.getElementById('forgotEmail').value;
+    const errorEl = document.getElementById('forgotError');
+    const successEl = document.getElementById('forgotSuccess');
+    errorEl.textContent = '';
+    successEl.textContent = '';
+    const redirectTo = window.location.origin + '/redefinir-senha.html';
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) {
+      errorEl.textContent = 'Não foi possível enviar o email: ' + error.message;
+      return false;
+    }
+    successEl.textContent = 'Email enviado! Verifique sua caixa de entrada.';
+    return false;
+  }
+
+  async function handleLogout(){
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  let isAdmin = false;
+
+  async function refreshAuthState(){
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (!session) {
+      document.getElementById('authGate').style.display = 'block';
+      document.getElementById('deniedState').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'none';
+      logoutBtn.style.display = 'none';
+      switchTab('login');
+      return;
+    }
+
+    logoutBtn.style.display = 'inline-flex';
+
+    const { data: adminRow } = await supabaseClient
+      .from('admins')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    isAdmin = !!adminRow;
+
+    if (!isAdmin) {
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('deniedState').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('authGate').style.display = 'none';
+    document.getElementById('deniedState').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadAnuncios();
+  }
+
+  function switchAdminTab(tab){
+    const isAnuncios = tab === 'anuncios';
+    document.getElementById('tabAnuncios').classList.toggle('active', isAnuncios);
+    document.getElementById('tabUsuarios').classList.toggle('active', !isAnuncios);
+    document.getElementById('panelAnuncios').style.display = isAnuncios ? 'block' : 'none';
+    document.getElementById('panelUsuarios').style.display = isAnuncios ? 'none' : 'block';
+    if (!isAnuncios && !usuariosLoaded) loadUsuarios();
+  }
+
+  function getFotosArray(item){
+    return (item.fotos_url || '')
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  // ======= ANÚNCIOS =======
+  let allAnuncios = [];
+  let statusFilter = 'Pendente';
+
+  function setStatusFilter(status){
+    statusFilter = status;
+    document.querySelectorAll('.pill-btn').forEach(b => b.classList.toggle('active', b.dataset.status === status));
+    renderAnunciosList();
+  }
+
+  async function loadAnuncios(){
+    const statusEl = document.getElementById('anunciosStatus');
+    statusEl.textContent = 'Carregando...';
+    const { data, error } = await supabaseClient
+      .from('quartos')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      statusEl.textContent = 'Não foi possível carregar os anúncios: ' + error.message;
+      return;
+    }
+    allAnuncios = data || [];
+    const pendCount = allAnuncios.filter(a => a.status === 'Pendente').length;
+    document.getElementById('countPendente').textContent = pendCount ? `(${pendCount})` : '';
+    renderAnunciosList();
+  }
+
+  function renderAnunciosList(){
+    const statusEl = document.getElementById('anunciosStatus');
+    const listEl = document.getElementById('anunciosList');
+    const search = (document.getElementById('anunciosSearch').value || '').toLowerCase();
+
+    let items = allAnuncios;
+    if (statusFilter) items = items.filter(a => a.status === statusFilter);
+    if (search) {
+      items = items.filter(a =>
+        (a.titulo || '').toLowerCase().includes(search) ||
+        (a.cidade || '').toLowerCase().includes(search) ||
+        (a.whatsapp || '').toLowerCase().includes(search) ||
+        (a.nome || '').toLowerCase().includes(search)
+      );
+    }
+
+    if (items.length === 0) {
+      statusEl.textContent = 'Nenhum anúncio encontrado com esse filtro.';
+      listEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = '';
+    listEl.innerHTML = items.map(renderAnuncioCard).join('');
+  }
+
+  function renderAnuncioCard(item){
+    const fotosCount = getFotosArray(item).length;
+    const criado = item.created_at ? new Date(item.created_at).toLocaleDateString('pt-BR') : '';
+    return `
+      <div class="admin-card">
+        <div class="admin-card-top">
+          <div>
+            <span class="status-badge status-${item.status}">${item.status}</span>
+            <div class="admin-card-title">${item.titulo || '(sem título)'}</div>
+            <div class="admin-card-meta">
+              ${item.cidade || ''} · €${item.valor || 0}/mês · ${fotosCount} foto(s)
+              ${item.fotos_extra_pagas ? '<span class="fotos-pagas-tag">· fotos extras pagas</span>' : ''}
+            </div>
+            <div class="admin-card-meta">${item.nome || 'sem nome'} · ${item.whatsapp || 'sem WhatsApp'} · publicado em ${criado}</div>
+          </div>
+        </div>
+        <div class="admin-card-actions">
+          ${item.status === 'Pendente' ? `<button class="btn btn-primary btn-small" onclick="quickSetStatus(${item.id}, 'Ativo')">Aprovar</button>` : ''}
+          ${item.status !== 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="quickSetStatus(${item.id}, 'Pausado')">Pausar</button>` : ''}
+          ${item.status === 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="quickSetStatus(${item.id}, 'Ativo')">Reativar</button>` : ''}
+          ${item.status !== 'Alugado' ? `<button class="btn btn-ghost btn-small" onclick="quickSetStatus(${item.id}, 'Alugado')">Marcar alugado</button>` : ''}
+          <button class="btn btn-ghost btn-small" onclick="openEditListing(${item.id})">Editar</button>
+          <button class="btn btn-ghost btn-small" onclick="openEditFotos(${item.id})">Editar fotos</button>
+          <button class="btn btn-ghost btn-small btn-danger" onclick="deleteAnuncio(${item.id})">Apagar</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function quickSetStatus(id, status){
+    const { error } = await supabaseClient.from('quartos').update({ status }).eq('id', id);
+    if (error) { alert('Não foi possível atualizar: ' + error.message); return; }
+    loadAnuncios();
+  }
+
+  async function deleteAnuncio(id){
+    if (!confirm('Apagar esse anúncio permanentemente?')) return;
+    const { error } = await supabaseClient.from('quartos').delete().eq('id', id);
+    if (error) { alert('Não foi possível apagar: ' + error.message); return; }
+    loadAnuncios();
+  }
+
+  // ======= EDITAR ANÚNCIO =======
+  let editingListingRecordId = null;
+
+  function openEditListing(id){
+    const item = allAnuncios.find(a => a.id === id);
+    if (!item) return;
+    editingListingRecordId = id;
+    document.getElementById('el_titulo').value = item.titulo || '';
+    document.getElementById('el_cidade').value = item.cidade || 'Dublin';
+    document.getElementById('el_eircode').value = item.eircode || '';
+    document.getElementById('el_tipo_quarto').value = item.tipo_quarto || 'Individual';
+    document.getElementById('el_valor').value = item.valor || 0;
+    document.getElementById('el_genero').value = item.genero || '';
+    document.getElementById('el_status').value = item.status || 'Pendente';
+    document.getElementById('el_aceita_sem_pps').checked = !!item.aceita_sem_pps;
+    document.getElementById('el_fotos_extra_pagas').checked = !!item.fotos_extra_pagas;
+    document.getElementById('el_nome').value = item.nome || '';
+    document.getElementById('el_whatsapp').value = item.whatsapp || '';
+    document.getElementById('el_descricao').value = item.descricao || '';
+    document.getElementById('editListingError').textContent = '';
+    document.getElementById('editListingOverlay').classList.add('open');
+  }
+
+  function closeEditListing(){
+    document.getElementById('editListingOverlay').classList.remove('open');
+    editingListingRecordId = null;
+  }
+
+  async function saveEditListing(event){
+    event.preventDefault();
+    const errorEl = document.getElementById('editListingError');
+    errorEl.textContent = '';
+    const payload = {
+      titulo: document.getElementById('el_titulo').value,
+      cidade: document.getElementById('el_cidade').value,
+      eircode: document.getElementById('el_eircode').value,
+      tipo_quarto: document.getElementById('el_tipo_quarto').value,
+      valor: parseFloat(document.getElementById('el_valor').value) || 0,
+      genero: document.getElementById('el_genero').value,
+      status: document.getElementById('el_status').value,
+      aceita_sem_pps: document.getElementById('el_aceita_sem_pps').checked,
+      fotos_extra_pagas: document.getElementById('el_fotos_extra_pagas').checked,
+      nome: document.getElementById('el_nome').value,
+      whatsapp: document.getElementById('el_whatsapp').value,
+      descricao: document.getElementById('el_descricao').value
+    };
+    const { error } = await supabaseClient.from('quartos').update(payload).eq('id', editingListingRecordId);
+    if (error) {
+      errorEl.textContent = 'Não foi possível salvar: ' + error.message;
+      return false;
+    }
+    closeEditListing();
+    loadAnuncios();
+    return false;
+  }
+
+  // ======= EDITAR FOTOS =======
+  const FOTOS_BUCKET = 'fotos-quartos';
+  let editingListingId = null;
+  let editingFotos = [];
+
+  async function uploadFotos(files, userId){
+    const urls = [];
+    for (const file of files) {
+      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+      const { error: upErr } = await supabaseClient.storage.from(FOTOS_BUCKET).upload(path, file);
+      if (upErr) throw upErr;
+      const { data } = supabaseClient.storage.from(FOTOS_BUCKET).getPublicUrl(path);
+      urls.push(data.publicUrl);
+    }
+    return urls;
+  }
+
+  function openEditFotos(id){
+    const item = allAnuncios.find(a => a.id === id);
+    if (!item) return;
+    editingListingId = id;
+    editingFotos = getFotosArray(item);
+    document.getElementById('editFotosError').textContent = '';
+    document.getElementById('editFotosInput').value = '';
+    renderEditFotosGrid();
+    document.getElementById('editFotosOverlay').classList.add('open');
+  }
+
+  function closeEditFotos(){
+    document.getElementById('editFotosOverlay').classList.remove('open');
+    editingListingId = null;
+    loadAnuncios();
+  }
+
+  function renderEditFotosGrid(){
+    const grid = document.getElementById('editFotosGrid');
+    const emptyEl = document.getElementById('editFotosEmpty');
+    emptyEl.style.display = editingFotos.length === 0 ? 'block' : 'none';
+    grid.innerHTML = editingFotos.map((url, i) => `
+      <div class="edit-fotos-item">
+        ${i === 0 ? '<span class="edit-fotos-cover-badge">Capa</span>' : ''}
+        <img src="${url}" alt="" loading="lazy">
+        <div class="edit-fotos-actions">
+          <button type="button" onclick="moveFoto(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="Trazer pra frente">&#8249;</button>
+          <button type="button" class="edit-fotos-remove" onclick="removeFoto(${i})" title="Apagar foto">&#128465;</button>
+          <button type="button" onclick="moveFoto(${i}, 1)" ${i === editingFotos.length - 1 ? 'disabled' : ''} title="Mandar pra trás">&#8250;</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function persistEditingFotos(){
+    const { error } = await supabaseClient.from('quartos').update({ fotos_url: editingFotos.join('\n') }).eq('id', editingListingId);
+    if (error) { document.getElementById('editFotosError').textContent = 'Não foi possível salvar: ' + error.message; return false; }
+    return true;
+  }
+
+  async function moveFoto(index, delta){
+    const newIndex = index + delta;
+    if (newIndex < 0 || newIndex >= editingFotos.length) return;
+    const [item] = editingFotos.splice(index, 1);
+    editingFotos.splice(newIndex, 0, item);
+    renderEditFotosGrid();
+    await persistEditingFotos();
+  }
+
+  async function removeFoto(index){
+    if (!confirm('Apagar essa foto?')) return;
+    editingFotos.splice(index, 1);
+    renderEditFotosGrid();
+    await persistEditingFotos();
+  }
+
+  async function addFotosToEdit(fileList){
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+    const errorEl = document.getElementById('editFotosError');
+    errorEl.textContent = '';
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) { errorEl.textContent = 'Sessão expirada, entre novamente.'; return; }
+    try {
+      const novasUrls = await uploadFotos(files, user.id);
+      editingFotos = editingFotos.concat(novasUrls);
+      renderEditFotosGrid();
+      await persistEditingFotos();
+    } catch (err) {
+      errorEl.textContent = 'Erro ao enviar fotos: ' + err.message;
+    }
+    document.getElementById('editFotosInput').value = '';
+  }
+
+  // ======= USUÁRIOS =======
+  let allUsuarios = [];
+  let usuariosLoaded = false;
+
+  async function loadUsuarios(){
+    const statusEl = document.getElementById('usuariosStatus');
+    const tableWrap = document.getElementById('usuariosTableWrap');
+    statusEl.textContent = 'Carregando...';
+    tableWrap.style.display = 'none';
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch('/api/admin-users', {
+        headers: { Authorization: 'Bearer ' + session.access_token }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao carregar usuários');
+      allUsuarios = data.users || [];
+      usuariosLoaded = true;
+      renderUsuariosList();
+    } catch (err) {
+      statusEl.textContent = 'Não foi possível carregar os usuários: ' + err.message;
+    }
+  }
+
+  function renderUsuariosList(){
+    const statusEl = document.getElementById('usuariosStatus');
+    const tableWrap = document.getElementById('usuariosTableWrap');
+    const body = document.getElementById('usuariosTableBody');
+    const search = (document.getElementById('usuariosSearch').value || '').toLowerCase();
+
+    let items = allUsuarios;
+    if (search) {
+      items = items.filter(u =>
+        (u.nome || '').toLowerCase().includes(search) ||
+        (u.email || '').toLowerCase().includes(search) ||
+        (u.whatsapp || '').toLowerCase().includes(search)
+      );
+    }
+
+    if (items.length === 0) {
+      statusEl.textContent = 'Nenhum usuário encontrado.';
+      tableWrap.style.display = 'none';
+      return;
+    }
+    statusEl.textContent = '';
+    tableWrap.style.display = 'block';
+    body.innerHTML = items.map(u => `
+      <tr>
+        <td>${u.nome || '—'}</td>
+        <td>${u.email || '—'}</td>
+        <td>${u.whatsapp || '—'}</td>
+        <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}</td>
+        <td class="actions-cell">
+          <button class="btn btn-ghost btn-small" onclick="openEditUser('${u.id}')">Editar</button>
+          <button class="btn btn-ghost btn-small btn-danger" onclick="deleteUsuario('${u.id}')">Remover</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  let editingUserId = null;
+
+  function openEditUser(id){
+    const u = allUsuarios.find(x => x.id === id);
+    if (!u) return;
+    editingUserId = id;
+    document.getElementById('eu_nome').value = u.nome || '';
+    document.getElementById('eu_email').value = u.email || '';
+    document.getElementById('eu_whatsapp').value = u.whatsapp || '';
+    document.getElementById('editUserError').textContent = '';
+    document.getElementById('editUserOverlay').classList.add('open');
+  }
+
+  function closeEditUser(){
+    document.getElementById('editUserOverlay').classList.remove('open');
+    editingUserId = null;
+  }
+
+  async function saveEditUser(event){
+    event.preventDefault();
+    const errorEl = document.getElementById('editUserError');
+    errorEl.textContent = '';
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch('/api/admin-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({
+          action: 'update',
+          user_id: editingUserId,
+          email: document.getElementById('eu_email').value,
+          nome: document.getElementById('eu_nome').value,
+          whatsapp: document.getElementById('eu_whatsapp').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao salvar');
+      closeEditUser();
+      loadUsuarios();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+    return false;
+  }
+
+  async function deleteUsuario(id){
+    if (!confirm('Remover essa conta permanentemente? Os anúncios publicados por ela vão continuar existindo, mas sem dono.')) return;
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch('/api/admin-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({ action: 'delete', user_id: id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao remover');
+      loadUsuarios();
+    } catch (err) {
+      alert('Não foi possível remover: ' + err.message);
+    }
+  }
+
+  supabaseClient.auth.onAuthStateChange(() => refreshAuthState());
+  refreshAuthState();
+</script>
+
+</body>
+</html>
