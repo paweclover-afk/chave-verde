@@ -11,9 +11,33 @@ module.exports = async (req, res) => {
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
     const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.replace('Bearer ', '').trim();
+    if (!token) {
+      res.status(401).json({ error: 'Não autenticado' });
+      return;
+    }
+    const { data: callerData, error: callerErr } = await supabaseAdmin.auth.getUser(token);
+    if (callerErr || !callerData?.user) {
+      res.status(401).json({ error: 'Sessão inválida' });
+      return;
+    }
+
     const { session_id, anuncio_id } = req.body || {};
     if (!session_id || !anuncio_id) {
       res.status(400).json({ error: 'Dados incompletos' });
+      return;
+    }
+
+    const { data: anuncio, error: anuncioErr } = await supabaseAdmin
+      .from('quartos')
+      .select('id, user_id')
+      .eq('id', anuncio_id)
+      .maybeSingle();
+
+    if (anuncioErr) throw anuncioErr;
+    if (!anuncio || anuncio.user_id !== callerData.user.id) {
+      res.status(403).json({ error: 'Esse anúncio não pertence a essa conta' });
       return;
     }
 
