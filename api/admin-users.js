@@ -61,7 +61,8 @@ module.exports = async (req, res) => {
         email: u.email,
         created_at: u.created_at,
         nome: u.user_metadata?.nome || '',
-        whatsapp: u.user_metadata?.whatsapp || ''
+        whatsapp: u.user_metadata?.whatsapp || '',
+        tipo_usuario: u.user_metadata?.tipo_usuario || ''
       }));
       res.status(200).json({ users });
       return;
