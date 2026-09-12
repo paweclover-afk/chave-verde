@@ -725,6 +725,10 @@
     return (Number(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
   async function uploadFotos(files, userId){
     const urls = [];
     for (const file of files) {
@@ -880,8 +884,8 @@
       <div class="card">
         <div class="listing-card">
           <div>
-            <p style="font-weight:600; color:var(--pine-dark);">${item.titulo}</p>
-            <p class="listing-status">${item.cidade}${item.distrito ? ' ' + item.distrito : ''} · €${formatEuro(item.valor)}/mês · <strong>${statusLabel}</strong>${destaqueInfo}</p>
+            <p style="font-weight:600; color:var(--pine-dark);">${escapeHtml(item.titulo)}</p>
+            <p class="listing-status">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''} · €${formatEuro(item.valor)}/mês · <strong>${statusLabel}</strong>${destaqueInfo}</p>
           </div>
         </div>
         <div class="listing-actions">

@@ -630,6 +630,10 @@
     return (Number(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
   // ======= ANÚNCIOS =======
   let allAnuncios = [];
   let statusFilter = 'Pendente';
@@ -691,13 +695,13 @@
       <div class="admin-card">
         <div class="admin-card-top">
           <div>
-            <span class="status-badge status-${item.status}">${item.status}</span>
-            <div class="admin-card-title">${item.titulo || '(sem título)'}</div>
+            <span class="status-badge status-${item.status}">${escapeHtml(item.status)}</span>
+            <div class="admin-card-title">${item.titulo ? escapeHtml(item.titulo) : '(sem título)'}</div>
             <div class="admin-card-meta">
-              ${item.cidade || ''}${item.distrito ? ' ' + item.distrito : ''} · €${formatEuro(item.valor)}/mês · ${fotosCount} foto(s)
+              ${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''} · €${formatEuro(item.valor)}/mês · ${fotosCount} foto(s)
               ${item.fotos_extra_pagas ? '<span class="fotos-pagas-tag">· fotos extras pagas</span>' : ''}
             </div>
-            <div class="admin-card-meta">${item.nome || 'sem nome'} · ${item.whatsapp || 'sem WhatsApp'} · publicado em ${criado}</div>
+            <div class="admin-card-meta">${item.nome ? escapeHtml(item.nome) : 'sem nome'} · ${item.whatsapp ? escapeHtml(item.whatsapp) : 'sem WhatsApp'} · publicado em ${criado}</div>
           </div>
         </div>
         <div class="admin-card-actions">
@@ -946,9 +950,9 @@
     tableWrap.style.display = 'block';
     body.innerHTML = items.map(u => `
       <tr>
-        <td>${u.nome || '—'}</td>
-        <td>${u.email || '—'}</td>
-        <td>${u.whatsapp || '—'}</td>
+        <td>${u.nome ? escapeHtml(u.nome) : '—'}</td>
+        <td>${u.email ? escapeHtml(u.email) : '—'}</td>
+        <td>${u.whatsapp ? escapeHtml(u.whatsapp) : '—'}</td>
         <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}</td>
         <td class="actions-cell">
           <button class="btn btn-ghost btn-small" onclick="openEditUser('${u.id}')">Editar</button>
@@ -1075,8 +1079,8 @@
       tableWrap.style.display = 'block';
       document.getElementById('adminsTableBody').innerHTML = admins.map(a => `
         <tr>
-          <td>${a.nome || '—'}</td>
-          <td>${a.email}</td>
+          <td>${a.nome ? escapeHtml(a.nome) : '—'}</td>
+          <td>${escapeHtml(a.email)}</td>
           <td>${a.criado_em ? new Date(a.criado_em).toLocaleDateString('pt-BR') : '—'}</td>
           <td class="actions-cell">
             <button class="btn btn-ghost btn-small btn-danger" onclick="removeAdminRole('${a.user_id}')">Remover admin</button>

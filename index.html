@@ -1049,6 +1049,10 @@
     return (Number(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
   function whatsappLink(item){
     const digits = (item.whatsapp || '').replace(/\D/g, '');
     const msg = encodeURIComponent(`Oi! Vi seu anúncio "${item.titulo || ''}" no Chave Verde e queria saber mais informações.`);
@@ -1093,15 +1097,15 @@
   function renderPublicCard(item){
     listingsCache[item.id] = item;
     const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem PPS</span>' : '';
-    const genero = item.genero ? `<span class="postcard-tag">${item.genero}</span>` : '';
+    const genero = item.genero ? `<span class="postcard-tag">${escapeHtml(item.genero)}</span>` : '';
     const fotos = getFotosArray(item);
     return `
       <article class="listing-card">
         ${renderCardPhotoArea(item, fotos)}
         <div class="listing-info">
-          <p class="listing-city">${item.cidade || ''}${item.distrito ? ' ' + item.distrito : ''}${item.eircode ? ' · ' + item.eircode : ''}</p>
-          <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${item.titulo || ''}</h3>
-          <p class="listing-meta">${item.tipo_quarto || ''}${item.descricao ? ' · ' + item.descricao : ''}</p>
+          <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
+          <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(item.titulo)}</h3>
+          <p class="listing-meta">${escapeHtml(item.tipo_quarto)}${item.descricao ? ' · ' + escapeHtml(item.descricao) : ''}</p>
           <div class="listing-foot">
             <span class="listing-price">€${formatEuro(item.valor)}/mês</span>
             ${badge}${genero}
@@ -1316,7 +1320,7 @@
     const fotos = getFotosArray(item);
     detailFotos = fotos;
     const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem PPS</span>' : '';
-    const genero = item.genero ? `<span class="postcard-tag">${item.genero}</span>` : '';
+    const genero = item.genero ? `<span class="postcard-tag">${escapeHtml(item.genero)}</span>` : '';
     const thumbs = fotos.map((url, i) => `
       <div class="detail-thumb${i === 0 ? ' active' : ''}" style="background-image:url('${url}')" onclick="selectDetailThumb(this, '${url}', ${i})"></div>
     `).join('');
@@ -1327,11 +1331,11 @@
         ${fotos.length > 1 ? `<div class="detail-thumbs">${thumbs}</div>` : ''}
       </div>
       <div>
-        <p class="detail-city">${item.cidade || ''}${item.distrito ? ' ' + item.distrito : ''}${item.eircode ? ' · ' + item.eircode : ''}</p>
-        <h2 class="detail-title">${item.titulo || ''}</h2>
-        <p class="detail-meta">${item.tipo_quarto || ''}</p>
+        <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
+        <h2 class="detail-title">${escapeHtml(item.titulo)}</h2>
+        <p class="detail-meta">${escapeHtml(item.tipo_quarto)}</p>
         <div class="detail-tags">${badge}${genero}</div>
-        ${item.descricao ? `<p class="detail-desc">${item.descricao}</p>` : ''}
+        ${item.descricao ? `<p class="detail-desc">${escapeHtml(item.descricao)}</p>` : ''}
         <p class="detail-price">€${formatEuro(item.valor)} <span>/mês</span></p>
         <a class="btn btn-primary listing-whats-btn" style="background:#25D366; margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener">
           ${whatsIconSvg()} Falar no WhatsApp
