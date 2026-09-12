@@ -29,14 +29,32 @@ module.exports = async (req, res) => {
       return;
     }
 
+    const tipo = session.metadata.tipo === 'destaque' ? 'destaque' : 'fotos';
+
+    const { error: jaProcessadoErr } = await supabaseAdmin
+      .from('pagamentos_processados')
+      .insert({ stripe_session_id: session_id, anuncio_id, tipo });
+
+    if (jaProcessadoErr) {
+      if (jaProcessadoErr.code === '23505') {
+        res.status(200).json({ ok: true, tipo, aviso: 'Esse pagamento já tinha sido confirmado antes.' });
+        return;
+      }
+      throw jaProcessadoErr;
+    }
+
+    const updatePayload = tipo === 'destaque'
+      ? { destaque_ate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() }
+      : { fotos_extra_pagas: true };
+
     const { error } = await supabaseAdmin
       .from('quartos')
-      .update({ fotos_extra_pagas: true })
+      .update(updatePayload)
       .eq('id', anuncio_id);
 
     if (error) throw error;
 
-    res.status(200).json({ ok: true });
+    res.status(200).json({ ok: true, tipo });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
