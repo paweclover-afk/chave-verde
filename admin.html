@@ -918,7 +918,7 @@
     grid.innerHTML = editingFotos.map((url, i) => `
       <div class="edit-fotos-item">
         ${i === 0 ? '<span class="edit-fotos-cover-badge">Capa</span>' : ''}
-        <img src="${url}" alt="" loading="lazy">
+        <img src="${escapeHtml(url)}" alt="" loading="lazy">
         <div class="edit-fotos-actions">
           <button type="button" onclick="moveFoto(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="Trazer pra frente">&#8249;</button>
           <button type="button" class="edit-fotos-remove" onclick="removeFoto(${i})" title="Apagar foto">&#128465;</button>

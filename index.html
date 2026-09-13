@@ -682,7 +682,7 @@
 <div id="lightboxOverlay" class="lightbox-overlay" onclick="if(event.target===this) closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()" aria-label="Fechar">&times;</button>
   <button type="button" class="lightbox-arrow lightbox-prev" onclick="moveLightbox(-1)" aria-label="Foto anterior">&#8249;</button>
-  <img id="lightboxImg" class="lightbox-img" src="" alt="">
+  <img id="lightboxImg" class="lightbox-img" src="${escapeHtml(url)}" alt="">
   <button type="button" class="lightbox-arrow lightbox-next" onclick="moveLightbox(1)" aria-label="Próxima foto">&#8250;</button>
   <div class="lightbox-count" id="lightboxCount"></div>
 </div>
@@ -1121,7 +1121,7 @@
     }
     const slides = fotos.map(url => `
       <div class="carousel-slide">
-        <img src="${url}" loading="lazy" alt="">
+        <img src="${escapeHtml(url)}" loading="lazy" alt="">
       </div>
     `).join('');
     const dots = fotos.length > 1
@@ -1372,7 +1372,7 @@
     el.style.background = '';
     const countBadge = detailFotos.length > 1 ? `<span class="detail-photo-count">${index + 1} / ${detailFotos.length}</span>` : '';
     el.innerHTML = `
-      <img src="${url}" alt="" onclick="openLightbox(${index})">
+      <img src="${escapeHtml(url)}" alt="" onclick="openLightbox(${index})">
       ${countBadge}
     `;
   }
