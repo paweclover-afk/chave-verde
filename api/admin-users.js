@@ -93,6 +93,24 @@ module.exports = async (req, res) => {
         return;
       }
 
+      if (action === 'promote_admin') {
+        if (!user_id) {
+          res.status(400).json({ error: 'user_id é obrigatório' });
+          return;
+        }
+        const { data: existing, error: getErr } = await supabaseAdmin.auth.admin.getUserById(user_id);
+        if (getErr || !existing?.user) {
+          res.status(404).json({ error: 'Usuário não encontrado' });
+          return;
+        }
+        const { error: insertErr } = await supabaseAdmin
+          .from('admins')
+          .upsert({ user_id }, { onConflict: 'user_id' });
+        if (insertErr) throw insertErr;
+        res.status(200).json({ ok: true });
+        return;
+      }
+
       if (action === 'remove_admin') {
         if (!user_id) {
           res.status(400).json({ error: 'user_id é obrigatório' });
@@ -144,3 +162,4 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
