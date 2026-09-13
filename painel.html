@@ -720,13 +720,21 @@
     const errorEl = document.getElementById('signupError');
     errorEl.textContent = '';
 
-    const { error } = await supabaseClient.auth.signUp({
+    const { data, error } = await supabaseClient.auth.signUp({
       email,
       password,
       options: { data: { nome: nome, whatsapp: whatsapp, tipo_usuario: tipoUsuario } }
     });
     if (error) {
       errorEl.textContent = 'Não foi possível criar a conta: ' + error.message;
+      return false;
+    }
+    // Se a confirmação de email estiver ligada, não há sessão ainda:
+    // o usuário precisa clicar no link enviado por email antes de entrar.
+    if (!data.session) {
+      errorEl.style.color = '#1F4D3A';
+      errorEl.textContent = 'Conta criada! Enviamos um email de confirmação para ' + email + '. Abra o email e clique no link para ativar sua conta — depois é só entrar.';
+      document.getElementById('signupForm').reset();
       return false;
     }
     await refreshAuthState();
