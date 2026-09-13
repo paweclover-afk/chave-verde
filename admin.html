@@ -309,6 +309,7 @@
         <button class="admin-tab active" id="tabAnuncios" onclick="switchAdminTab('anuncios')">Anúncios</button>
         <button class="admin-tab" id="tabUsuarios" onclick="switchAdminTab('usuarios')">Usuários</button>
         <button class="admin-tab" id="tabAdmins" onclick="switchAdminTab('admins')">Administradores</button>
+        <button class="admin-tab" id="tabMensagens" onclick="switchAdminTab('mensagens')">Mensagens <span id="countMensagensNaoLidas"></span></button>
       </div>
 
       <!-- PAINEL ANÚNCIOS -->
@@ -374,6 +375,13 @@
             <tbody id="adminsTableBody"></tbody>
           </table>
         </div>
+      </div>
+
+      <!-- PAINEL MENSAGENS -->
+      <div id="panelMensagens" style="display:none;">
+        <h3 style="font-size:1.02rem; margin-bottom:14px;">Sugestões dos anunciantes</h3>
+        <div id="mensagensStatus" class="empty-state">Carregando...</div>
+        <div id="mensagensList" style="display:flex; flex-direction:column; gap:12px;"></div>
       </div>
     </div>
 
@@ -645,17 +653,21 @@
     document.getElementById('deniedState').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     loadAnuncios();
+    loadMensagens();
   }
 
   function switchAdminTab(tab){
     document.getElementById('tabAnuncios').classList.toggle('active', tab === 'anuncios');
     document.getElementById('tabUsuarios').classList.toggle('active', tab === 'usuarios');
     document.getElementById('tabAdmins').classList.toggle('active', tab === 'admins');
+    document.getElementById('tabMensagens').classList.toggle('active', tab === 'mensagens');
     document.getElementById('panelAnuncios').style.display = tab === 'anuncios' ? 'block' : 'none';
     document.getElementById('panelUsuarios').style.display = tab === 'usuarios' ? 'block' : 'none';
     document.getElementById('panelAdmins').style.display = tab === 'admins' ? 'block' : 'none';
+    document.getElementById('panelMensagens').style.display = tab === 'mensagens' ? 'block' : 'none';
     if (tab === 'usuarios' && !usuariosLoaded) loadUsuarios();
     if (tab === 'admins') loadAdmins();
+    if (tab === 'mensagens') loadMensagens();
   }
 
   function getFotosArray(item){
@@ -1197,6 +1209,55 @@
     } catch (err) {
       alert('Não foi possível remover: ' + err.message);
     }
+  }
+
+  // ======= MENSAGENS / SUGESTÕES =======
+  async function loadMensagens(){
+    const statusEl = document.getElementById('mensagensStatus');
+    const listEl = document.getElementById('mensagensList');
+    try {
+      const { data, error } = await supabaseClient
+        .from('feedback_mensagens')
+        .select('*')
+        .order('criado_em', { ascending: false });
+      if (error) throw error;
+
+      if (!usuariosLoaded) {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const res = await fetch('/api/admin-users', { headers: { Authorization: 'Bearer ' + session.access_token } });
+        const usersData = await res.json();
+        if (res.ok) { allUsuarios = usersData.users || []; usuariosLoaded = true; }
+      }
+      const userMap = {};
+      allUsuarios.forEach(u => { userMap[u.id] = u; });
+
+      const naoLidas = (data || []).filter(m => !m.lida).length;
+      document.getElementById('countMensagensNaoLidas').textContent = naoLidas ? `(${naoLidas})` : '';
+
+      if (!data || data.length === 0) {
+        statusEl.textContent = 'Nenhuma mensagem por enquanto.';
+        listEl.innerHTML = '';
+        return;
+      }
+      statusEl.textContent = '';
+      listEl.innerHTML = data.map(m => {
+        const u = userMap[m.user_id];
+        return `
+          <div class="admin-card">
+            <div class="admin-card-meta">${u ? escapeHtml(u.nome || u.email) : 'usuário removido'} · ${new Date(m.criado_em).toLocaleDateString('pt-BR')}${!m.lida ? ' · <strong style="color:#C1502E;">não lida</strong>' : ''}</div>
+            <p style="margin-top:8px; white-space:pre-wrap;">${escapeHtml(m.mensagem)}</p>
+            ${!m.lida ? `<div class="admin-card-actions"><button class="btn btn-ghost btn-small" onclick="marcarMensagemLida(${m.id})">Marcar como lida</button></div>` : ''}
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      statusEl.textContent = 'Não foi possível carregar as mensagens: ' + err.message;
+    }
+  }
+
+  async function marcarMensagemLida(id){
+    const { error } = await supabaseClient.from('feedback_mensagens').update({ lida: true }).eq('id', id);
+    if (!error) loadMensagens();
   }
 
   supabaseClient.auth.onAuthStateChange(() => refreshAuthState());

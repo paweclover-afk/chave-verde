@@ -88,6 +88,9 @@
   .hero-grid{
     display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;
   }
+  .hero-image-wrap{display:flex; justify-content:center; min-width:0; align-self:flex-start; margin-top:-32px;}
+  .hero-image{max-width:100%; width:460px; height:auto; display:block;}
+  @media (max-width:880px){ .hero-image{width:280px; margin:0 auto;} }
   .eyebrow-hero{
     font-size:0.95rem; color:var(--teal); font-weight:600; margin-bottom:14px;
   }
@@ -537,6 +540,8 @@
     padding:5px 10px; border-radius:20px;
   }
   .listing-disponibilidade{font-size:0.82rem; color:var(--teal); font-weight:600; margin-top:6px;}
+  .listing-anunciante{font-size:0.85rem; color:#5C5C50; margin-top:6px; display:flex; align-items:center; gap:5px;}
+  .verified-icon{width:15px; height:15px; flex-shrink:0;}
   .city-pill{
     display:inline-flex; align-items:center; gap:10px;
     background:var(--paper); border:1px solid var(--line); border-radius:24px;
@@ -699,7 +704,7 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="wrap">
+    <div class="wrap hero-grid">
       <div>
         <p class="eyebrow-hero">Feito por brasileiros, pra brasileiros na Irlanda</p>
         <h1>Encontre seu quarto, casa ou apartamento sem enrolação — ou anuncie sem burocracia.</h1>
@@ -709,6 +714,9 @@
           <a class="btn btn-ghost" href="#" onclick="openAuth('signup'); return false;">Anunciar sem burocracia</a>
         </div>
         <p class="hero-note">Sem "proof of income"? Sem problema — filtramos quem já aceita esse perfil.</p>
+      </div>
+      <div class="hero-image-wrap">
+        <img src="hero-chaves.png" alt="Mulher sorrindo segurando as chaves do novo lar" class="hero-image">
       </div>
     </div>
   </section>
@@ -906,7 +914,6 @@
       <ul>
         <li><a href="mailto:oi@chaveverde.ie">oi@chaveverde.ie</a></li>
         <li><a href="#">Instagram</a></li>
-        <li><a href="#">WhatsApp da comunidade</a></li>
       </ul>
     </div>
   </div>
@@ -925,6 +932,12 @@
   // =========================================
 
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let adminUserIds = new Set();
+  async function loadAdminUserIds(){
+    const { data, error } = await supabaseClient.from('admins').select('user_id');
+    if (!error && data) adminUserIds = new Set(data.map(a => a.user_id));
+  }
 
   function openAuth(tab){
     document.getElementById('authOverlay').classList.add('open');
@@ -1121,6 +1134,14 @@
     return texto;
   }
 
+  function renderAnunciante(item){
+    if (!item.nome) return '';
+    const verificado = adminUserIds.has(item.user_id)
+      ? `<svg class="verified-icon" viewBox="0 0 20 20" fill="none" aria-label="Verificado"><circle cx="10" cy="10" r="9" fill="var(--sun)"/><path d="M6 10.3l2.6 2.6L14 7.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+      : '';
+    return `<p class="listing-anunciante">Anunciado por ${escapeHtml(item.nome)}${verificado}</p>`;
+  }
+
   function renderCardPhotoArea(item, fotos){
     const destaqueBadge = isDestacado(item) ? '<span class="badge-destaque">★ Destaque</span>' : '';
     const futuroBadge = isLancamentoFuturo(item) ? '<span class="badge-futuro">Lançamento futuro</span>' : '';
@@ -1162,6 +1183,7 @@
           <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
           <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(item.titulo)}</h3>
           <p class="listing-meta">${escapeHtml(item.tipo_quarto)}${item.descricao ? ' · ' + escapeHtml(item.descricao) : ''}</p>
+          ${renderAnunciante(item)}
           ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade">${formatDisponibilidade(item)}</p>` : ''}
           <div class="listing-foot">
             <span class="listing-price">€${formatEuro(item.valor)}/mês</span>
@@ -1404,6 +1426,7 @@
         <h2 class="detail-title">${escapeHtml(item.titulo)}</h2>
         <p class="detail-meta">${escapeHtml(item.tipo_quarto)}</p>
         <div class="detail-tags">${badge}${genero}</div>
+        ${renderAnunciante(item)}
         ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade" style="margin-top:12px;">${formatDisponibilidade(item)}</p>` : ''}
         ${item.descricao ? `<p class="detail-desc">${escapeHtml(item.descricao)}</p>` : ''}
         <p class="detail-price">€${formatEuro(item.valor)} <span>/mês</span></p>
@@ -1489,7 +1512,7 @@
   const savedCity = getSavedCity();
   updateCityPill(savedCity);
   updateAuthUI();
-  loadPublicListings(savedCity);
+  loadAdminUserIds().then(() => loadPublicListings(savedCity));
 
   const hasDeepLink = new URLSearchParams(window.location.search).has('anuncio');
   if (!savedCity && !hasDeepLink) {

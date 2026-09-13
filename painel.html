@@ -317,6 +317,12 @@
         <p>Publique um anúncio novo ou gerencie os que você já tem: pause, reative, marque como alugado ou apague.</p>
       </div>
 
+      <div class="auth-tabs" style="margin-bottom:32px;">
+        <button class="auth-tab active" id="panelTabAnuncios" onclick="switchPanelTab('anuncios')">Meus anúncios</button>
+        <button class="auth-tab" id="panelTabSugestoes" onclick="switchPanelTab('sugestoes')">Sugestões</button>
+      </div>
+
+      <div id="panelAnuncios">
       <form id="novoAnuncioForm" class="auth-form form-card" onsubmit="return handleNovoAnuncio(event)">
         <h3 style="font-size:1.05rem; margin-bottom:6px;">Publicar novo anúncio</h3>
         <label>Título do anúncio
@@ -484,6 +490,24 @@
       <h3 style="font-size:1.05rem; margin-bottom:16px;">Seus anúncios</h3>
       <div id="myListingsStatus" style="color:#5C5C50;">Carregando...</div>
       <div id="myListingsList" style="display:flex; flex-direction:column; gap:14px;"></div>
+      </div>
+
+      <div id="panelSugestoes" style="display:none; max-width:560px;">
+        <h3 style="font-size:1.05rem; margin-bottom:6px;">Sugestões pra gente</h3>
+        <p style="font-size:0.92rem; color:#3A3A32; margin-bottom:18px;">Achou algo que poderia ser melhor no site? Manda pra gente aqui — nosso time lê direto no painel administrativo.</p>
+        <form id="feedbackForm" class="auth-form" onsubmit="return handleEnviarFeedback(event)">
+          <label>Sua mensagem
+            <textarea id="feedbackMensagem" rows="5" required placeholder="Conta o que você achou, o que poderia melhorar..."></textarea>
+          </label>
+          <p class="auth-error" id="feedbackError"></p>
+          <p class="auth-success" id="feedbackSuccess"></p>
+          <button type="submit" class="btn btn-primary">Enviar sugestão</button>
+        </form>
+        <h4 style="font-size:0.92rem; margin-top:32px; margin-bottom:12px;">Suas mensagens anteriores</h4>
+        <div id="myFeedbackStatus" style="color:#5C5C50; font-size:0.9rem;">Carregando...</div>
+        <div id="myFeedbackList" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+
     </div>
 
   </div>
@@ -692,6 +716,68 @@
     document.getElementById('signupError').textContent = '';
     document.getElementById('forgotError').textContent = '';
     document.getElementById('forgotSuccess').textContent = '';
+  }
+
+  let feedbackLoaded = false;
+
+  function switchPanelTab(tab){
+    const isAnuncios = tab === 'anuncios';
+    document.getElementById('panelTabAnuncios').classList.toggle('active', isAnuncios);
+    document.getElementById('panelTabSugestoes').classList.toggle('active', !isAnuncios);
+    document.getElementById('panelAnuncios').style.display = isAnuncios ? 'block' : 'none';
+    document.getElementById('panelSugestoes').style.display = isAnuncios ? 'none' : 'block';
+    if (!isAnuncios && !feedbackLoaded) loadMyFeedback();
+  }
+
+  async function handleEnviarFeedback(event){
+    event.preventDefault();
+    const errorEl = document.getElementById('feedbackError');
+    const successEl = document.getElementById('feedbackSuccess');
+    errorEl.textContent = '';
+    successEl.textContent = '';
+    const mensagem = document.getElementById('feedbackMensagem').value.trim();
+    if (!mensagem) return false;
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) { errorEl.textContent = 'Sessão expirada, entre novamente.'; return false; }
+
+    const { error } = await supabaseClient.from('feedback_mensagens').insert({ user_id: user.id, mensagem });
+    if (error) {
+      errorEl.textContent = 'Não foi possível enviar: ' + error.message;
+      return false;
+    }
+    successEl.textContent = 'Sugestão enviada! Obrigado pelo feedback.';
+    document.getElementById('feedbackForm').reset();
+    feedbackLoaded = false;
+    loadMyFeedback();
+    return false;
+  }
+
+  async function loadMyFeedback(){
+    const statusEl = document.getElementById('myFeedbackStatus');
+    const listEl = document.getElementById('myFeedbackList');
+    const { data, error } = await supabaseClient
+      .from('feedback_mensagens')
+      .select('*')
+      .order('criado_em', { ascending: false });
+
+    if (error) {
+      statusEl.textContent = 'Não foi possível carregar suas mensagens.';
+      return;
+    }
+    feedbackLoaded = true;
+    if (!data || data.length === 0) {
+      statusEl.textContent = 'Você ainda não enviou nenhuma sugestão.';
+      listEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = '';
+    listEl.innerHTML = data.map(m => `
+      <div class="card">
+        <p style="font-size:0.85rem; color:#5C5C50;">${new Date(m.criado_em).toLocaleDateString('pt-BR')}${m.lida ? ' · lida pela equipe' : ''}</p>
+        <p style="margin-top:6px; white-space:pre-wrap;">${escapeHtml(m.mensagem)}</p>
+      </div>
+    `).join('');
   }
 
   async function handleLogin(event){
