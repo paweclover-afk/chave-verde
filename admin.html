@@ -1024,6 +1024,7 @@
         <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}</td>
         <td class="actions-cell">
           <button class="btn btn-ghost btn-small" onclick="openEditUser('${u.id}')">Editar</button>
+          <button class="btn btn-ghost btn-small" onclick="promoteToAdmin('${u.id}')">Tornar admin</button>
           <button class="btn btn-ghost btn-small btn-danger" onclick="deleteUsuario('${u.id}')">Remover</button>
         </td>
       </tr>
@@ -1075,6 +1076,24 @@
     return false;
   }
 
+  async function promoteToAdmin(id){
+    const u = allUsuarios.find(x => x.id === id);
+    if (!confirm(`Tornar "${u?.nome || u?.email || 'essa conta'}" administrador do painel?`)) return;
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch('/api/admin-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({ action: 'promote_admin', user_id: id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao tornar admin');
+      alert('Pronto! Essa conta agora tem acesso ao painel admin.');
+    } catch (err) {
+      alert('Não foi possível tornar admin: ' + err.message);
+    }
+  }
+
   async function deleteUsuario(id){
     if (!confirm('Remover essa conta permanentemente? Os anúncios publicados por ela vão continuar existindo, mas sem dono.')) return;
     try {
@@ -1121,7 +1140,10 @@
       document.getElementById('ca_senha').value = '';
       loadAdmins();
     } catch (err) {
-      errorEl.textContent = err.message;
+      const jaExiste = /already been registered|already exists/i.test(err.message);
+      errorEl.textContent = jaExiste
+        ? 'Essa pessoa já tem uma conta no site. Vá na aba "Usuários" e clique em "Tornar admin" ao lado do nome dela.'
+        : err.message;
     }
     return false;
   }
