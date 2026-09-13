@@ -665,7 +665,7 @@
     document.getElementById('panelUsuarios').style.display = tab === 'usuarios' ? 'block' : 'none';
     document.getElementById('panelAdmins').style.display = tab === 'admins' ? 'block' : 'none';
     document.getElementById('panelMensagens').style.display = tab === 'mensagens' ? 'block' : 'none';
-    if (tab === 'usuarios' && !usuariosLoaded) loadUsuarios();
+    if (tab === 'usuarios') loadUsuarios();
     if (tab === 'admins') loadAdmins();
     if (tab === 'mensagens') loadMensagens();
   }
