@@ -94,6 +94,15 @@
     background:#fff; color:var(--ink);
   }
   .auth-form input:focus, .auth-form select:focus, .auth-form textarea:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  .pw-wrap{position:relative;}
+  .pw-wrap input{width:100%; padding-right:42px;}
+  .pw-toggle{
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; padding:6px;
+    display:flex; align-items:center; justify-content:center; color:#8a8a7c;
+  }
+  .pw-toggle:hover{color:var(--pine-dark);}
+  .pw-toggle svg{width:19px; height:19px;}
   .auth-error{color:#B33A2E; font-size:0.85rem; margin:0; min-height:1em;}
   .auth-success{color:var(--pine-dark); font-weight:600; font-size:0.88rem; margin:0; min-height:1em;}
   .auth-note{margin-top:4px; font-size:0.85rem; color:#5C5C50;}
@@ -245,7 +254,13 @@
             <input type="email" id="loginEmail" required placeholder="seu@email.com">
           </label>
           <label>Senha
-            <input type="password" id="loginPassword" required placeholder="Sua senha">
+            <div class="pw-wrap">
+              <input type="password" id="loginPassword" required placeholder="Sua senha">
+              <button type="button" class="pw-toggle" onclick="togglePw(this)" aria-label="Mostrar senha" tabindex="-1">
+                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 4.2A10.4 10.4 0 0 1 12 4c6.5 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.1 3.9"/><path d="M6.1 6.1C3.2 8 1.5 11 1.5 11S5.5 19 12 19c1 0 2-.2 2.9-.5"/></svg>
+              </button>
+            </div>
           </label>
           <p class="auth-error" id="loginError"></p>
           <button type="submit" class="btn btn-primary" style="width:100%;">Entrar</button>
@@ -256,6 +271,13 @@
           <label>Nome
             <input type="text" id="signupNome" required placeholder="Seu nome">
           </label>
+          <label>Você é
+            <select id="signupTipo" required>
+              <option value="">Selecione</option>
+              <option value="landlord">Landlord (dono do imóvel)</option>
+              <option value="repassando">Estou repassando minha vaga/contrato</option>
+            </select>
+          </label>
           <label>WhatsApp
             <input type="text" id="signupWhatsapp" required placeholder="+353 ...">
           </label>
@@ -263,7 +285,13 @@
             <input type="email" id="signupEmail" required placeholder="seu@email.com">
           </label>
           <label>Senha
-            <input type="password" id="signupPassword" required placeholder="Crie uma senha" minlength="6">
+            <div class="pw-wrap">
+              <input type="password" id="signupPassword" required placeholder="Crie uma senha" minlength="6">
+              <button type="button" class="pw-toggle" onclick="togglePw(this)" aria-label="Mostrar senha" tabindex="-1">
+                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 4.2A10.4 10.4 0 0 1 12 4c6.5 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.1 3.9"/><path d="M6.1 6.1C3.2 8 1.5 11 1.5 11S5.5 19 12 19c1 0 2-.2 2.9-.5"/></svg>
+              </button>
+            </div>
           </label>
           <p class="auth-error" id="signupError"></p>
           <button type="submit" class="btn btn-primary" style="width:100%;">Criar conta</button>
@@ -374,12 +402,14 @@
           <div></div>
         </div>
         <div class="form-row">
-          <label>Tipo de quarto
+          <label>Tipo de imóvel
             <select id="f_tipo_quarto" required>
               <option value="">Selecione</option>
               <option>Individual</option>
               <option>Compartilhado</option>
               <option>Studio</option>
+              <option>Casa inteira</option>
+              <option>Apartamento inteiro</option>
             </select>
           </label>
           <label>Preço mensal (€)
@@ -400,9 +430,24 @@
               <input type="checkbox" id="f_aceita_sem_pps" style="width:auto;">
               Aceita sem PPS
             </label>
-            <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse quarto.</p>
+            <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse imóvel.</p>
           </div>
         </div>
+        <div class="form-row">
+          <label>Disponível a partir de
+            <input type="date" id="f_disponivel_de">
+          </label>
+          <div>
+            <label id="f_disponivel_ate_wrap">Até quando
+              <input type="date" id="f_disponivel_ate">
+            </label>
+            <label style="flex-direction:row; align-items:center; gap:8px; margin-top:10px;">
+              <input type="checkbox" id="f_tempo_combinar" style="width:auto;" onchange="toggleTempoCombinar('f')">
+              Tempo a combinar
+            </label>
+          </div>
+        </div>
+        <p style="font-size:0.78rem; color:#5C5C50; margin-top:-8px;">Deixe "Disponível a partir de" em branco se já está disponível agora.</p>
         <label>Fotos (até 5 grátis — dá pra desbloquear mais depois)
           <input type="file" id="f_fotos" accept="image/*" multiple>
         </label>
@@ -532,11 +577,13 @@
         <div></div>
       </div>
       <div class="form-row">
-        <label>Tipo de quarto
+        <label>Tipo de imóvel
           <select id="el_tipo_quarto" required>
             <option>Individual</option>
             <option>Compartilhado</option>
             <option>Studio</option>
+            <option>Casa inteira</option>
+            <option>Apartamento inteiro</option>
           </select>
         </label>
         <label>Preço mensal (€)
@@ -557,7 +604,21 @@
             <input type="checkbox" id="el_aceita_sem_pps" style="width:auto;">
             Aceita sem PPS
           </label>
-          <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse quarto.</p>
+          <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse imóvel.</p>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Disponível a partir de
+          <input type="date" id="el_disponivel_de">
+        </label>
+        <div>
+          <label id="el_disponivel_ate_wrap">Até quando
+            <input type="date" id="el_disponivel_ate">
+          </label>
+          <label style="flex-direction:row; align-items:center; gap:8px; margin-top:10px;">
+            <input type="checkbox" id="el_tempo_combinar" style="width:auto;" onchange="toggleTempoCombinar('el')">
+            Tempo a combinar
+          </label>
         </div>
       </div>
       <label>Descrição
@@ -610,6 +671,14 @@
 
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  function togglePw(btn){
+    const input = btn.previousElementSibling;
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.querySelector('.eye-open').style.display = showing ? '' : 'none';
+    btn.querySelector('.eye-closed').style.display = showing ? 'none' : '';
+  }
+
   function switchTab(tab){
     const isLogin = tab === 'login';
     const isSignup = tab === 'signup';
@@ -644,6 +713,7 @@
   async function handleSignup(event){
     event.preventDefault();
     const nome = document.getElementById('signupNome').value;
+    const tipoUsuario = document.getElementById('signupTipo').value;
     const whatsapp = document.getElementById('signupWhatsapp').value;
     const email = document.getElementById('signupEmail').value;
     const password = document.getElementById('signupPassword').value;
@@ -653,7 +723,7 @@
     const { error } = await supabaseClient.auth.signUp({
       email,
       password,
-      options: { data: { nome: nome, whatsapp: whatsapp } }
+      options: { data: { nome: nome, whatsapp: whatsapp, tipo_usuario: tipoUsuario } }
     });
     if (error) {
       errorEl.textContent = 'Não foi possível criar a conta: ' + error.message;
@@ -725,6 +795,18 @@
     return (Number(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function formatDisponibilidade(item){
+    if (!item.disponivel_de) return '';
+    const de = new Date(item.disponivel_de + 'T00:00:00');
+    let texto = 'Disponível a partir de ' + de.toLocaleDateString('pt-BR');
+    if (item.disponivel_ate) {
+      texto += ' até ' + new Date(item.disponivel_ate + 'T00:00:00').toLocaleDateString('pt-BR');
+    } else {
+      texto += ' · tempo a combinar';
+    }
+    return texto;
+  }
+
   function escapeHtml(str){
     return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
@@ -760,6 +842,14 @@
       dublinSelect.removeAttribute('required');
       dublinSelect.value = '';
     }
+  }
+
+  function toggleTempoCombinar(prefix){
+    const combinar = document.getElementById(prefix + '_tempo_combinar').checked;
+    const wrap = document.getElementById(prefix + '_disponivel_ate_wrap');
+    const input = document.getElementById(prefix + '_disponivel_ate');
+    wrap.style.display = combinar ? 'none' : 'flex';
+    if (combinar) input.value = '';
   }
 
   function getDistritoValue(prefix){
@@ -841,6 +931,8 @@
       eircode: document.getElementById('f_eircode').value,
       genero: document.getElementById('f_genero').value,
       aceita_sem_pps: document.getElementById('f_aceita_sem_pps').checked,
+      disponivel_de: document.getElementById('f_disponivel_de').value || null,
+      disponivel_ate: document.getElementById('f_tempo_combinar').checked ? null : (document.getElementById('f_disponivel_ate').value || null),
       fotos_url: fotosUrls.join('\n'),
       descricao: document.getElementById('f_descricao').value,
       status: 'Pendente'
@@ -853,6 +945,7 @@
     }
     document.getElementById('novoAnuncioForm').reset();
     toggleDistritoField('f');
+    toggleTempoCombinar('f');
     loadMyListings();
     return false;
   }
@@ -886,6 +979,7 @@
           <div>
             <p style="font-weight:600; color:var(--pine-dark);">${escapeHtml(item.titulo)}</p>
             <p class="listing-status">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''} · €${formatEuro(item.valor)}/mês · <strong>${statusLabel}</strong>${destaqueInfo}</p>
+            ${formatDisponibilidade(item) ? `<p class="listing-status">${formatDisponibilidade(item)}</p>` : ''}
           </div>
         </div>
         <div class="listing-actions">
@@ -1110,6 +1204,10 @@
     document.getElementById('el_valor').value = item.valor || 0;
     document.getElementById('el_genero').value = item.genero || '';
     document.getElementById('el_aceita_sem_pps').checked = !!item.aceita_sem_pps;
+    document.getElementById('el_disponivel_de').value = item.disponivel_de || '';
+    document.getElementById('el_disponivel_ate').value = item.disponivel_ate || '';
+    document.getElementById('el_tempo_combinar').checked = !item.disponivel_ate && !!item.disponivel_de;
+    toggleTempoCombinar('el');
     document.getElementById('el_descricao').value = item.descricao || '';
     setWhatsappValue('el', item.whatsapp);
     document.getElementById('editListingError').textContent = '';
@@ -1134,6 +1232,8 @@
       valor: parseFloat(document.getElementById('el_valor').value) || 0,
       genero: document.getElementById('el_genero').value,
       aceita_sem_pps: document.getElementById('el_aceita_sem_pps').checked,
+      disponivel_de: document.getElementById('el_disponivel_de').value || null,
+      disponivel_ate: document.getElementById('el_tempo_combinar').checked ? null : (document.getElementById('el_disponivel_ate').value || null),
       descricao: document.getElementById('el_descricao').value,
       whatsapp: getWhatsappValue('el')
     };
