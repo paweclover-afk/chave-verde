@@ -259,15 +259,17 @@
   .carousel-arrow.prev{left:8px;}
   .carousel-arrow.next{right:8px;}
   @media (hover:none){ .carousel-arrow{display:none;} }
-  .listing-info{padding:18px;}
-  .listing-city{font-size:0.82rem; color:var(--teal); font-weight:600;}
-  .listing-title{font-family:'Fraunces', serif; font-weight:600; font-size:1.08rem; margin-top:6px; color:var(--pine-dark);}
-  .listing-meta{font-size:0.87rem; color:#5C5C50; margin-top:8px;}
+  .listing-info{padding:18px; display:flex; flex-direction:column;}
+  .listing-city{font-size:0.8rem; color:var(--teal); font-weight:600; letter-spacing:0.01em;}
+  .listing-title{font-family:'Fraunces', serif; font-weight:600; font-size:1.12rem; margin-top:6px; color:var(--pine-dark); line-height:1.25;}
+  .listing-meta{font-size:0.87rem; color:#5C5C50; margin-top:6px;}
+  .listing-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
   .listing-foot{
-    display:flex; justify-content:space-between; align-items:center;
-    margin-top:16px; padding-top:14px; border-top:1px dashed var(--line);
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);
   }
-  .listing-price{font-weight:600; color:var(--pine-dark);}
+  .listing-price{font-family:'Fraunces', serif; font-weight:600; font-size:1.35rem; color:var(--pine-dark);}
+  .listing-price small{font-family:'Work Sans',sans-serif; font-weight:500; font-size:0.78rem; color:#5C5C50;}
   .listings-cta{margin-top:32px; text-align:center;}
   .listing-whats-btn{
     display:flex; align-items:center; justify-content:center; gap:8px;
@@ -577,11 +579,44 @@
   }
   .listing-disponibilidade{font-size:0.82rem; color:var(--teal); font-weight:600; margin-top:6px;}
   .report-btn{
-    display:block; margin-top:16px; background:none; border:none;
-    color:#8a8a7c; font-size:0.82rem; text-decoration:underline; cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px; margin-top:18px; background:none; border:none;
+    color:#8a8a7c; font-size:0.85rem; cursor:pointer;
     font-family:'Work Sans',sans-serif; padding:0;
   }
+  .report-btn svg{width:15px; height:15px;}
   .report-btn:hover{color:var(--clay);}
+
+  /* ---------- modal de denúncia ---------- */
+  .report-overlay{
+    display:none; position:fixed; inset:0; z-index:130;
+    background:rgba(27,42,30,0.55); align-items:center; justify-content:center; padding:20px;
+  }
+  .report-overlay.open{display:flex;}
+  .report-modal{
+    background:var(--paper); border-radius:12px; max-width:440px; width:100%;
+    padding:30px 28px; position:relative; box-shadow:8px 8px 0 var(--pine-dark);
+  }
+  .report-modal h3{font-size:1.2rem;}
+  .report-modal .sub{margin-top:8px; font-size:0.92rem; color:#3A3A32;}
+  .report-close{
+    position:absolute; top:14px; right:16px; background:none; border:none;
+    font-size:1.6rem; line-height:1; color:var(--ink); cursor:pointer; opacity:0.55;
+  }
+  .report-close:hover{opacity:1;}
+  .report-reasons{display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 16px;}
+  .report-chip{
+    background:var(--paper-2); border:1px solid var(--line); border-radius:20px;
+    padding:8px 14px; font-size:0.85rem; color:var(--pine-dark); cursor:pointer;
+    font-family:'Work Sans',sans-serif; font-weight:500;
+  }
+  .report-chip.active{background:var(--pine-dark); color:var(--paper); border-color:var(--pine-dark);}
+  .report-modal textarea{
+    width:100%; font-family:'Work Sans',sans-serif; font-size:0.95rem;
+    padding:11px 12px; border-radius:8px; border:1px solid var(--line);
+    background:#fff; color:var(--ink); resize:vertical; min-height:80px;
+  }
+  .report-modal textarea:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  .report-error{color:#B33A2E; font-size:0.85rem; margin:8px 0 0; min-height:1em;}
   .listing-anunciante{font-size:0.85rem; color:#5C5C50; margin-top:6px; display:flex; align-items:center; gap:5px;}
   .verified-icon{width:15px; height:15px; flex-shrink:0;}
   .city-pill{
@@ -698,6 +733,25 @@
     </form>
 
     <p class="auth-note" id="authFooterNote">Depois de entrar, você poderá publicar e gerenciar seus próprios anúncios.</p>
+  </div>
+</div>
+
+<!-- MODAL DE DENÚNCIA -->
+<div id="reportOverlay" class="report-overlay" onclick="if(event.target===this) closeReport()">
+  <div class="report-modal">
+    <button class="report-close" onclick="closeReport()" aria-label="Fechar">&times;</button>
+    <h3>Denunciar anúncio</h3>
+    <p class="sub">Conta pra gente o que há de errado. Nossa equipe analisa cada denúncia pra manter o Chave Verde seguro.</p>
+    <div class="report-reasons" id="reportReasons">
+      <button type="button" class="report-chip" onclick="selectReportReason(this)">Parece golpe</button>
+      <button type="button" class="report-chip" onclick="selectReportReason(this)">Pediu depósito adiantado</button>
+      <button type="button" class="report-chip" onclick="selectReportReason(this)">Informação falsa</button>
+      <button type="button" class="report-chip" onclick="selectReportReason(this)">Já foi alugado</button>
+      <button type="button" class="report-chip" onclick="selectReportReason(this)">Conteúdo impróprio</button>
+    </div>
+    <textarea id="reportMotivo" placeholder="Conte mais detalhes (opcional se você já escolheu um motivo acima)"></textarea>
+    <p class="report-error" id="reportError"></p>
+    <button type="button" class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="enviarDenuncia()">Enviar denúncia</button>
   </div>
 </div>
 
@@ -1247,12 +1301,12 @@
         <div class="listing-info">
           <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
           <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(item.titulo)}</h3>
-          <p class="listing-meta">${escapeHtml(item.tipo_quarto)}${item.descricao ? ' · ' + escapeHtml(item.descricao) : ''}</p>
+          <p class="listing-meta">${escapeHtml(item.tipo_quarto)}</p>
           ${renderAnunciante(item)}
           ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade">${formatDisponibilidade(item)}</p>` : ''}
+          ${badge || genero ? `<div class="listing-tags">${badge}${genero}</div>` : ''}
           <div class="listing-foot">
-            <span class="listing-price">€${formatEuro(item.valor)}/mês</span>
-            ${badge}${genero}
+            <span class="listing-price">€${formatEuro(item.valor)} <small>/mês</small></span>
           </div>
           <a class="listing-whats-btn" href="${whatsappLink(item)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
             ${whatsIconSvg()} Falar no WhatsApp
@@ -1513,20 +1567,46 @@
         <a class="btn btn-primary listing-whats-btn" style="background:#25D366; margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener">
           ${whatsIconSvg()} Falar no WhatsApp
         </a>
-        <button type="button" class="report-btn" onclick="denunciarAnuncio(${item.id})">Denunciar este anúncio</button>
+        <button type="button" class="report-btn" onclick="openReport(${item.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4a1 1 0 0 1 1-1h11l-2 4 2 4H5"/></svg>
+          Denunciar este anúncio
+        </button>
       </div>
     `;
     setDetailMainPhoto(fotos[0], 0);
   }
 
-  async function denunciarAnuncio(anuncioId){
-    const motivo = prompt('Por que você está denunciando este anúncio? (ex: golpe, informação falsa, já alugado, conteúdo impróprio)');
-    if (!motivo || !motivo.trim()) return;
-    const { error } = await supabaseClient.from('denuncias').insert({ anuncio_id: anuncioId, motivo: motivo.trim() });
-    if (error) {
-      alert('Não foi possível enviar a denúncia agora. Tente de novo em instantes.');
+  let reportAnuncioId = null;
+  function openReport(anuncioId){
+    reportAnuncioId = anuncioId;
+    document.getElementById('reportMotivo').value = '';
+    document.getElementById('reportError').textContent = '';
+    document.querySelectorAll('#reportReasons .report-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('reportOverlay').classList.add('open');
+  }
+  function closeReport(){
+    document.getElementById('reportOverlay').classList.remove('open');
+    reportAnuncioId = null;
+  }
+  function selectReportReason(btn){
+    btn.classList.toggle('active');
+  }
+  async function enviarDenuncia(){
+    const errorEl = document.getElementById('reportError');
+    errorEl.textContent = '';
+    const chips = Array.from(document.querySelectorAll('#reportReasons .report-chip.active')).map(c => c.textContent.trim());
+    const texto = document.getElementById('reportMotivo').value.trim();
+    const motivo = [chips.join(', '), texto].filter(Boolean).join(' — ');
+    if (!motivo) {
+      errorEl.textContent = 'Escolha um motivo acima ou escreva o que está errado.';
       return;
     }
+    const { error } = await supabaseClient.from('denuncias').insert({ anuncio_id: reportAnuncioId, motivo });
+    if (error) {
+      errorEl.textContent = 'Não foi possível enviar agora. Tente de novo em instantes.';
+      return;
+    }
+    closeReport();
     alert('Denúncia enviada. Nossa equipe vai analisar. Obrigado por ajudar a manter o Chave Verde seguro!');
   }
 

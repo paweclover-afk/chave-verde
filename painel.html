@@ -439,21 +439,27 @@
             <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse imóvel.</p>
           </div>
         </div>
-        <div class="form-row">
-          <label>Disponível a partir de
-            <input type="date" id="f_disponivel_de">
-          </label>
-          <div>
-            <label id="f_disponivel_ate_wrap">Até quando
-              <input type="date" id="f_disponivel_ate">
+        <label style="flex-direction:row; align-items:center; gap:8px;">
+          <input type="checkbox" id="f_lancamento_futuro" style="width:auto;" onchange="toggleLancamentoFuturo('f')">
+          É um lançamento futuro (ainda não está disponível)
+        </label>
+        <p style="font-size:0.78rem; color:#5C5C50; margin-top:-8px;">Deixe desmarcado se o imóvel já está disponível agora. Marque se só vai liberar mais pra frente e quer avisar quem procura.</p>
+        <div id="f_futuro_wrap" style="display:none;">
+          <div class="form-row">
+            <label>Disponível a partir de
+              <input type="date" id="f_disponivel_de">
             </label>
-            <label style="flex-direction:row; align-items:center; gap:8px; margin-top:10px;">
-              <input type="checkbox" id="f_tempo_combinar" style="width:auto;" onchange="toggleTempoCombinar('f')">
-              Tempo a combinar
-            </label>
+            <div>
+              <label id="f_disponivel_ate_wrap">Até quando
+                <input type="date" id="f_disponivel_ate">
+              </label>
+              <label style="flex-direction:row; align-items:center; gap:8px; margin-top:10px;">
+                <input type="checkbox" id="f_tempo_combinar" style="width:auto;" onchange="toggleTempoCombinar('f')">
+                Tempo a combinar
+              </label>
+            </div>
           </div>
         </div>
-        <p style="font-size:0.78rem; color:#5C5C50; margin-top:-8px;">Deixe "Disponível a partir de" em branco se já está disponível agora.</p>
         <label>Fotos (até 5 grátis — dá pra desbloquear mais depois)
           <input type="file" id="f_fotos" accept="image/*" multiple>
         </label>
@@ -631,18 +637,24 @@
           <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse imóvel.</p>
         </div>
       </div>
-      <div class="form-row">
-        <label>Disponível a partir de
-          <input type="date" id="el_disponivel_de">
-        </label>
-        <div>
-          <label id="el_disponivel_ate_wrap">Até quando
-            <input type="date" id="el_disponivel_ate">
+      <label style="flex-direction:row; align-items:center; gap:8px;">
+        <input type="checkbox" id="el_lancamento_futuro" style="width:auto;" onchange="toggleLancamentoFuturo('el')">
+        É um lançamento futuro (ainda não está disponível)
+      </label>
+      <div id="el_futuro_wrap" style="display:none;">
+        <div class="form-row">
+          <label>Disponível a partir de
+            <input type="date" id="el_disponivel_de">
           </label>
-          <label style="flex-direction:row; align-items:center; gap:8px; margin-top:10px;">
-            <input type="checkbox" id="el_tempo_combinar" style="width:auto;" onchange="toggleTempoCombinar('el')">
-            Tempo a combinar
-          </label>
+          <div>
+            <label id="el_disponivel_ate_wrap">Até quando
+              <input type="date" id="el_disponivel_ate">
+            </label>
+            <label style="flex-direction:row; align-items:center; gap:8px; margin-top:10px;">
+              <input type="checkbox" id="el_tempo_combinar" style="width:auto;" onchange="toggleTempoCombinar('el')">
+              Tempo a combinar
+            </label>
+          </div>
         </div>
       </div>
       <label>Descrição
@@ -946,6 +958,16 @@
     if (combinar) input.value = '';
   }
 
+  function toggleLancamentoFuturo(prefix){
+    const futuro = document.getElementById(prefix + '_lancamento_futuro').checked;
+    document.getElementById(prefix + '_futuro_wrap').style.display = futuro ? 'block' : 'none';
+    if (!futuro) {
+      document.getElementById(prefix + '_disponivel_de').value = '';
+      document.getElementById(prefix + '_disponivel_ate').value = '';
+      document.getElementById(prefix + '_tempo_combinar').checked = false;
+    }
+  }
+
   function getDistritoValue(prefix){
     const cidade = document.getElementById(prefix + '_cidade').value;
     return cidade === 'Dublin'
@@ -995,6 +1017,11 @@
       return false;
     }
 
+    if (document.getElementById('f_lancamento_futuro').checked && !document.getElementById('f_disponivel_de').value) {
+      errorEl.textContent = 'Você marcou como lançamento futuro — informe a data em que o imóvel ficará disponível.';
+      return false;
+    }
+
     const fileInput = document.getElementById('f_fotos');
     const allFiles = Array.from(fileInput.files || []);
     if (allFiles.length > 5) {
@@ -1025,8 +1052,8 @@
       eircode: document.getElementById('f_eircode').value,
       genero: document.getElementById('f_genero').value,
       aceita_sem_pps: document.getElementById('f_aceita_sem_pps').checked,
-      disponivel_de: document.getElementById('f_disponivel_de').value || null,
-      disponivel_ate: document.getElementById('f_tempo_combinar').checked ? null : (document.getElementById('f_disponivel_ate').value || null),
+      disponivel_de: document.getElementById('f_lancamento_futuro').checked ? (document.getElementById('f_disponivel_de').value || null) : null,
+      disponivel_ate: document.getElementById('f_lancamento_futuro').checked && !document.getElementById('f_tempo_combinar').checked ? (document.getElementById('f_disponivel_ate').value || null) : null,
       fotos_url: fotosUrls.join('\n'),
       descricao: document.getElementById('f_descricao').value,
       status: 'Pendente'
@@ -1039,7 +1066,7 @@
     }
     document.getElementById('novoAnuncioForm').reset();
     toggleDistritoField('f');
-    toggleTempoCombinar('f');
+    toggleLancamentoFuturo('f');
     loadMyListings();
     return false;
   }
@@ -1298,9 +1325,11 @@
     document.getElementById('el_valor').value = item.valor || 0;
     document.getElementById('el_genero').value = item.genero || '';
     document.getElementById('el_aceita_sem_pps').checked = !!item.aceita_sem_pps;
+    document.getElementById('el_lancamento_futuro').checked = !!item.disponivel_de;
     document.getElementById('el_disponivel_de').value = item.disponivel_de || '';
     document.getElementById('el_disponivel_ate').value = item.disponivel_ate || '';
     document.getElementById('el_tempo_combinar').checked = !item.disponivel_ate && !!item.disponivel_de;
+    toggleLancamentoFuturo('el');
     toggleTempoCombinar('el');
     document.getElementById('el_descricao').value = item.descricao || '';
     setWhatsappValue('el', item.whatsapp);
@@ -1326,8 +1355,8 @@
       valor: parseFloat(document.getElementById('el_valor').value) || 0,
       genero: document.getElementById('el_genero').value,
       aceita_sem_pps: document.getElementById('el_aceita_sem_pps').checked,
-      disponivel_de: document.getElementById('el_disponivel_de').value || null,
-      disponivel_ate: document.getElementById('el_tempo_combinar').checked ? null : (document.getElementById('el_disponivel_ate').value || null),
+      disponivel_de: document.getElementById('el_lancamento_futuro').checked ? (document.getElementById('el_disponivel_de').value || null) : null,
+      disponivel_ate: document.getElementById('el_lancamento_futuro').checked && !document.getElementById('el_tempo_combinar').checked ? (document.getElementById('el_disponivel_ate').value || null) : null,
       descricao: document.getElementById('el_descricao').value,
       whatsapp: getWhatsappValue('el')
     };

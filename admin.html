@@ -333,14 +333,7 @@
           <input type="text" class="search-input" id="usuariosSearch" placeholder="Buscar por nome, email ou WhatsApp..." oninput="renderUsuariosList()" style="margin-left:0;">
         </div>
         <div id="usuariosStatus" class="empty-state">Carregando...</div>
-        <div class="table-wrap" id="usuariosTableWrap" style="display:none;">
-          <table>
-            <thead>
-              <tr><th>Nome</th><th>Tipo</th><th>Selo</th><th>Email</th><th>WhatsApp</th><th>Criado em</th><th>Ações</th></tr>
-            </thead>
-            <tbody id="usuariosTableBody"></tbody>
-          </table>
-        </div>
+        <div id="usuariosList" style="display:flex; flex-direction:column; gap:12px;"></div>
       </div>
 
       <!-- PAINEL ADMINISTRADORES -->
@@ -1004,9 +997,8 @@
 
   async function loadUsuarios(){
     const statusEl = document.getElementById('usuariosStatus');
-    const tableWrap = document.getElementById('usuariosTableWrap');
     statusEl.textContent = 'Carregando...';
-    tableWrap.style.display = 'none';
+    document.getElementById('usuariosList').innerHTML = '';
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
       const res = await fetch('/api/admin-users', {
@@ -1047,8 +1039,7 @@
 
   function renderUsuariosList(){
     const statusEl = document.getElementById('usuariosStatus');
-    const tableWrap = document.getElementById('usuariosTableWrap');
-    const body = document.getElementById('usuariosTableBody');
+    const listEl = document.getElementById('usuariosList');
     const search = (document.getElementById('usuariosSearch').value || '').toLowerCase();
 
     let items = allUsuarios;
@@ -1062,28 +1053,34 @@
 
     if (items.length === 0) {
       statusEl.textContent = 'Nenhum usuário encontrado.';
-      tableWrap.style.display = 'none';
+      listEl.innerHTML = '';
       return;
     }
     statusEl.textContent = '';
-    tableWrap.style.display = 'block';
     const tipoLabel = { landlord: 'Landlord', repassando: 'Repassando vaga' };
-    body.innerHTML = items.map(u => `
-      <tr>
-        <td>${u.nome ? escapeHtml(u.nome) : '—'}</td>
-        <td>${tipoLabel[u.tipo_usuario] || '—'}</td>
-        <td>${verificadosSet.has(u.id) ? '<strong style="color:#B8860B;">✓ Verificado</strong>' : '—'}</td>
-        <td>${u.email ? escapeHtml(u.email) : '—'}</td>
-        <td>${u.whatsapp ? escapeHtml(u.whatsapp) : '—'}</td>
-        <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}</td>
-        <td class="actions-cell">
+    listEl.innerHTML = items.map(u => {
+      const verificado = verificadosSet.has(u.id);
+      return `
+      <div class="admin-card">
+        <div class="admin-card-top">
+          <div>
+            <div class="admin-card-title">
+              ${u.nome ? escapeHtml(u.nome) : '(sem nome)'}
+              ${verificado ? '<span style="color:#B8860B; font-size:0.82rem; font-weight:700;">✓ Verificado</span>' : ''}
+            </div>
+            <div class="admin-card-meta">${u.email ? escapeHtml(u.email) : 'sem email'} · ${u.whatsapp ? escapeHtml(u.whatsapp) : 'sem WhatsApp'}</div>
+            <div class="admin-card-meta">${tipoLabel[u.tipo_usuario] || 'tipo não informado'} · cadastrado em ${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}</div>
+          </div>
+        </div>
+        <div class="admin-card-actions">
           <button class="btn btn-ghost btn-small" onclick="openEditUser('${u.id}')">Editar</button>
-          <button class="btn btn-ghost btn-small" onclick="toggleSelo('${u.id}')">${verificadosSet.has(u.id) ? 'Remover selo' : 'Dar selo'}</button>
+          <button class="btn btn-ghost btn-small" onclick="toggleSelo('${u.id}')">${verificado ? 'Remover selo' : 'Dar selo'}</button>
           <button class="btn btn-ghost btn-small" onclick="promoteToAdmin('${u.id}')">Tornar admin</button>
           <button class="btn btn-ghost btn-small btn-danger" onclick="deleteUsuario('${u.id}')">Remover</button>
-        </td>
-      </tr>
-    `).join('');
+        </div>
+      </div>
+      `;
+    }).join('');
   }
 
   let editingUserId = null;
