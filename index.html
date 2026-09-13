@@ -933,10 +933,10 @@
 
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  let adminUserIds = new Set();
-  async function loadAdminUserIds(){
-    const { data, error } = await supabaseClient.from('admins').select('user_id');
-    if (!error && data) adminUserIds = new Set(data.map(a => a.user_id));
+  let verificadoUserIds = new Set();
+  async function loadVerificados(){
+    const { data, error } = await supabaseClient.from('verificados').select('user_id');
+    if (!error && data) verificadoUserIds = new Set(data.map(v => v.user_id));
   }
 
   function openAuth(tab){
@@ -1136,8 +1136,8 @@
 
   function renderAnunciante(item){
     if (!item.nome) return '';
-    const verificado = adminUserIds.has(item.user_id)
-      ? `<svg class="verified-icon" viewBox="0 0 20 20" fill="none" aria-label="Verificado"><circle cx="10" cy="10" r="9" fill="var(--sun)"/><path d="M6 10.3l2.6 2.6L14 7.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+    const verificado = verificadoUserIds.has(item.user_id)
+      ? `<svg class="verified-icon" viewBox="0 0 20 20" fill="none" aria-label="Anunciante verificado pela equipe Chave Verde"><title>Anunciante verificado pela equipe Chave Verde</title><circle cx="10" cy="10" r="9" fill="var(--sun)"/><path d="M6 10.3l2.6 2.6L14 7.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
       : '';
     return `<p class="listing-anunciante">Anunciado por ${escapeHtml(item.nome)}${verificado}</p>`;
   }
@@ -1512,7 +1512,7 @@
   const savedCity = getSavedCity();
   updateCityPill(savedCity);
   updateAuthUI();
-  loadAdminUserIds().then(() => loadPublicListings(savedCity));
+  loadVerificados().then(() => loadPublicListings(savedCity));
 
   const hasDeepLink = new URLSearchParams(window.location.search).has('anuncio');
   if (!savedCity && !hasDeepLink) {

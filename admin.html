@@ -335,7 +335,7 @@
         <div class="table-wrap" id="usuariosTableWrap" style="display:none;">
           <table>
             <thead>
-              <tr><th>Nome</th><th>Tipo</th><th>Email</th><th>WhatsApp</th><th>Criado em</th><th>Ações</th></tr>
+              <tr><th>Nome</th><th>Tipo</th><th>Selo</th><th>Email</th><th>WhatsApp</th><th>Criado em</th><th>Ações</th></tr>
             </thead>
             <tbody id="usuariosTableBody"></tbody>
           </table>
@@ -983,6 +983,12 @@
   // ======= USUÁRIOS =======
   let allUsuarios = [];
   let usuariosLoaded = false;
+  let verificadosSet = new Set();
+
+  async function loadVerificados(){
+    const { data, error } = await supabaseClient.from('verificados').select('user_id');
+    if (!error && data) verificadosSet = new Set(data.map(v => v.user_id));
+  }
 
   async function loadUsuarios(){
     const statusEl = document.getElementById('usuariosStatus');
@@ -997,10 +1003,33 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro ao carregar usuários');
       allUsuarios = data.users || [];
+      await loadVerificados();
       usuariosLoaded = true;
       renderUsuariosList();
     } catch (err) {
       statusEl.textContent = 'Não foi possível carregar os usuários: ' + err.message;
+    }
+  }
+
+  async function toggleSelo(id){
+    const u = allUsuarios.find(x => x.id === id);
+    const jaTem = verificadosSet.has(id);
+    const nome = u?.nome || u?.email || 'essa conta';
+    if (!confirm(jaTem
+      ? `Remover o selo de verificado de "${nome}"?`
+      : `Dar o selo de verificado pra "${nome}"? Isso mostra pra quem procura que a equipe confirmou que essa pessoa é confiável.`)) return;
+    try {
+      if (jaTem) {
+        const { error } = await supabaseClient.from('verificados').delete().eq('user_id', id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabaseClient.from('verificados').insert({ user_id: id });
+        if (error) throw error;
+      }
+      await loadVerificados();
+      renderUsuariosList();
+    } catch (err) {
+      alert('Não foi possível atualizar o selo: ' + err.message);
     }
   }
 
@@ -1031,11 +1060,13 @@
       <tr>
         <td>${u.nome ? escapeHtml(u.nome) : '—'}</td>
         <td>${tipoLabel[u.tipo_usuario] || '—'}</td>
+        <td>${verificadosSet.has(u.id) ? '<strong style="color:#B8860B;">✓ Verificado</strong>' : '—'}</td>
         <td>${u.email ? escapeHtml(u.email) : '—'}</td>
         <td>${u.whatsapp ? escapeHtml(u.whatsapp) : '—'}</td>
         <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}</td>
         <td class="actions-cell">
           <button class="btn btn-ghost btn-small" onclick="openEditUser('${u.id}')">Editar</button>
+          <button class="btn btn-ghost btn-small" onclick="toggleSelo('${u.id}')">${verificadosSet.has(u.id) ? 'Remover selo' : 'Dar selo'}</button>
           <button class="btn btn-ghost btn-small" onclick="promoteToAdmin('${u.id}')">Tornar admin</button>
           <button class="btn btn-ghost btn-small btn-danger" onclick="deleteUsuario('${u.id}')">Remover</button>
         </td>
