@@ -4,6 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chave Verde — Aluguel para brasileiros na Irlanda</title>
+<meta name="description" content="Anúncios de aluguel revisados para brasileiros na Irlanda. Ache quarto, casa ou apartamento sem enrolação, ou anuncie sem burocracia.">
+
+<!-- Preview ao compartilhar (WhatsApp, Instagram, Facebook, etc.) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Chave Verde">
+<meta property="og:title" content="Chave Verde — Aluguel para brasileiros na Irlanda">
+<meta property="og:description" content="Ache seu quarto, casa ou apartamento sem enrolação — ou anuncie sem burocracia. Anúncios revisados, em português.">
+<meta property="og:url" content="https://chave-verde.vercel.app/">
+<meta property="og:image" content="https://chave-verde.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Chave Verde — Aluguel para brasileiros na Irlanda">
+<meta name="twitter:description" content="Ache seu quarto, casa ou apartamento sem enrolação — ou anuncie sem burocracia.">
+<meta name="twitter:image" content="https://chave-verde.vercel.app/og-image.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -409,10 +426,29 @@
     font-size:0.85rem; color:#8AA083; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
   }
 
+  .menu-toggle{
+    display:none; background:none; border:1px solid var(--line); border-radius:8px;
+    padding:7px; cursor:pointer; color:var(--pine-dark); align-items:center; justify-content:center;
+  }
+  .menu-toggle svg{width:22px; height:22px;}
+  .nav-mobile-only{display:none;}
+
   @media (max-width: 880px){
     .hero-grid, .compare, .advertiser-grid, .foot-grid{grid-template-columns:1fr;}
     .steps, .listing-grid{grid-template-columns:1fr;}
-    .nav-links{display:none;}
+    .nav-links{
+      display:none; position:absolute; top:100%; left:0; right:0;
+      flex-direction:column; align-items:stretch; gap:0;
+      background:var(--paper); border-bottom:1px solid var(--line);
+      padding:8px 28px 16px; box-shadow:0 10px 20px rgba(27,42,30,0.08);
+    }
+    .nav-links.open{display:flex;}
+    .nav-links a{padding:13px 0; font-size:1rem; border-bottom:1px solid var(--line);}
+    .nav-links a:last-child{border-bottom:none;}
+    .nav-mobile-only{display:block;}
+    .menu-toggle{display:inline-flex;}
+    .header-entrar{display:none;}
+    .header-anunciar{font-size:0.8rem; padding:9px 12px;}
     .hero{padding:52px 0 64px;}
     section{padding:64px 0;}
   }
@@ -540,6 +576,12 @@
     padding:5px 10px; border-radius:20px;
   }
   .listing-disponibilidade{font-size:0.82rem; color:var(--teal); font-weight:600; margin-top:6px;}
+  .report-btn{
+    display:block; margin-top:16px; background:none; border:none;
+    color:#8a8a7c; font-size:0.82rem; text-decoration:underline; cursor:pointer;
+    font-family:'Work Sans',sans-serif; padding:0;
+  }
+  .report-btn:hover{color:var(--clay);}
   .listing-anunciante{font-size:0.85rem; color:#5C5C50; margin-top:6px; display:flex; align-items:center; gap:5px;}
   .verified-icon{width:15px; height:15px; flex-shrink:0;}
   .city-pill{
@@ -568,15 +610,19 @@
       </svg>
       Chave Verde
     </a>
-    <nav class="nav-links">
-      <a href="#anuncios">Anúncios</a>
-      <a href="#como-funciona">Como funciona</a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#anuncios" onclick="closeMobileMenu()">Anúncios</a>
+      <a href="#como-funciona" onclick="closeMobileMenu()">Como funciona</a>
       <a href="painel.html">Meus anúncios</a>
-      <a href="#duvidas">Dúvidas</a>
+      <a href="#duvidas" onclick="closeMobileMenu()">Dúvidas</a>
+      <a href="#" class="nav-mobile-only" onclick="closeMobileMenu(); openAuth('login'); return false;">Entrar</a>
     </nav>
     <div style="display:flex; align-items:center; gap:12px;">
-      <a class="btn btn-ghost" href="#" id="openAuthBtn" onclick="openAuth('login'); return false;">Entrar</a>
-      <a class="btn btn-primary" href="#" onclick="openAuth('signup'); return false;">Anunciar sem burocracia</a>
+      <a class="btn btn-ghost header-entrar" href="#" id="openAuthBtn" onclick="openAuth('login'); return false;">Entrar</a>
+      <a class="btn btn-primary header-anunciar" href="#" onclick="openAuth('signup'); return false;">Anunciar sem burocracia</a>
+      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Abrir menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
     </div>
   </div>
 </header>
@@ -742,6 +788,14 @@
           <option value="Misto">Misto</option>
           <option value="Só mulheres">Só mulheres</option>
           <option value="Só homens">Só homens</option>
+        </select>
+        <select id="precoFilter" class="distrito-select" onchange="applyPrecoFilter(this.value)">
+          <option value="">Preço: qualquer</option>
+          <option value="500">até €500</option>
+          <option value="700">até €700</option>
+          <option value="900">até €900</option>
+          <option value="1200">até €1200</option>
+          <option value="1500">até €1500</option>
         </select>
         <button type="button" id="futurosToggle" class="distrito-select" onclick="toggleFuturosFilter()">Lançamentos futuros</button>
       </div>
@@ -937,6 +991,17 @@
   async function loadVerificados(){
     const { data, error } = await supabaseClient.from('verificados').select('user_id');
     if (!error && data) verificadoUserIds = new Set(data.map(v => v.user_id));
+  }
+
+  function toggleMobileMenu(){
+    const nav = document.getElementById('navLinks');
+    const btn = document.querySelector('.menu-toggle');
+    const aberto = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+  }
+  function closeMobileMenu(){
+    document.getElementById('navLinks').classList.remove('open');
+    document.querySelector('.menu-toggle').setAttribute('aria-expanded', 'false');
   }
 
   function openAuth(tab){
@@ -1270,6 +1335,7 @@
   let currentDistritoFilter = '';
   let currentGeneroFilter = '';
   let currentFuturosFilter = false;
+  let currentPrecoMax = null;
 
   async function loadPublicListings(cidade){
     const statusEl = document.getElementById('publicListingsStatus');
@@ -1292,6 +1358,10 @@
     currentDistritoFilter = '';
     currentGeneroFilter = '';
     document.getElementById('generoFilter').value = '';
+    currentPrecoMax = null;
+    document.getElementById('precoFilter').value = '';
+    currentFuturosFilter = false;
+    document.getElementById('futurosToggle').classList.remove('active');
     populateDistritoFilter();
     renderFilteredListings();
     initCardCarousels();
@@ -1352,6 +1422,12 @@
     initCardCarousels();
   }
 
+  function applyPrecoFilter(valor){
+    currentPrecoMax = valor ? Number(valor) : null;
+    renderFilteredListings();
+    initCardCarousels();
+  }
+
   function renderFilteredListings(){
     const statusEl = document.getElementById('publicListingsStatus');
     const grid = document.getElementById('publicListingsGrid');
@@ -1366,11 +1442,15 @@
     if (currentFuturosFilter) {
       data = data.filter(isLancamentoFuturo);
     }
+    if (currentPrecoMax) {
+      data = data.filter(item => (Number(item.valor) || 0) <= currentPrecoMax);
+    }
 
     if (data.length === 0) {
       const partes = [];
       if (currentCityLabel) partes.push(currentDistritoFilter ? `${currentCityLabel} ${currentDistritoFilter}` : currentCityLabel);
       if (currentGeneroFilter) partes.push(currentGeneroFilter);
+      if (currentPrecoMax) partes.push(`até €${currentPrecoMax}`);
       if (currentFuturosFilter) partes.push('lançamentos futuros');
       const ondeTexto = partes.length ? `em ${partes.join(' · ')}` : '';
       statusEl.textContent = ondeTexto
@@ -1433,9 +1513,21 @@
         <a class="btn btn-primary listing-whats-btn" style="background:#25D366; margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener">
           ${whatsIconSvg()} Falar no WhatsApp
         </a>
+        <button type="button" class="report-btn" onclick="denunciarAnuncio(${item.id})">Denunciar este anúncio</button>
       </div>
     `;
     setDetailMainPhoto(fotos[0], 0);
+  }
+
+  async function denunciarAnuncio(anuncioId){
+    const motivo = prompt('Por que você está denunciando este anúncio? (ex: golpe, informação falsa, já alugado, conteúdo impróprio)');
+    if (!motivo || !motivo.trim()) return;
+    const { error } = await supabaseClient.from('denuncias').insert({ anuncio_id: anuncioId, motivo: motivo.trim() });
+    if (error) {
+      alert('Não foi possível enviar a denúncia agora. Tente de novo em instantes.');
+      return;
+    }
+    alert('Denúncia enviada. Nossa equipe vai analisar. Obrigado por ajudar a manter o Chave Verde seguro!');
   }
 
   function selectDetailThumb(el, url, index){

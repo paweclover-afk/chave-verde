@@ -310,6 +310,7 @@
         <button class="admin-tab" id="tabUsuarios" onclick="switchAdminTab('usuarios')">Usuários</button>
         <button class="admin-tab" id="tabAdmins" onclick="switchAdminTab('admins')">Administradores</button>
         <button class="admin-tab" id="tabMensagens" onclick="switchAdminTab('mensagens')">Mensagens <span id="countMensagensNaoLidas"></span></button>
+        <button class="admin-tab" id="tabDenuncias" onclick="switchAdminTab('denuncias')">Denúncias <span id="countDenunciasAbertas"></span></button>
       </div>
 
       <!-- PAINEL ANÚNCIOS -->
@@ -382,6 +383,13 @@
         <h3 style="font-size:1.02rem; margin-bottom:14px;">Sugestões dos anunciantes</h3>
         <div id="mensagensStatus" class="empty-state">Carregando...</div>
         <div id="mensagensList" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+
+      <!-- PAINEL DENÚNCIAS -->
+      <div id="panelDenuncias" style="display:none;">
+        <h3 style="font-size:1.02rem; margin-bottom:14px;">Anúncios denunciados</h3>
+        <div id="denunciasStatus" class="empty-state">Carregando...</div>
+        <div id="denunciasList" style="display:flex; flex-direction:column; gap:12px;"></div>
       </div>
     </div>
 
@@ -654,6 +662,7 @@
     document.getElementById('dashboard').style.display = 'block';
     loadAnuncios();
     loadMensagens();
+    loadDenuncias();
   }
 
   function switchAdminTab(tab){
@@ -661,13 +670,16 @@
     document.getElementById('tabUsuarios').classList.toggle('active', tab === 'usuarios');
     document.getElementById('tabAdmins').classList.toggle('active', tab === 'admins');
     document.getElementById('tabMensagens').classList.toggle('active', tab === 'mensagens');
+    document.getElementById('tabDenuncias').classList.toggle('active', tab === 'denuncias');
     document.getElementById('panelAnuncios').style.display = tab === 'anuncios' ? 'block' : 'none';
     document.getElementById('panelUsuarios').style.display = tab === 'usuarios' ? 'block' : 'none';
     document.getElementById('panelAdmins').style.display = tab === 'admins' ? 'block' : 'none';
     document.getElementById('panelMensagens').style.display = tab === 'mensagens' ? 'block' : 'none';
+    document.getElementById('panelDenuncias').style.display = tab === 'denuncias' ? 'block' : 'none';
     if (tab === 'usuarios') loadUsuarios();
     if (tab === 'admins') loadAdmins();
     if (tab === 'mensagens') loadMensagens();
+    if (tab === 'denuncias') loadDenuncias();
   }
 
   function getFotosArray(item){
@@ -1289,6 +1301,53 @@
   async function marcarMensagemLida(id){
     const { error } = await supabaseClient.from('feedback_mensagens').update({ lida: true }).eq('id', id);
     if (!error) loadMensagens();
+  }
+
+  // ======= DENÚNCIAS =======
+  async function loadDenuncias(){
+    const statusEl = document.getElementById('denunciasStatus');
+    const listEl = document.getElementById('denunciasList');
+    try {
+      const { data, error } = await supabaseClient
+        .from('denuncias')
+        .select('*')
+        .order('criado_em', { ascending: false });
+      if (error) throw error;
+
+      const anuncioMap = {};
+      allAnuncios.forEach(a => { anuncioMap[a.id] = a; });
+
+      const abertas = (data || []).filter(d => !d.resolvida).length;
+      document.getElementById('countDenunciasAbertas').textContent = abertas ? `(${abertas})` : '';
+
+      if (!data || data.length === 0) {
+        statusEl.textContent = 'Nenhuma denúncia por enquanto.';
+        listEl.innerHTML = '';
+        return;
+      }
+      statusEl.textContent = '';
+      listEl.innerHTML = data.map(d => {
+        const a = anuncioMap[d.anuncio_id];
+        const titulo = a ? escapeHtml(a.titulo || '(sem título)') : `anúncio #${d.anuncio_id} (removido)`;
+        return `
+          <div class="admin-card">
+            <div class="admin-card-meta">Anúncio: <strong>${titulo}</strong> · ${new Date(d.criado_em).toLocaleDateString('pt-BR')}${!d.resolvida ? ' · <strong style="color:#C1502E;">aberta</strong>' : ' · resolvida'}</div>
+            <p style="margin-top:8px; white-space:pre-wrap;">${escapeHtml(d.motivo)}</p>
+            <div class="admin-card-actions">
+              ${a ? `<button class="btn btn-ghost btn-small" onclick="openEditListing(${d.anuncio_id})">Ver anúncio</button>` : ''}
+              ${!d.resolvida ? `<button class="btn btn-ghost btn-small" onclick="resolverDenuncia(${d.id})">Marcar como resolvida</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      statusEl.textContent = 'Não foi possível carregar as denúncias: ' + err.message;
+    }
+  }
+
+  async function resolverDenuncia(id){
+    const { error } = await supabaseClient.from('denuncias').update({ resolvida: true }).eq('id', id);
+    if (!error) loadDenuncias();
   }
 
   supabaseClient.auth.onAuthStateChange(() => refreshAuthState());
