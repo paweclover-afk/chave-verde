@@ -790,7 +790,20 @@
   }
 
   async function deleteListing(id){
-    if (!confirm('Tem certeza que quer apagar esse anúncio?')) return;
+    const item = myListingsCache.find(a => a.id === id);
+    const temFotosPagas = !!(item && item.fotos_extra_pagas);
+    const temDestaque = !!(item && isDestacado(item));
+    let pergunta;
+    if (temFotosPagas && temDestaque) {
+      pergunta = 'Este anúncio tem fotos extras pagas E destaque ativo. Se apagar, você perde os dois e não há reembolso.\n\nSe você só quer tirá-lo do ar por um tempo, feche este aviso e use o botão "Pausar".\n\nApagar mesmo assim?';
+    } else if (temFotosPagas) {
+      pergunta = 'Este anúncio tem fotos extras pagas. Se apagar, você perde esse benefício e não há reembolso.\n\nSe você só quer tirá-lo do ar por um tempo, feche este aviso e use o botão "Pausar".\n\nApagar mesmo assim?';
+    } else if (temDestaque) {
+      pergunta = 'Este anúncio tem destaque ativo (pago). Se apagar, você perde o destaque e não há reembolso.\n\nSe você só quer tirá-lo do ar por um tempo, feche este aviso e use o botão "Pausar".\n\nApagar mesmo assim?';
+    } else {
+      pergunta = 'Tem certeza que quer apagar esse anúncio? Essa ação não pode ser desfeita.';
+    }
+    if (!confirm(pergunta)) return;
     const { error } = await supabaseClient.from('quartos').delete().eq('id', id);
     if (!error) {
       loadMyListings();
