@@ -2,12 +2,6 @@
 // Depende de js/comum.js (supabaseClient, escapeHtml, formatEuro, getFotosArray,
 // formatDisponibilidade, isDestacado, togglePw). CSS em css/index.css.
 
-  let verificadoUserIds = new Set();
-  async function loadVerificados(){
-    const { data, error } = await supabaseClient.from('verificados').select('user_id');
-    if (!error && data) verificadoUserIds = new Set(data.map(v => v.user_id));
-  }
-
   function toggleMobileMenu(){
     const nav = document.getElementById('navLinks');
     const btn = document.querySelector('.menu-toggle');
@@ -187,7 +181,7 @@
   function renderAnunciante(item, completo){
     if (!item.nome) return '';
     const nome = completo ? formatarNome(item.nome) : primeiroNome(item.nome);
-    const verificado = verificadoUserIds.has(item.user_id)
+    const verificado = item.verificado
       ? `<svg class="verified-icon" viewBox="0 0 20 20" fill="none" aria-label="Anunciante verificado pela equipe Chave Verde"><title>Anunciante verificado pela equipe Chave Verde</title><circle cx="10" cy="10" r="9" fill="var(--sun)"/><path d="M6 10.3l2.6 2.6L14 7.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
       : '';
     return `<p class="listing-anunciante">Anunciado por ${escapeHtml(nome)}${verificado}</p>`;
@@ -331,9 +325,8 @@
     const statusEl = document.getElementById('publicListingsStatus');
     const grid = document.getElementById('publicListingsGrid');
     let query = supabaseClient
-      .from('quartos')
+      .from('anuncios_publicos')
       .select('*')
-      .eq('status', 'Ativo')
       .order('created_at', { ascending: false });
     if (cidade) query = query.eq('cidade', cidade);
     const { data, error } = await query;
@@ -598,7 +591,7 @@
     let item = listingsCache[id];
     if (!item && Number.isInteger(id) && id > 0) {
       // maybeSingle: anúncio inexistente/removido volta vazio em vez de erro 406
-      const { data } = await supabaseClient.from('quartos').select('*').eq('id', id).eq('status', 'Ativo').maybeSingle();
+      const { data } = await supabaseClient.from('anuncios_publicos').select('*').eq('id', id).maybeSingle();
       item = data;
     }
     if (!item) {
@@ -638,7 +631,7 @@
   const savedCity = getSavedCity();
   updateCityPill(savedCity);
   updateAuthUI();
-  loadVerificados().then(() => loadPublicListings(savedCity));
+  loadPublicListings(savedCity);
   loadAvaliacoes();
 
   // A janela de cidade não abre sozinha: quem chega vê todas as cidades e troca pelo botão "Trocar cidade".
