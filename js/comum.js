@@ -199,3 +199,77 @@ function mostrarAviso(mensagem, tipo){
   cont.appendChild(el);
   setTimeout(remover, tipo === 'erro' ? 7000 : 5000);
 }
+
+
+// ======= CONFIRMAÇÃO estilizada (substitui o confirm() feio) — retorna Promise<boolean> =======
+function confirmarAcao(opts){
+  opts = opts || {};
+  const titulo = opts.titulo || 'Confirmar';
+  const mensagem = opts.mensagem || '';
+  const textoOk = opts.textoConfirmar || 'Confirmar';
+  const textoCancelar = opts.textoCancelar || 'Cancelar';
+  const perigo = !!opts.perigo;
+  if (!document.getElementById('confirm-estilos')) {
+    const st = document.createElement('style');
+    st.id = 'confirm-estilos';
+    st.textContent = [
+      "#confirmOverlay{position:fixed;inset:0;z-index:210;background:rgba(27,42,30,0.55);display:flex;align-items:center;justify-content:center;padding:20px;animation:confFade .18s ease;}",
+      ".confirm-modal{background:var(--paper,#F6F1E4);color:var(--ink,#1B2A1E);border-radius:12px;max-width:420px;width:100%;padding:26px 26px 22px;box-shadow:8px 8px 0 var(--pine-dark,#153529);font-family:'Work Sans',sans-serif;animation:confPop .2s ease;}",
+      ".confirm-modal h3{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;color:var(--pine-dark,#153529);margin:0 0 10px;}",
+      ".confirm-modal p{font-size:0.95rem;line-height:1.5;color:#3A3A32;margin:0;white-space:pre-line;}",
+      ".confirm-acoes{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap;}",
+      ".confirm-btn{padding:11px 20px;border-radius:6px;font-weight:600;font-size:0.95rem;cursor:pointer;border:1px solid transparent;font-family:inherit;min-height:44px;}",
+      ".confirm-btn.cancelar{background:transparent;color:var(--pine-dark,#153529);border-color:var(--line,rgba(27,42,30,0.14));}",
+      ".confirm-btn.cancelar:hover{background:var(--paper-2,#EFE7D3);}",
+      ".confirm-btn.ok{background:var(--pine,#1F4D3A);color:var(--paper,#F6F1E4);}",
+      ".confirm-btn.ok.perigo{background:var(--clay,#C1502E);color:#fff;}",
+      ".confirm-btn.ok:hover{filter:brightness(0.95);}",
+      "@keyframes confFade{from{opacity:0;}to{opacity:1;}}",
+      "@keyframes confPop{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}",
+      "@media (prefers-reduced-motion:reduce){#confirmOverlay,.confirm-modal{animation:none;}}"
+    ].join('');
+    document.head.appendChild(st);
+  }
+  return new Promise(function(resolve){
+    const overlay = document.createElement('div');
+    overlay.id = 'confirmOverlay';
+    const modal = document.createElement('div');
+    modal.className = 'confirm-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    const h = document.createElement('h3');
+    h.textContent = titulo;
+    modal.appendChild(h);
+    if (mensagem) {
+      const p = document.createElement('p');
+      p.textContent = mensagem;
+      modal.appendChild(p);
+    }
+    const acoes = document.createElement('div');
+    acoes.className = 'confirm-acoes';
+    const btnCancel = document.createElement('button');
+    btnCancel.type = 'button';
+    btnCancel.className = 'confirm-btn cancelar';
+    btnCancel.textContent = textoCancelar;
+    const btnOk = document.createElement('button');
+    btnOk.type = 'button';
+    btnOk.className = 'confirm-btn ok' + (perigo ? ' perigo' : '');
+    btnOk.textContent = textoOk;
+    acoes.appendChild(btnCancel);
+    acoes.appendChild(btnOk);
+    modal.appendChild(acoes);
+    overlay.appendChild(modal);
+    function fechar(valor){
+      document.removeEventListener('keydown', onKey);
+      overlay.remove();
+      resolve(valor);
+    }
+    function onKey(e){ if (e.key === 'Escape') fechar(false); }
+    btnCancel.onclick = function(){ fechar(false); };
+    btnOk.onclick = function(){ fechar(true); };
+    overlay.onclick = function(e){ if (e.target === overlay) fechar(false); };
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+    btnCancel.focus();
+  });
+}

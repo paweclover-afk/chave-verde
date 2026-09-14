@@ -620,7 +620,8 @@
   }
 
   async function removeFoto(index){
-    if (!confirm('Apagar essa foto?')) return;
+    const ok = await confirmarAcao({ titulo: 'Apagar foto?', mensagem: 'Essa foto será removida do anúncio.', textoConfirmar: 'Apagar', textoCancelar: 'Cancelar', perigo: true });
+    if (!ok) return;
     editingFotos.splice(index, 1);
     renderEditFotosGrid();
     await persistEditingFotos(false);
@@ -795,15 +796,22 @@
     const temDestaque = !!(item && isDestacado(item));
     let pergunta;
     if (temFotosPagas && temDestaque) {
-      pergunta = 'Este anúncio tem fotos extras pagas E destaque ativo. Se apagar, você perde os dois e não há reembolso.\n\nSe você só quer tirá-lo do ar por um tempo, feche este aviso e use o botão "Pausar".\n\nApagar mesmo assim?';
+      pergunta = 'Este anúncio tem fotos extras pagas E destaque ativo. Se apagar, você perde os dois e não há reembolso.\n\nSe quiser só tirá-lo do ar por um tempo, use o botão "Pausar".';
     } else if (temFotosPagas) {
-      pergunta = 'Este anúncio tem fotos extras pagas. Se apagar, você perde esse benefício e não há reembolso.\n\nSe você só quer tirá-lo do ar por um tempo, feche este aviso e use o botão "Pausar".\n\nApagar mesmo assim?';
+      pergunta = 'Este anúncio tem fotos extras pagas. Se apagar, você perde esse benefício e não há reembolso.\n\nSe quiser só tirá-lo do ar por um tempo, use o botão "Pausar".';
     } else if (temDestaque) {
-      pergunta = 'Este anúncio tem destaque ativo (pago). Se apagar, você perde o destaque e não há reembolso.\n\nSe você só quer tirá-lo do ar por um tempo, feche este aviso e use o botão "Pausar".\n\nApagar mesmo assim?';
+      pergunta = 'Este anúncio tem destaque ativo (pago). Se apagar, você perde o destaque e não há reembolso.\n\nSe quiser só tirá-lo do ar por um tempo, use o botão "Pausar".';
     } else {
-      pergunta = 'Tem certeza que quer apagar esse anúncio? Essa ação não pode ser desfeita.';
+      pergunta = 'Essa ação não pode ser desfeita.';
     }
-    if (!confirm(pergunta)) return;
+    const confirmou = await confirmarAcao({
+      titulo: 'Apagar anúncio?',
+      mensagem: pergunta,
+      textoConfirmar: 'Apagar',
+      textoCancelar: 'Cancelar',
+      perigo: true
+    });
+    if (!confirmou) return;
     const { error } = await supabaseClient.from('quartos').delete().eq('id', id);
     if (!error) {
       loadMyListings();
