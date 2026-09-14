@@ -643,11 +643,12 @@
     footer li a{display:inline-block; padding:12px 0;}
   }
 
-  /* celulares pequenos: logo só com o ícone pra caber Entrar + Anunciar grátis + menu */
+  /* celulares até 420px: marca visível + Entrar + "Anunciar" (sem "grátis") + menu */
   @media (max-width: 420px){
-    .brand-name{
-      position:absolute; width:1px; height:1px; overflow:hidden;
-      clip:rect(0 0 0 0); white-space:nowrap;
-    }
-    .brand svg{width:28px; height:28px;}
+    header .wrap{padding-left:16px; padding-right:16px;}
+    .brand{font-size:1rem; gap:7px;}
+    .brand svg{width:21px; height:21px;}
+    .cta-extra{display:none;}
+    .nav-actions{gap:5px;}
+    .header-entrar, .header-anunciar{padding:9px 10px;}
   }
