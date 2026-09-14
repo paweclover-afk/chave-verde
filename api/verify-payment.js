@@ -80,6 +80,7 @@ module.exports = async (req, res) => {
 
     res.status(200).json({ ok: true, tipo });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('verify-payment:', err);
+    res.status(500).json({ error: 'Erro ao confirmar o pagamento. Tente novamente.' });
   }
 };

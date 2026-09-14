@@ -71,6 +71,7 @@ module.exports = async (req, res) => {
 
     res.status(200).json({ url: session.url });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('create-checkout-session:', err);
+    res.status(500).json({ error: 'Erro ao iniciar o pagamento. Tente novamente.' });
   }
 };
