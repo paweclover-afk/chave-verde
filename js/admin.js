@@ -86,6 +86,7 @@
     loadAnuncios();
     loadMensagens();
     loadDenuncias();
+    loadAvaliacoesAdmin();
   }
 
   function switchAdminTab(tab){

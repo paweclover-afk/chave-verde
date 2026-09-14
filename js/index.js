@@ -162,6 +162,10 @@
   // ======= LISTA PÚBLICA =======
   const listingsCache = {};
 
+  function registrarCliqueWhats(id){
+    try { supabaseClient.rpc('registrar_clique_whatsapp', { p_anuncio_id: id }); } catch (e) {}
+  }
+
   function whatsappLink(item){
     const digits = (item.whatsapp || '').replace(/\D/g, '');
     const msg = encodeURIComponent(`Oi! Vi seu anúncio "${formatarTitulo(item.titulo)}" no Chave Verde e queria saber mais informações.`);
@@ -240,7 +244,7 @@
           <div class="listing-foot">
             <span class="listing-price">€${formatEuro(item.valor)} <small>/mês</small></span>
           </div>
-          <a class="listing-whats-btn" href="${whatsappLink(item)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          <a class="listing-whats-btn" href="${whatsappLink(item)}" target="_blank" rel="noopener" onclick="registrarCliqueWhats(${item.id}); event.stopPropagation();">
             ${whatsIconSvg()} Falar no WhatsApp
           </a>
         </div>
@@ -497,7 +501,7 @@
         ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade" style="margin-top:12px;">${formatDisponibilidade(item)}</p>` : ''}
         ${item.descricao ? `<p class="detail-desc">${escapeHtml(item.descricao)}</p>` : ''}
         <p class="detail-price">€${formatEuro(item.valor)} <span>/mês</span></p>
-        <a class="btn listing-whats-btn" style="margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener">
+        <a class="btn listing-whats-btn" style="margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener" onclick="registrarCliqueWhats(${item.id})">
           ${whatsIconSvg()} Falar no WhatsApp
         </a>
         <button type="button" class="report-btn" onclick="openReport(${item.id})">

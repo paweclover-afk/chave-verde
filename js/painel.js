@@ -507,6 +507,7 @@
             <p style="font-weight:600; color:var(--pine-dark);">${escapeHtml(item.titulo)}</p>
             <p class="listing-status">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''} · €${formatEuro(item.valor)}/mês · <strong>${statusLabel}</strong>${destaqueInfo}</p>
             ${formatDisponibilidade(item) ? `<p class="listing-status">${formatDisponibilidade(item)}</p>` : ''}
+            <p class="listing-status">📲 ${item.whatsapp_cliques || 0} clique${(item.whatsapp_cliques || 0) === 1 ? '' : 's'} no WhatsApp</p>
           </div>
         </div>
         <div class="listing-actions">
