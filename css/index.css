@@ -89,6 +89,7 @@
     margin-top:22px; font-size:1.12rem; max-width:46ch; color:#3A3A32;
   }
   .hero-ctas{display:flex; gap:14px; margin-top:34px; flex-wrap:wrap;}
+  .hero-cta-mobile{display:none;} /* no computador o "Anunciar grátis" já está no cabeçalho */
   .hero-note{margin-top:18px; font-size:0.88rem; color:#5C5C50;}
 
   /* postcard mock */
@@ -622,6 +623,7 @@
     .hero .lede{font-size:1rem; margin-top:14px;}
     .hero-ctas{margin-top:22px; gap:10px;}
     .hero-ctas .btn{flex:1 1 100%; min-height:48px;}
+    .hero-ctas .hero-cta-mobile{display:inline-flex;}
     .hero-image-wrap{margin-top:0;}
     .hero-image{width:200px;}
 
