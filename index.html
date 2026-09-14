@@ -145,7 +145,7 @@
       <button type="button" class="report-chip" onclick="selectReportReason(this)">Já foi alugado</button>
       <button type="button" class="report-chip" onclick="selectReportReason(this)">Conteúdo impróprio</button>
     </div>
-    <textarea id="reportMotivo" placeholder="Conte mais detalhes (opcional se você já escolheu um motivo acima)"></textarea>
+    <textarea id="reportMotivo" maxlength="500" placeholder="Conte mais detalhes (opcional se você já escolheu um motivo acima)"></textarea>
     <p class="report-error" id="reportError"></p>
     <button type="button" class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="enviarDenuncia()">Enviar denúncia</button>
   </div>

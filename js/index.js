@@ -531,13 +531,18 @@
   async function enviarDenuncia(){
     const errorEl = document.getElementById('reportError');
     errorEl.textContent = '';
+    if (!reportAnuncioId) {
+      errorEl.textContent = 'Não foi possível identificar o anúncio. Feche e abra a denúncia de novo.';
+      return;
+    }
     const chips = Array.from(document.querySelectorAll('#reportReasons .report-chip.active')).map(c => c.textContent.trim());
     const texto = document.getElementById('reportMotivo').value.trim();
-    const motivo = [chips.join(', '), texto].filter(Boolean).join(' — ');
+    let motivo = [chips.join(', '), texto].filter(Boolean).join(' — ');
     if (!motivo) {
       errorEl.textContent = 'Escolha um motivo acima ou escreva o que está errado.';
       return;
     }
+    motivo = motivo.slice(0, 500); // o banco também limita (trigger + constraint)
     const { error } = await supabaseClient.from('denuncias').insert({ anuncio_id: reportAnuncioId, motivo });
     if (error) {
       errorEl.textContent = 'Não foi possível enviar agora. Tente de novo em instantes.';
