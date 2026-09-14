@@ -235,7 +235,13 @@
   @media (hover:none){ .carousel-arrow{display:none;} }
   .listing-info{padding:18px; display:flex; flex-direction:column;}
   .listing-city{font-size:0.8rem; color:var(--teal); font-weight:600; letter-spacing:0.01em;}
-  .listing-title{font-family:'Fraunces', serif; font-weight:600; font-size:1.12rem; margin-top:6px; color:var(--pine-dark); line-height:1.25;}
+  .listing-title{
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.12rem; margin-top:6px; color:var(--pine-dark); line-height:1.25;
+    /* no card: no máximo 2 linhas, quebra equilibrada (sem palavra sozinha na 2ª linha) */
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;
+    text-wrap:balance; overflow-wrap:anywhere;
+  }
+  .detail-title{text-wrap:balance; overflow-wrap:anywhere;}
   .listing-meta{font-size:0.87rem; color:#5C5C50; margin-top:6px;}
   .listing-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
   .listing-foot{

@@ -68,3 +68,19 @@ function tituloJaTemTipo(titulo, tipo){
   const t = norm(titulo);
   return !!tipo && (t.includes(norm(tipoImovelLabel(tipo))) || t.includes(norm(tipo)));
 }
+
+// Tira do fim do título o local que o anúncio já mostra em cima (ex: "Quarto compartilhado em Dublin 3"),
+// pra não repetir. Só mexe na exibição; o título salvo no banco não muda.
+function tituloSemLocal(titulo, item){
+  const t = String(titulo || '').trim();
+  const cidade = String(item.cidade || '').trim();
+  const distrito = String(item.distrito || '').trim();
+  const locais = [cidade && distrito ? cidade + ' ' + distrito : '', distrito, cidade].filter(Boolean);
+  for (const local of locais) {
+    const sufixo = ' em ' + local;
+    if (t.length > sufixo.length && t.toLowerCase().endsWith(sufixo.toLowerCase())) {
+      return t.slice(0, t.length - sufixo.length).trim();
+    }
+  }
+  return t;
+}

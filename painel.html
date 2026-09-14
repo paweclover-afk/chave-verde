@@ -211,8 +211,9 @@
           <div></div>
         </div>
         <label>Título do anúncio
-          <input type="text" id="f_titulo" required placeholder="Ex: Quarto individual em Dublin 6">
-          <span class="field-hint">A gente sugere um título quando você escolhe o tipo e o local — pode mudar à vontade. Dica: acrescente o diferencial, ex: perto do Luas, com varanda.</span>
+          <input type="text" id="f_titulo" required maxlength="60" placeholder="Ex: Quarto individual perto do Luas">
+          <span class="titulo-contador" id="f_titulo_contador" aria-live="polite"></span>
+          <span class="field-hint">O bairro já aparece no anúncio, não precisa repetir. Dica: acrescente o diferencial, ex: Quarto compartilhado perto do Luas.</span>
         </label>
         <div class="form-row">
           <label>Gênero
@@ -416,8 +417,9 @@
         <div></div>
       </div>
       <label>Título do anúncio
-        <input type="text" id="el_titulo" required placeholder="Ex: Quarto individual em Dublin 6">
-        <span class="field-hint">A gente sugere um título quando você escolhe o tipo e o local — pode mudar à vontade. Dica: acrescente o diferencial, ex: perto do Luas, com varanda.</span>
+        <input type="text" id="el_titulo" required maxlength="60" placeholder="Ex: Quarto individual perto do Luas">
+        <span class="titulo-contador" id="el_titulo_contador" aria-live="polite"></span>
+        <span class="field-hint">O bairro já aparece no anúncio, não precisa repetir. Dica: acrescente o diferencial, ex: Quarto compartilhado perto do Luas.</span>
       </label>
       <div class="form-row">
         <label>Gênero

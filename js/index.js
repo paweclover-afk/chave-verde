@@ -224,7 +224,7 @@
         ${renderCardPhotoArea(item, fotos)}
         <div class="listing-info">
           <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
-          <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(item.titulo)}</h3>
+          <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(tituloSemLocal(item.titulo, item))}</h3>
           ${renderAnunciante(item)}
           ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade">${formatDisponibilidade(item)}</p>` : ''}
           ${tipo || badge || genero ? `<div class="listing-tags">${tipo}${badge}${genero}</div>` : ''}
@@ -481,7 +481,7 @@
       </div>
       <div>
         <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
-        <h2 class="detail-title">${escapeHtml(item.titulo)}</h2>
+        <h2 class="detail-title">${escapeHtml(tituloSemLocal(item.titulo, item))}</h2>
         <div class="detail-tags">${tipo}${badge}${genero}</div>
         ${renderAnunciante(item)}
         ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade" style="margin-top:12px;">${formatDisponibilidade(item)}</p>` : ''}
