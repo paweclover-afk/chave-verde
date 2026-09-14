@@ -47,3 +47,24 @@ function formatDisponibilidade(item){
 function isDestacado(item){
   return !!item.destaque_ate && new Date(item.destaque_ate) > new Date();
 }
+
+// Tipo de imóvel: valor salvo no banco -> nome mostrado nas telas
+const TIPO_IMOVEL_LABEL = {
+  'Individual': 'Quarto individual',
+  'Compartilhado': 'Quarto compartilhado',
+  'Studio': 'Studio',
+  'Casa inteira': 'Casa inteira',
+  'Apartamento inteiro': 'Apartamento inteiro'
+};
+
+function tipoImovelLabel(tipo){
+  return TIPO_IMOVEL_LABEL[tipo] || tipo || '';
+}
+
+// true se o título já diz o tipo (ex: "Quarto individual em Rathmines" com tipo Individual), pra não repetir
+function tituloJaTemTipo(titulo, tipo){
+  // tira acentos e deixa minúsculo (códigos 768-879 são os acentos soltos depois do normalize)
+  const norm = s => [...String(s || '').normalize('NFD')].filter(ch => { const n = ch.charCodeAt(0); return n < 768 || n > 879; }).join('').toLowerCase();
+  const t = norm(titulo);
+  return !!tipo && (t.includes(norm(tipoImovelLabel(tipo))) || t.includes(norm(tipo)));
+}

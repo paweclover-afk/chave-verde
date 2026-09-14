@@ -368,6 +368,34 @@
     updateWhatsappPreview('f', false);
   }
 
+  // ======= TÍTULO SUGERIDO (tipo + local) =======
+  function localDoAnuncio(prefix){
+    const cidade = document.getElementById(prefix + '_cidade').value;
+    const distrito = (getDistritoValue(prefix) || '').trim();
+    if (cidade === 'Dublin') return distrito ? 'Dublin ' + distrito : 'Dublin';
+    if (distrito) return distrito;
+    return cidade && cidade !== 'Outra' ? cidade : '';
+  }
+
+  // Só preenche se o título estiver vazio ou ainda for a nossa sugestão (nunca apaga o que a pessoa escreveu)
+  function sugerirTitulo(prefix){
+    const input = document.getElementById(prefix + '_titulo');
+    const tipo = document.getElementById(prefix + '_tipo_quarto').value;
+    const atual = input.value.trim();
+    if (!tipo || (atual && atual !== input.dataset.sugerido)) return;
+    const local = localDoAnuncio(prefix);
+    const sugestao = tipoImovelLabel(tipo) + (local ? ' em ' + local : '');
+    input.value = sugestao;
+    input.dataset.sugerido = sugestao;
+  }
+
+  ['f', 'el'].forEach(prefix => {
+    ['_tipo_quarto', '_cidade', '_distrito_dublin'].forEach(campo => {
+      document.getElementById(prefix + campo).addEventListener('change', () => sugerirTitulo(prefix));
+    });
+    document.getElementById(prefix + '_distrito_outro').addEventListener('input', () => sugerirTitulo(prefix));
+  });
+
   toggleDistritoField('f');
   updateWhatsappPreview('f', false);
 
@@ -688,6 +716,7 @@
     if (!item) return;
     editingListingRecordId = id;
     document.getElementById('el_titulo').value = item.titulo || '';
+    document.getElementById('el_titulo').dataset.sugerido = '';
     document.getElementById('el_cidade').value = item.cidade || 'Dublin';
     toggleDistritoField('el');
     setDistritoValue('el', item.cidade || 'Dublin', item.distrito);

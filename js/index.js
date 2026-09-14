@@ -217,6 +217,7 @@
     listingsCache[item.id] = item;
     const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem PPS</span>' : '';
     const genero = item.genero ? `<span class="postcard-tag">${escapeHtml(item.genero)}</span>` : '';
+    const tipo = item.tipo_quarto && !tituloJaTemTipo(item.titulo, item.tipo_quarto) ? `<span class="postcard-tag">${escapeHtml(tipoImovelLabel(item.tipo_quarto))}</span>` : '';
     const fotos = getFotosArray(item);
     return `
       <article class="listing-card">
@@ -224,10 +225,9 @@
         <div class="listing-info">
           <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
           <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(item.titulo)}</h3>
-          <p class="listing-meta">${escapeHtml(item.tipo_quarto)}</p>
           ${renderAnunciante(item)}
           ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade">${formatDisponibilidade(item)}</p>` : ''}
-          ${badge || genero ? `<div class="listing-tags">${badge}${genero}</div>` : ''}
+          ${tipo || badge || genero ? `<div class="listing-tags">${tipo}${badge}${genero}</div>` : ''}
           <div class="listing-foot">
             <span class="listing-price">€${formatEuro(item.valor)} <small>/mês</small></span>
           </div>
@@ -469,6 +469,7 @@
     detailFotos = fotos;
     const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem PPS</span>' : '';
     const genero = item.genero ? `<span class="postcard-tag">${escapeHtml(item.genero)}</span>` : '';
+    const tipo = item.tipo_quarto && !tituloJaTemTipo(item.titulo, item.tipo_quarto) ? `<span class="postcard-tag">${escapeHtml(tipoImovelLabel(item.tipo_quarto))}</span>` : '';
     const thumbs = fotos.map((url, i) => `
       <div class="detail-thumb${i === 0 ? ' active' : ''}" data-index="${i}" onclick="selectDetailThumb(this, ${i})"></div>
     `).join('');
@@ -481,8 +482,7 @@
       <div>
         <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
         <h2 class="detail-title">${escapeHtml(item.titulo)}</h2>
-        <p class="detail-meta">${escapeHtml(item.tipo_quarto)}</p>
-        <div class="detail-tags">${badge}${genero}</div>
+        <div class="detail-tags">${tipo}${badge}${genero}</div>
         ${renderAnunciante(item)}
         ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade" style="margin-top:12px;">${formatDisponibilidade(item)}</p>` : ''}
         ${item.descricao ? `<p class="detail-desc">${escapeHtml(item.descricao)}</p>` : ''}
