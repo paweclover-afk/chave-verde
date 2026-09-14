@@ -222,7 +222,7 @@
       <article class="listing-card">
         ${renderCardPhotoArea(item, fotos)}
         <div class="listing-info">
-          <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}</p>
+          <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
           <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(item.titulo)}</h3>
           <p class="listing-meta">${escapeHtml(item.tipo_quarto)}</p>
           ${renderAnunciante(item)}
@@ -479,7 +479,7 @@
         ${fotos.length > 1 ? `<div class="detail-thumbs">${thumbs}</div>` : ''}
       </div>
       <div>
-        <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}</p>
+        <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
         <h2 class="detail-title">${escapeHtml(item.titulo)}</h2>
         <p class="detail-meta">${escapeHtml(item.tipo_quarto)}</p>
         <div class="detail-tags">${badge}${genero}</div>
