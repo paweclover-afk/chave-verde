@@ -108,7 +108,7 @@
     const { data, error } = await supabaseClient.auth.signUp({
       email,
       password,
-      options: { data: { nome: nome, whatsapp: whatsapp, tipo_usuario: tipoUsuario } }
+      options: { data: { nome: formatarNome(nome), whatsapp: whatsapp, tipo_usuario: tipoUsuario } }
     });
     if (error) {
       errorEl.textContent = 'Não foi possível criar a conta: ' + error.message;
@@ -445,14 +445,14 @@
 
     const payload = {
       user_id: user.id,
-      nome: user.user_metadata?.nome || '',
+      nome: formatarNome(user.user_metadata?.nome || ''),
       whatsapp: getWhatsappValue('f'),
       cidade: document.getElementById('f_cidade').value,
       distrito: getDistritoValue('f'),
-      titulo: document.getElementById('f_titulo').value,
+      titulo: formatarTitulo(document.getElementById('f_titulo').value),
       tipo_quarto: document.getElementById('f_tipo_quarto').value,
       valor: parseFloat(document.getElementById('f_valor').value) || 0,
-      eircode: document.getElementById('f_eircode').value,
+      eircode: formatarEircode(document.getElementById('f_eircode').value),
       genero: document.getElementById('f_genero').value,
       aceita_sem_pps: document.getElementById('f_aceita_sem_pps').checked,
       disponivel_de: document.getElementById('f_lancamento_futuro').checked ? (document.getElementById('f_disponivel_de').value || null) : null,
@@ -757,10 +757,10 @@
       return false;
     }
     const payload = {
-      titulo: document.getElementById('el_titulo').value,
+      titulo: formatarTitulo(document.getElementById('el_titulo').value),
       cidade: document.getElementById('el_cidade').value,
       distrito: getDistritoValue('el'),
-      eircode: document.getElementById('el_eircode').value,
+      eircode: formatarEircode(document.getElementById('el_eircode').value),
       tipo_quarto: document.getElementById('el_tipo_quarto').value,
       valor: parseFloat(document.getElementById('el_valor').value) || 0,
       genero: document.getElementById('el_genero').value,

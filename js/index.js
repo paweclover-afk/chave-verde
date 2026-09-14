@@ -72,7 +72,7 @@
     const { data, error } = await supabaseClient.auth.signUp({
       email,
       password,
-      options: { data: { nome: nome, whatsapp: whatsapp, tipo_usuario: tipoUsuario } }
+      options: { data: { nome: formatarNome(nome), whatsapp: whatsapp, tipo_usuario: tipoUsuario } }
     });
     if (error) {
       errorEl.textContent = 'Não foi possível criar a conta: ' + error.message;
@@ -161,7 +161,7 @@
 
   function whatsappLink(item){
     const digits = (item.whatsapp || '').replace(/\D/g, '');
-    const msg = encodeURIComponent(`Oi! Vi seu anúncio "${item.titulo || ''}" no Chave Verde e queria saber mais informações.`);
+    const msg = encodeURIComponent(`Oi! Vi seu anúncio "${formatarTitulo(item.titulo)}" no Chave Verde e queria saber mais informações.`);
     return `https://wa.me/${digits}?text=${msg}`;
   }
 
@@ -176,12 +176,14 @@
     return new Date(item.disponivel_de + 'T00:00:00') > hoje;
   }
 
-  function renderAnunciante(item){
+  // No card só o primeiro nome; na página do anúncio (completo = true) o nome inteiro
+  function renderAnunciante(item, completo){
     if (!item.nome) return '';
+    const nome = completo ? formatarNome(item.nome) : primeiroNome(item.nome);
     const verificado = verificadoUserIds.has(item.user_id)
       ? `<svg class="verified-icon" viewBox="0 0 20 20" fill="none" aria-label="Anunciante verificado pela equipe Chave Verde"><title>Anunciante verificado pela equipe Chave Verde</title><circle cx="10" cy="10" r="9" fill="var(--sun)"/><path d="M6 10.3l2.6 2.6L14 7.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
       : '';
-    return `<p class="listing-anunciante">Anunciado por ${escapeHtml(item.nome)}${verificado}</p>`;
+    return `<p class="listing-anunciante">Anunciado por ${escapeHtml(nome)}${verificado}</p>`;
   }
 
   function renderCardPhotoArea(item, fotos){
@@ -223,8 +225,8 @@
       <article class="listing-card">
         ${renderCardPhotoArea(item, fotos)}
         <div class="listing-info">
-          <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
-          <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(tituloSemLocal(item.titulo, item))}</h3>
+          <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(formatarEircode(item.eircode)) : ''}</p>
+          <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(formatarTitulo(tituloSemLocal(item.titulo, item)))}</h3>
           ${renderAnunciante(item)}
           ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade">${formatDisponibilidade(item)}</p>` : ''}
           ${tipo || badge || genero ? `<div class="listing-tags">${tipo}${badge}${genero}</div>` : ''}
@@ -480,10 +482,10 @@
         ${fotos.length > 1 ? `<div class="detail-thumbs">${thumbs}</div>` : ''}
       </div>
       <div>
-        <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
-        <h2 class="detail-title">${escapeHtml(tituloSemLocal(item.titulo, item))}</h2>
+        <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(formatarEircode(item.eircode)) : ''}</p>
+        <h2 class="detail-title">${escapeHtml(formatarTitulo(tituloSemLocal(item.titulo, item)))}</h2>
         <div class="detail-tags">${tipo}${badge}${genero}</div>
-        ${renderAnunciante(item)}
+        ${renderAnunciante(item, true)}
         ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade" style="margin-top:12px;">${formatDisponibilidade(item)}</p>` : ''}
         ${item.descricao ? `<p class="detail-desc">${escapeHtml(item.descricao)}</p>` : ''}
         <p class="detail-price">€${formatEuro(item.valor)} <span>/mês</span></p>

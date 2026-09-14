@@ -84,3 +84,45 @@ function tituloSemLocal(titulo, item){
   }
   return t;
 }
+
+// ======= MAIÚSCULAS / MINÚSCULAS (formata pra exibir e ao salvar) =======
+const PARTICULAS_NOME = ['de', 'da', 'do', 'das', 'dos', 'e', 'di', 'du', 'van', 'von'];
+const NOMES_PROPRIOS = { dublin: 'Dublin', cork: 'Cork', galway: 'Galway', limerick: 'Limerick', irlanda: 'Irlanda', luas: 'Luas', dart: 'DART', pps: 'PPS' };
+
+function capitalizar(palavra){
+  return palavra ? palavra.charAt(0).toLocaleUpperCase('pt-BR') + palavra.slice(1) : '';
+}
+
+function juntarEspacos(texto){
+  return String(texto || '').trim().split(' ').filter(Boolean).join(' ');
+}
+
+// "adilson mariano batista" -> "Adilson Mariano Batista"; "JOÃO DA SILVA" -> "João da Silva"
+function formatarNome(nome){
+  return juntarEspacos(nome).toLocaleLowerCase('pt-BR').split(' ').map((palavra, i) => {
+    if (i > 0 && PARTICULAS_NOME.includes(palavra)) return palavra;
+    return palavra.split('-').map(parte => parte.split("'").map(capitalizar).join("'")).join('-');
+  }).join(' ');
+}
+
+// Só o primeiro nome, pro card ficar curto ("Adilson")
+function primeiroNome(nome){
+  return formatarNome(nome).split(' ')[0] || '';
+}
+
+// Título: TUDO EM MAIÚSCULAS vira frase normal, sempre começa com maiúscula e nomes de lugar ficam certos
+function formatarTitulo(titulo){
+  let t = juntarEspacos(titulo);
+  const letras = t.split('').filter(ch => ch.toLocaleLowerCase('pt-BR') !== ch.toLocaleUpperCase('pt-BR'));
+  const maiusculas = letras.filter(ch => ch === ch.toLocaleUpperCase('pt-BR')).length;
+  if (letras.length >= 4 && maiusculas / letras.length > 0.8) t = t.toLocaleLowerCase('pt-BR');
+  t = t.split(' ').map(palavra => NOMES_PROPRIOS[palavra.toLocaleLowerCase('pt-BR')] || palavra).join(' ');
+  return capitalizar(t);
+}
+
+// "d060766" -> "D06 0766"
+function formatarEircode(eircode){
+  const original = juntarEspacos(eircode).toLocaleUpperCase('pt-BR');
+  const limpo = original.split('').filter(ch => (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')).join('');
+  return limpo.length === 7 ? limpo.slice(0, 3) + ' ' + limpo.slice(3) : original;
+}
