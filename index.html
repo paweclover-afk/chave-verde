@@ -151,6 +151,20 @@
   </div>
 </div>
 
+<!-- MODAL DE AVALIACAO -->
+<div id="avaliacaoOverlay" class="report-overlay" onclick="if(event.target===this) closeAvaliacao()">
+  <div class="report-modal">
+    <button class="report-close" onclick="closeAvaliacao()" aria-label="Fechar">&times;</button>
+    <h3>Avaliar o Chave Verde</h3>
+    <p class="sub">Sua opinião ajuda outras pessoas a confiarem no site.</p>
+    <div class="estrela-picker" id="estrelaPicker" role="radiogroup" aria-label="Nota de 1 a 5 estrelas"></div>
+    <input type="text" id="avaliacaoNome" maxlength="60" placeholder="Seu nome (ex: Ana S.)" class="avaliacao-input">
+    <textarea id="avaliacaoComentario" maxlength="500" placeholder="Conte como foi sua experiência com o Chave Verde (opcional)"></textarea>
+    <p class="report-error" id="avaliacaoError"></p>
+    <button type="button" class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="enviarAvaliacao()">Enviar avaliação</button>
+  </div>
+</div>
+
 <!-- SELETOR DE CIDADE -->
 <div id="cityOverlay" class="city-overlay" onclick="if(event.target===this) closeCitySelector()">
   <div class="city-modal">
@@ -396,6 +410,20 @@
     </div>
   </section>
 
+  <!-- AVALIACOES -->
+  <section id="avaliacoes" class="listings" style="background:var(--paper);">
+    <div class="wrap" style="max-width:960px;">
+      <div class="section-head" style="text-align:center; margin-left:auto; margin-right:auto;">
+        <h2>O que dizem sobre o Chave Verde</h2>
+        <p id="avaliacoesResumo">Veja o que quem já usou está achando.</p>
+      </div>
+      <div id="avaliacoesGrid" class="avaliacoes-grid"></div>
+      <div style="text-align:center; margin-top:30px;">
+        <button class="btn btn-primary" onclick="openAvaliacao()">Deixar minha avaliação</button>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer>
@@ -411,6 +439,7 @@
         <li><a href="#como-funciona">Como funciona</a></li>
         <li><a href="#anunciar">Anunciar imóvel</a></li>
         <li><a href="#duvidas">Dúvidas</a></li>
+        <li><a href="#avaliacoes">Avaliações</a></li>
       </ul>
     </div>
     <div>

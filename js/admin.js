@@ -94,15 +94,18 @@
     document.getElementById('tabAdmins').classList.toggle('active', tab === 'admins');
     document.getElementById('tabMensagens').classList.toggle('active', tab === 'mensagens');
     document.getElementById('tabDenuncias').classList.toggle('active', tab === 'denuncias');
+    document.getElementById('tabAvaliacoes').classList.toggle('active', tab === 'avaliacoes');
     document.getElementById('panelAnuncios').style.display = tab === 'anuncios' ? 'block' : 'none';
     document.getElementById('panelUsuarios').style.display = tab === 'usuarios' ? 'block' : 'none';
     document.getElementById('panelAdmins').style.display = tab === 'admins' ? 'block' : 'none';
     document.getElementById('panelMensagens').style.display = tab === 'mensagens' ? 'block' : 'none';
     document.getElementById('panelDenuncias').style.display = tab === 'denuncias' ? 'block' : 'none';
+    document.getElementById('panelAvaliacoes').style.display = tab === 'avaliacoes' ? 'block' : 'none';
     if (tab === 'usuarios') loadUsuarios();
     if (tab === 'admins') loadAdmins();
     if (tab === 'mensagens') loadMensagens();
     if (tab === 'denuncias') loadDenuncias();
+    if (tab === 'avaliacoes') loadAvaliacoesAdmin();
   }
 
   function toggleTempoCombinar(prefix){
@@ -749,6 +752,47 @@
   async function resolverDenuncia(id){
     const { error } = await supabaseClient.from('denuncias').update({ resolvida: true }).eq('id', id);
     if (!error) loadDenuncias();
+  }
+
+  async function loadAvaliacoesAdmin(){
+    const statusEl = document.getElementById('avaliacoesAdminStatus');
+    const listEl = document.getElementById('avaliacoesAdminList');
+    try {
+      const { data, error } = await supabaseClient.from('avaliacoes').select('*').order('criado_em', { ascending: false });
+      if (error) throw error;
+      const pendentes = (data || []).filter(a => !a.aprovada).length;
+      document.getElementById('countAvaliacoesPendentes').textContent = pendentes ? '(' + pendentes + ')' : '';
+      if (!data || data.length === 0) { statusEl.textContent = 'Nenhuma avaliação por enquanto.'; listEl.innerHTML = ''; return; }
+      statusEl.textContent = '';
+      listEl.innerHTML = data.map(a => `
+        <div class="admin-card">
+          <div class="admin-card-meta">${estrelasHtml(a.nota)} · ${a.nome ? escapeHtml(a.nome) : 'Anônimo'} · ${new Date(a.criado_em).toLocaleDateString('pt-BR')} · ${a.aprovada ? '<strong style="color:#1F4D3A;">no site</strong>' : '<strong style="color:#C1502E;">pendente</strong>'}</div>
+          ${a.comentario ? `<p style="margin-top:8px; white-space:pre-wrap;">${escapeHtml(a.comentario)}</p>` : ''}
+          <div class="admin-card-actions">
+            ${a.aprovada
+              ? `<button class="btn btn-ghost btn-small" onclick="esconderAvaliacao(${a.id})">Tirar do site</button>`
+              : `<button class="btn btn-primary btn-small" onclick="aprovarAvaliacao(${a.id})">Aprovar</button>`}
+            <button class="btn btn-ghost btn-small" style="color:#C1502E;" onclick="apagarAvaliacao(${a.id})">Apagar</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      statusEl.textContent = 'Não foi possível carregar as avaliações: ' + err.message;
+    }
+  }
+  async function aprovarAvaliacao(id){
+    const { error } = await supabaseClient.from('avaliacoes').update({ aprovada: true }).eq('id', id);
+    if (!error) loadAvaliacoesAdmin();
+  }
+  async function esconderAvaliacao(id){
+    const { error } = await supabaseClient.from('avaliacoes').update({ aprovada: false }).eq('id', id);
+    if (!error) loadAvaliacoesAdmin();
+  }
+  async function apagarAvaliacao(id){
+    const ok = await confirmarAcao({ titulo: 'Apagar avaliação?', mensagem: 'Essa avaliação será removida para sempre.', textoConfirmar: 'Apagar', textoCancelar: 'Cancelar', perigo: true });
+    if (!ok) return;
+    const { error } = await supabaseClient.from('avaliacoes').delete().eq('id', id);
+    if (!error) loadAvaliacoesAdmin();
   }
 
   supabaseClient.auth.onAuthStateChange(() => refreshAuthState());

@@ -670,3 +670,21 @@
     .brand svg{width:22px; height:22px;}
     .header-anunciar{padding:9px 12px;}
   }
+  /* ---------- avaliações ---------- */
+  .estrelas{display:inline-flex; gap:2px;}
+  .estrelas .estrela{color:var(--line); font-size:1rem; line-height:1;}
+  .estrelas .estrela.cheia{color:var(--sun);}
+  #avaliacoesResumo .estrelas{vertical-align:-2px; margin-right:6px;}
+  .avaliacoes-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:10px;}
+  @media (max-width:880px){ .avaliacoes-grid{grid-template-columns:1fr;} }
+  .avaliacao-card{background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px; box-shadow:4px 4px 0 var(--pine-dark);}
+  .avaliacao-card .estrelas .estrela{font-size:1.05rem;}
+  .avaliacao-texto{margin-top:10px; font-size:0.96rem; color:#3A3A32; line-height:1.5; white-space:pre-wrap;}
+  .avaliacao-nome{margin-top:12px; font-size:0.85rem; font-weight:600; color:var(--pine-dark);}
+  .estrela-picker{display:flex; gap:6px; justify-content:center; margin:8px 0 16px;}
+  .estrela-btn{background:none; border:none; cursor:pointer; font-size:2rem; line-height:1; color:var(--line); padding:2px 4px;}
+  .estrela-btn.ativa{color:var(--sun);}
+  .avaliacao-input{width:100%; font-family:'Work Sans',sans-serif; font-size:1rem; padding:11px 12px; border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink); margin-bottom:10px;}
+  .avaliacao-input:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  #avaliacaoComentario{width:100%; font-family:'Work Sans',sans-serif; font-size:1rem; padding:11px 12px; border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink); resize:vertical; min-height:90px;}
+  #avaliacaoComentario:focus{outline:2px solid var(--teal); outline-offset:1px;}

@@ -222,3 +222,6 @@
   .edit-fotos-add{margin-top:18px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
 
   .empty-state{color:#5C5C50; padding:20px 0;}
+  .estrelas{display:inline-flex; gap:2px; vertical-align:-2px;}
+  .estrelas .estrela{color:var(--line,rgba(27,42,30,0.14)); font-size:1rem; line-height:1;}
+  .estrelas .estrela.cheia{color:var(--sun,#E8A33D);}

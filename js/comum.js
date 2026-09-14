@@ -273,3 +273,11 @@ function confirmarAcao(opts){
     btnCancel.focus();
   });
 }
+
+// ======= ESTRELAS (avaliações) =======
+function estrelasHtml(nota){
+  const n = Math.max(0, Math.min(5, Math.round(Number(nota) || 0)));
+  let s = '';
+  for (let i = 1; i <= 5; i++) s += '<span class="estrela' + (i <= n ? ' cheia' : '') + '">\u2605</span>';
+  return '<span class="estrelas" role="img" aria-label="' + n + ' de 5 estrelas">' + s + '</span>';
+}

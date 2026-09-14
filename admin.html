@@ -91,6 +91,7 @@
         <button class="admin-tab" id="tabAdmins" onclick="switchAdminTab('admins')">Administradores</button>
         <button class="admin-tab" id="tabMensagens" onclick="switchAdminTab('mensagens')">Mensagens <span id="countMensagensNaoLidas"></span></button>
         <button class="admin-tab" id="tabDenuncias" onclick="switchAdminTab('denuncias')">Denúncias <span id="countDenunciasAbertas"></span></button>
+        <button class="admin-tab" id="tabAvaliacoes" onclick="switchAdminTab('avaliacoes')">Avaliações <span id="countAvaliacoesPendentes"></span></button>
       </div>
 
       <!-- PAINEL ANÚNCIOS -->
@@ -156,6 +157,13 @@
         <h3 style="font-size:1.02rem; margin-bottom:14px;">Sugestões dos anunciantes</h3>
         <div id="mensagensStatus" class="empty-state">Carregando...</div>
         <div id="mensagensList" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+
+      <!-- PAINEL AVALIAÇÕES -->
+      <div id="panelAvaliacoes" style="display:none;">
+        <h3 style="font-size:1.02rem; margin-bottom:14px;">Avaliações do site</h3>
+        <div id="avaliacoesAdminStatus" class="empty-state">Carregando...</div>
+        <div id="avaliacoesAdminList" style="display:flex; flex-direction:column; gap:12px;"></div>
       </div>
 
       <!-- PAINEL DENÚNCIAS -->

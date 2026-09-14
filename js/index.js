@@ -635,8 +635,71 @@
   updateCityPill(savedCity);
   updateAuthUI();
   loadVerificados().then(() => loadPublicListings(savedCity));
+  loadAvaliacoes();
 
   // A janela de cidade não abre sozinha: quem chega vê todas as cidades e troca pelo botão "Trocar cidade".
+
+  // ======= AVALIAÇÕES DO SITE =======
+  async function loadAvaliacoes(){
+    const grid = document.getElementById('avaliacoesGrid');
+    const resumo = document.getElementById('avaliacoesResumo');
+    if (!grid) return;
+    const { data, error } = await supabaseClient
+      .from('avaliacoes').select('nome, nota, comentario, criado_em')
+      .eq('aprovada', true).order('criado_em', { ascending: false }).limit(12);
+    if (error || !data || data.length === 0) {
+      grid.innerHTML = '';
+      resumo.textContent = 'Seja a primeira pessoa a avaliar o Chave Verde.';
+      return;
+    }
+    const media = data.reduce((s, a) => s + a.nota, 0) / data.length;
+    resumo.innerHTML = estrelasHtml(Math.round(media)) + ' <strong>' + media.toFixed(1) + '</strong> · ' + data.length + ' avaliaç' + (data.length === 1 ? 'ão' : 'ões');
+    grid.innerHTML = data.map(a => `
+      <div class="avaliacao-card">
+        ${estrelasHtml(a.nota)}
+        ${a.comentario ? `<p class="avaliacao-texto">${escapeHtml(a.comentario)}</p>` : ''}
+        <p class="avaliacao-nome">${a.nome ? escapeHtml(formatarNome(a.nome)) : 'Anônimo'}</p>
+      </div>
+    `).join('');
+  }
+
+  let avaliacaoNota = 0;
+  function renderEstrelaPicker(){
+    const p = document.getElementById('estrelaPicker');
+    p.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'estrela-btn' + (i <= avaliacaoNota ? ' ativa' : '');
+      b.textContent = '\u2605';
+      b.setAttribute('aria-label', i + (i > 1 ? ' estrelas' : ' estrela'));
+      b.onclick = () => { avaliacaoNota = i; renderEstrelaPicker(); };
+      p.appendChild(b);
+    }
+  }
+  function openAvaliacao(){
+    avaliacaoNota = 0;
+    document.getElementById('avaliacaoNome').value = '';
+    document.getElementById('avaliacaoComentario').value = '';
+    document.getElementById('avaliacaoError').textContent = '';
+    renderEstrelaPicker();
+    document.getElementById('avaliacaoOverlay').classList.add('open');
+  }
+  function closeAvaliacao(){
+    document.getElementById('avaliacaoOverlay').classList.remove('open');
+  }
+  async function enviarAvaliacao(){
+    const err = document.getElementById('avaliacaoError');
+    err.textContent = '';
+    if (avaliacaoNota < 1) { err.textContent = 'Escolha de 1 a 5 estrelas.'; return; }
+    const nome = document.getElementById('avaliacaoNome').value.trim().slice(0, 60);
+    const comentario = document.getElementById('avaliacaoComentario').value.trim().slice(0, 500);
+    if (!nome) { err.textContent = 'Escreva seu nome.'; return; }
+    const { error } = await supabaseClient.from('avaliacoes').insert({ nome, nota: avaliacaoNota, comentario });
+    if (error) { err.textContent = 'Não foi possível enviar agora. Tente de novo em instantes.'; return; }
+    closeAvaliacao();
+    mostrarAviso('Obrigado pela avaliação! Ela aparece no site após uma revisão rápida.', 'sucesso');
+  }
 
   function toggleFaq(btn){
     const item = btn.closest('.faq-item');
