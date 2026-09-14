@@ -654,11 +654,16 @@
     document.getElementById('editFotosInput').value = '';
   }
 
+  let pagamentoVerificado = false;
   async function checkPaymentReturn(){
+    if (pagamentoVerificado) return;
     const params = new URLSearchParams(window.location.search);
     const anuncioPago = params.get('anuncio_pago');
     const sessionId = params.get('session_id');
     if (!anuncioPago || !sessionId) return;
+    pagamentoVerificado = true;
+    // limpa a URL já aqui (antes do await) pra uma 2ª chamada não reprocessar e duplicar o aviso
+    history.replaceState({}, '', window.location.pathname);
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
       const res = await fetch('/api/verify-payment', {
@@ -679,7 +684,6 @@
     } catch (err) {
       mostrarAviso('Erro ao confirmar pagamento: ' + err.message, 'erro');
     }
-    history.replaceState({}, '', window.location.pathname);
     loadMyListings();
   }
 
