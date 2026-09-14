@@ -126,3 +126,31 @@ function formatarEircode(eircode){
   const limpo = original.split('').filter(ch => (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')).join('');
   return limpo.length === 7 ? limpo.slice(0, 3) + ' ' + limpo.slice(3) : original;
 }
+
+// ======= FOTOS: reduz e comprime antes de enviar =======
+// Foto de celular chega com 2-5 MB; aqui vira JPEG de ~150-350 KB com o lado maior até 1600px.
+const FOTO_LADO_MAX = 1600;
+
+async function comprimirImagem(file){
+  if (!file || !file.type || !file.type.startsWith('image/') || file.type === 'image/gif') return file;
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch (e) {
+    return file; // formato que o navegador não abre (ex: HEIC): envia como veio
+  }
+  const escala = Math.min(1, FOTO_LADO_MAX / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * escala));
+  canvas.height = Math.max(1, Math.round(bitmap.height * escala));
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  if (bitmap.close) bitmap.close();
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.82));
+  if (!blob || blob.size >= file.size) return file;
+  const nome = file.name || 'foto';
+  const ponto = nome.lastIndexOf('.');
+  return new File([blob], (ponto > 0 ? nome.slice(0, ponto) : nome) + '.jpg', { type: 'image/jpeg' });
+}

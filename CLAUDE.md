@@ -26,7 +26,7 @@ vercel.json           ← cabeçalhos de segurança e Content-Security-Policy
 | Painel do anunciante: criar/editar/excluir anúncio, fotos, pagar destaque/fotos extras, feedback | `painel.html`, `js/painel.js`, `css/painel.css` |
 | Admin: moderação de anúncios, usuários, selo de verificado, admins, mensagens, denúncias | `admin.html`, `js/admin.js`, `css/admin.css` |
 | Redefinir senha (link do e-mail) | `redefinir-senha.html`, `js/redefinir-senha.js` |
-| `supabaseClient`, `escapeHtml`, `formatEuro`, `getFotosArray`, `formatDisponibilidade`, `isDestacado`, `togglePw` | `js/comum.js` |
+| `supabaseClient`, `escapeHtml`, `formatEuro`, `getFotosArray`, `formatDisponibilidade`, `isDestacado`, `togglePw`, `tipoImovelLabel`, `tituloSemLocal`, `formatarNome`/`primeiroNome`, `formatarTitulo`, `formatarEircode`, `comprimirImagem` | `js/comum.js` |
 | Checkout Stripe | `api/create-checkout-session.js` (+ `startCheckout` em `js/painel.js`) |
 | Confirmação de pagamento | `api/verify-payment.js` (+ `checkPaymentReturn` em `js/painel.js`) |
 | Ações de admin sobre usuários (service role) | `api/admin-users.js` (+ `js/admin.js`) |
@@ -43,6 +43,7 @@ Mudanças de banco: criar um novo `.sql` em `sql/` e avisar que precisa ser roda
 - Não confiar no navegador para status/pagamento: triggers no banco forçam `status = 'Pendente'` e protegem campos pagos (ver `sql/`).
 - Os scripts são clássicos (sem `type="module"`), porque as funções são chamadas por `onclick` no HTML. Por isso tudo é global:
   não redeclarar em `js/<pagina>.js` nada que já exista em `js/comum.js` (dá erro de `const` duplicada).
-- Ordem dos scripts em cada página: CDN do supabase-js → `js/comum.js` → `js/<pagina>.js`.
+- Ordem dos scripts em cada página: CDN do supabase-js (versão fixa 2.116.0) → `js/comum.js` → `js/<pagina>.js`.
+- Fotos passam por `comprimirImagem()` antes do upload (JPEG, lado maior 1600px) em `js/painel.js` e `js/admin.js`.
 - Um domínio externo novo (script, imagem, API) precisa ser liberado na CSP em `vercel.json`.
 - Rodar localmente: `python -m http.server 8080` na raiz (as rotas `/api/*` só funcionam na Vercel).

@@ -180,9 +180,10 @@
 
   async function uploadFotos(files, userId){
     const urls = [];
-    for (const file of files) {
+    for (const original of files) {
+      const file = await comprimirImagem(original);
       const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
-      const { error: upErr } = await supabaseClient.storage.from(FOTOS_BUCKET).upload(path, file);
+      const { error: upErr } = await supabaseClient.storage.from(FOTOS_BUCKET).upload(path, file, { contentType: file.type });
       if (upErr) throw upErr;
       const { data } = supabaseClient.storage.from(FOTOS_BUCKET).getPublicUrl(path);
       urls.push(data.publicUrl);

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /painel.html
+Disallow: /redefinir-senha.html
+
+Sitemap: https://chave-verde.vercel.app/sitemap.xml

@@ -117,6 +117,9 @@
   async function updateAuthUI(){
     const { data: { session } } = await supabaseClient.auth.getSession();
     const btn = document.getElementById('openAuthBtn');
+    // seção "Meus anúncios" só pra quem está logado (visitante já tem a seção "Anunciar")
+    const secaoPainel = document.getElementById('painel');
+    if (secaoPainel) secaoPainel.hidden = !session;
     if (session) {
       btn.textContent = 'Meu painel';
       btn.setAttribute('href', 'painel.html');
@@ -192,9 +195,12 @@
     if (fotos.length === 0) {
       return `<div class="listing-photo" data-id="${item.id}" style="background:linear-gradient(135deg,#DCA85C,#4C7A63);">${destaqueBadge}${futuroBadge}</div>`;
     }
-    const slides = fotos.map(url => `
+    const alt = escapeHtml(formatarTitulo(item.titulo) || 'Foto do anúncio');
+    // a 1ª imagem é a mesma foto desfocada, cobrindo as faixas pretas de fotos em pé
+    const slides = fotos.map((url, i) => `
       <div class="carousel-slide">
-        <img src="${escapeHtml(url)}" loading="lazy" alt="">
+        <img class="slide-fundo" src="${escapeHtml(url)}" loading="lazy" alt="" aria-hidden="true">
+        <img src="${escapeHtml(url)}" loading="lazy" alt="${alt} — foto ${i + 1} de ${fotos.length}">
       </div>
     `).join('');
     const dots = fotos.length > 1
@@ -226,10 +232,11 @@
         ${renderCardPhotoArea(item, fotos)}
         <div class="listing-info">
           <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(formatarEircode(item.eircode)) : ''}</p>
-          <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(formatarTitulo(tituloSemLocal(item.titulo, item)))}</h3>
+          <h3 class="listing-title"><a href="?anuncio=${item.id}#anuncios" onclick="openListingDetail(${item.id}); return false;">${escapeHtml(formatarTitulo(tituloSemLocal(item.titulo, item)))}</a></h3>
           ${renderAnunciante(item)}
           ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade">${formatDisponibilidade(item)}</p>` : ''}
           ${tipo || badge || genero ? `<div class="listing-tags">${tipo}${badge}${genero}</div>` : ''}
+          <div class="listing-spacer"></div>
           <div class="listing-foot">
             <span class="listing-price">€${formatEuro(item.valor)} <small>/mês</small></span>
           </div>
@@ -461,7 +468,8 @@
     el.style.background = '';
     const countBadge = detailFotos.length > 1 ? `<span class="detail-photo-count">${index + 1} / ${detailFotos.length}</span>` : '';
     el.innerHTML = `
-      <img src="${escapeHtml(url)}" alt="" onclick="openLightbox(${index})">
+      <img class="slide-fundo" src="${escapeHtml(url)}" alt="" aria-hidden="true">
+      <img src="${escapeHtml(url)}" alt="Foto ${index + 1} de ${detailFotos.length}" onclick="openLightbox(${index})">
       ${countBadge}
     `;
   }
@@ -550,6 +558,7 @@
 
   function updateLightboxImg(){
     document.getElementById('lightboxImg').src = detailFotos[lightboxIndex];
+    document.getElementById('lightboxImg').alt = 'Foto ' + (lightboxIndex + 1) + ' de ' + detailFotos.length;
     document.getElementById('lightboxCount').textContent = `${lightboxIndex + 1} / ${detailFotos.length}`;
   }
 
@@ -578,11 +587,18 @@
 
   async function openListingDetail(id, pushState){
     let item = listingsCache[id];
-    if (!item) {
-      const { data } = await supabaseClient.from('quartos').select('*').eq('id', id).eq('status', 'Ativo').single();
+    if (!item && Number.isInteger(id) && id > 0) {
+      // maybeSingle: anúncio inexistente/removido volta vazio em vez de erro 406
+      const { data } = await supabaseClient.from('quartos').select('*').eq('id', id).eq('status', 'Ativo').maybeSingle();
       item = data;
     }
-    if (!item) return;
+    if (!item) {
+      // link antigo ou errado: tira o ?anuncio= da barra e fica na lista
+      if (new URLSearchParams(window.location.search).has('anuncio')) {
+        history.replaceState({}, '', window.location.pathname + '#anuncios');
+      }
+      return;
+    }
     listingsCache[id] = item;
     renderListingDetail(item);
     document.getElementById('detailOverlay').classList.add('open');
@@ -615,10 +631,7 @@
   updateAuthUI();
   loadVerificados().then(() => loadPublicListings(savedCity));
 
-  const hasDeepLink = new URLSearchParams(window.location.search).has('anuncio');
-  if (!savedCity && !hasDeepLink) {
-    openCitySelector();
-  }
+  // A janela de cidade não abre sozinha: quem chega vê todas as cidades e troca pelo botão "Trocar cidade".
 
   function toggleFaq(btn){
     const item = btn.closest('.faq-item');

@@ -21,6 +21,10 @@
 <meta name="twitter:description" content="Ache seu quarto, casa ou apartamento sem enrolação — ou anuncie sem burocracia.">
 <meta name="twitter:image" content="https://chave-verde.vercel.app/assets/og-image.png">
 
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#F6F1E4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -219,14 +223,14 @@
       <div class="city-bar">
         <span class="city-pill">
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-7.2 7-12a7 7 0 10-14 0c0 4.8 7 12 7 12z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg>
-          Mostrando: <strong id="cityPillLabel">Todas as cidades</strong>
+          <strong id="cityPillLabel">Todas as cidades</strong>
           <button type="button" onclick="openCitySelector()">Trocar cidade</button>
         </span>
         <select id="distritoFilter" class="distrito-select" style="display:none;" onchange="applyDistritoFilter(this.value)">
           <option value="">Todos os distritos</option>
         </select>
         <select id="generoFilter" class="distrito-select" onchange="applyGeneroFilter(this.value)">
-          <option value="">Compartilhar com: todos</option>
+          <option value="">Gênero: todos</option>
           <option value="Misto">Misto</option>
           <option value="Só mulheres">Só mulheres</option>
           <option value="Só homens">Só homens</option>
@@ -318,7 +322,7 @@
   </section>
 
   <!-- MEUS ANUNCIOS (redireciona pro painel dedicado) -->
-  <section id="painel" class="listings" style="background:var(--paper);">
+  <section id="painel" class="listings" style="background:var(--paper);" hidden>
     <div class="wrap" style="max-width:760px; text-align:center;">
       <div class="section-head" style="margin-left:auto; margin-right:auto;">
         <h2>Meus anúncios</h2>
@@ -412,18 +416,16 @@
     <div>
       <h4>Contato</h4>
       <ul>
-        <li><a href="mailto:oi@chaveverde.ie">oi@chaveverde.ie</a></li>
-        <li><a href="#">Instagram</a></li>
+        <li><a href="painel.html">Enviar sugestão ou dúvida</a></li>
       </ul>
     </div>
   </div>
   <div class="wrap foot-bottom">
     <span>© 2026 Chave Verde. Feito com carinho em Dublin.</span>
-    <span>Site em fase de validação — feedback é bem-vindo.</span>
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
 <script src="js/comum.js"></script>
 <script src="js/index.js"></script>
 
