@@ -230,12 +230,16 @@
             <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse imóvel.</p>
           </div>
         </div>
-        <label style="flex-direction:row; align-items:center; gap:8px;">
-          <input type="checkbox" id="f_lancamento_futuro" style="width:auto;" onchange="toggleLancamentoFuturo('f')">
-          É um lançamento futuro (ainda não está disponível)
-        </label>
-        <p style="font-size:0.78rem; color:#5C5C50; margin-top:-8px;">Deixe desmarcado se o imóvel já está disponível agora. Marque se só vai liberar mais pra frente e quer avisar quem procura.</p>
-        <div id="f_futuro_wrap" style="display:none;">
+        <div class="futuro-card" id="f_futuro_card">
+          <label class="futuro-toggle">
+            <input type="checkbox" id="f_lancamento_futuro" onchange="toggleLancamentoFuturo('f')">
+            <span class="futuro-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M12 14v3l2 1"/></svg></span>
+            <span class="futuro-texto">
+              <strong>É um lançamento futuro?</strong>
+              <span>Marque se o imóvel só fica disponível mais pra frente. O anúncio ganha o selo <em class="futuro-selo">Lançamento futuro</em> e aparece no filtro de lançamentos.</span>
+            </span>
+          </label>
+          <div id="f_futuro_wrap" class="futuro-datas" style="display:none;">
           <div class="form-row">
             <label>Disponível a partir de
               <input type="date" id="f_disponivel_de">
@@ -250,6 +254,7 @@
               </label>
             </div>
           </div>
+        </div>
         </div>
         <label>Fotos (até 5 grátis — dá pra desbloquear mais depois)
           <input type="file" id="f_fotos" accept="image/*" multiple>
@@ -429,11 +434,16 @@
           <p style="font-size:0.78rem; color:#B33A2E; font-weight:600; margin-top:6px;">Se deixar marcado, quer dizer que você não precisa de "proof of income" pra alugar esse imóvel.</p>
         </div>
       </div>
-      <label style="flex-direction:row; align-items:center; gap:8px;">
-        <input type="checkbox" id="el_lancamento_futuro" style="width:auto;" onchange="toggleLancamentoFuturo('el')">
-        É um lançamento futuro (ainda não está disponível)
-      </label>
-      <div id="el_futuro_wrap" style="display:none;">
+      <div class="futuro-card" id="el_futuro_card">
+        <label class="futuro-toggle">
+          <input type="checkbox" id="el_lancamento_futuro" onchange="toggleLancamentoFuturo('el')">
+          <span class="futuro-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M12 14v3l2 1"/></svg></span>
+          <span class="futuro-texto">
+            <strong>É um lançamento futuro?</strong>
+            <span>Marque se o imóvel só fica disponível mais pra frente. O anúncio ganha o selo <em class="futuro-selo">Lançamento futuro</em> e aparece no filtro de lançamentos.</span>
+          </span>
+        </label>
+        <div id="el_futuro_wrap" class="futuro-datas" style="display:none;">
         <div class="form-row">
           <label>Disponível a partir de
             <input type="date" id="el_disponivel_de">
@@ -448,6 +458,7 @@
             </label>
           </div>
         </div>
+      </div>
       </div>
       <label>Descrição
         <textarea id="el_descricao" rows="3"></textarea>

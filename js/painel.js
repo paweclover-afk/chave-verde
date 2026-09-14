@@ -222,6 +222,8 @@
   function toggleLancamentoFuturo(prefix){
     const futuro = document.getElementById(prefix + '_lancamento_futuro').checked;
     document.getElementById(prefix + '_futuro_wrap').style.display = futuro ? 'block' : 'none';
+    const card = document.getElementById(prefix + '_futuro_card');
+    if (card) card.classList.toggle('ativo', futuro);
     if (!futuro) {
       document.getElementById(prefix + '_disponivel_de').value = '';
       document.getElementById(prefix + '_disponivel_ate').value = '';
