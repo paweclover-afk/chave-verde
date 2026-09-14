@@ -157,6 +157,7 @@
       document.getElementById('authGate').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       logoutBtn.style.display = 'inline-flex';
+      prefillWhatsappDoCadastro(session.user);
       loadMyListings();
       checkPaymentReturn();
       const { data: adminRow } = await supabaseClient
@@ -243,28 +244,130 @@
     }
   }
 
+  // ======= WHATSAPP: limpeza, validação e prévia do número =======
+  const WHATSAPP_PAISES = {
+    '+353': { min: 9,  max: 9,  inicio: /^8/,     exemplo: '85 123 4567',   grupos: [2, 3, 4], dica: 'na Irlanda o celular tem 9 dígitos e começa com 8, ex: 85 123 4567' },
+    '+55':  { min: 10, max: 11, inicio: /^[1-9]/, exemplo: '31 99999 8888', grupos: [2, 5, 4], dica: 'no Brasil é DDD + número (10 ou 11 dígitos), ex: 31 99999 8888' },
+    '+351': { min: 9,  max: 9,  inicio: /^9/,     exemplo: '912 345 678',   grupos: [3, 3, 3], dica: 'em Portugal o celular tem 9 dígitos e começa com 9, ex: 912 345 678' },
+    '+44':  { min: 10, max: 10, inicio: /^7/,     exemplo: '7400 123456',   grupos: [4, 6],    dica: 'no Reino Unido o celular tem 10 dígitos e começa com 7, ex: 7400 123456' }
+  };
+
+  // Tira espaços/traços, o 0 da frente e o código do país repetido (quando a pessoa cola o número inteiro)
+  function limparNumeroWhatsapp(pais, valor){
+    let digits = String(valor || '').replace(/\D/g, '');
+    if (!pais) return digits.replace(/^00/, '');
+    const code = pais.slice(1);
+    if (digits.startsWith('00' + code)) digits = digits.slice(2 + code.length);
+    else if (digits.startsWith(code) && digits.length > WHATSAPP_PAISES[pais].max) digits = digits.slice(code.length);
+    return digits.replace(/^0+/, '');
+  }
+
+  function validarWhatsapp(pais, digits){
+    if (!digits) return 'Digite seu número de WhatsApp.';
+    if (!pais) {
+      return digits.length >= 8 && digits.length <= 15 ? '' : 'Confere o número: digite o número completo com o código do país, ex: 1 555 123 4567.';
+    }
+    const cfg = WHATSAPP_PAISES[pais];
+    const ok = digits.length >= cfg.min && digits.length <= cfg.max && cfg.inicio.test(digits);
+    return ok ? '' : 'Confere o número: ' + cfg.dica + '.';
+  }
+
+  function formatarWhatsapp(pais, digits){
+    const cfg = WHATSAPP_PAISES[pais];
+    if (!cfg) return '+' + digits;
+    const grupos = pais === '+55' && digits.length === 10 ? [2, 4, 4] : cfg.grupos;
+    const partes = [];
+    let i = 0;
+    for (const g of grupos) {
+      if (i >= digits.length) break;
+      partes.push(digits.slice(i, i + g));
+      i += g;
+    }
+    if (i < digits.length) partes.push(digits.slice(i));
+    return pais + ' ' + partes.join(' ');
+  }
+
+  // Mostra embaixo do campo o número final + link pra testar. Erro só aparece ao sair do campo ou ao publicar.
+  function updateWhatsappPreview(prefix, mostrarErro){
+    const pais = document.getElementById(prefix + '_whatsapp_pais').value;
+    const input = document.getElementById(prefix + '_whatsapp_numero');
+    const el = document.getElementById(prefix + '_whatsapp_preview');
+    const cfg = WHATSAPP_PAISES[pais];
+    input.placeholder = 'Ex: ' + (cfg ? cfg.exemplo : '1 555 123 4567');
+    const digits = limparNumeroWhatsapp(pais, input.value);
+    const erro = validarWhatsapp(pais, digits);
+    el.className = 'wa-preview';
+    el.textContent = '';
+    if (!digits) {
+      el.textContent = cfg ? 'Pode digitar do seu jeito, com ou sem o 0 na frente.' : 'Digite o número completo, com o código do país.';
+    } else if (erro) {
+      if (mostrarErro) {
+        el.classList.add('wa-preview-erro');
+        el.textContent = erro;
+      } else {
+        el.textContent = 'Número: ' + formatarWhatsapp(pais, digits);
+      }
+    } else {
+      const numero = document.createElement('strong');
+      numero.textContent = formatarWhatsapp(pais, digits);
+      const teste = document.createElement('a');
+      teste.href = 'https://wa.me/' + (pais ? pais.slice(1) : '') + digits;
+      teste.target = '_blank';
+      teste.rel = 'noopener';
+      teste.textContent = 'Testar no WhatsApp';
+      el.append('Os interessados vão te chamar em: ', numero, ' · ', teste);
+    }
+    return erro;
+  }
+
+  // Ao sair do campo: deixa só os dígitos já corrigidos e avisa se estiver errado
+  function normalizeWhatsappInput(prefix){
+    const pais = document.getElementById(prefix + '_whatsapp_pais').value;
+    const input = document.getElementById(prefix + '_whatsapp_numero');
+    const digits = limparNumeroWhatsapp(pais, input.value);
+    if (digits) input.value = digits;
+    return updateWhatsappPreview(prefix, true);
+  }
+
   function getWhatsappValue(prefix){
     const pais = document.getElementById(prefix + '_whatsapp_pais').value;
-    const numero = document.getElementById(prefix + '_whatsapp_numero').value.replace(/\D/g, '');
-    return pais + numero;
+    const digits = limparNumeroWhatsapp(pais, document.getElementById(prefix + '_whatsapp_numero').value);
+    return (pais || '+') + digits;
   }
 
   function setWhatsappValue(prefix, whatsapp){
     const digits = (whatsapp || '').replace(/\D/g, '');
-    const knownCodes = ['353', '55', '351', '44'];
-    const matched = knownCodes.find(c => digits.startsWith(c));
+    const matched = Object.keys(WHATSAPP_PAISES).find(p => digits.startsWith(p.slice(1)));
     const paisSelect = document.getElementById(prefix + '_whatsapp_pais');
     const numeroInput = document.getElementById(prefix + '_whatsapp_numero');
     if (matched) {
-      paisSelect.value = '+' + matched;
-      numeroInput.value = digits.slice(matched.length);
+      paisSelect.value = matched;
+      numeroInput.value = digits.slice(matched.length - 1);
     } else {
       paisSelect.value = '';
-      numeroInput.value = whatsapp || '';
+      numeroInput.value = digits;
     }
+    updateWhatsappPreview(prefix, false);
+  }
+
+  // Preenche o WhatsApp do novo anúncio com o número informado no cadastro (só se o campo estiver vazio)
+  function prefillWhatsappDoCadastro(user){
+    const input = document.getElementById('f_whatsapp_numero');
+    const doCadastro = user?.user_metadata?.whatsapp;
+    if (!doCadastro || input.value.trim()) return;
+    const digits = String(doCadastro).replace(/\D/g, '');
+    const comCodigo = Object.keys(WHATSAPP_PAISES).find(p => digits.startsWith(p.slice(1)) && digits.length > WHATSAPP_PAISES[p].max);
+    if (comCodigo) {
+      document.getElementById('f_whatsapp_pais').value = comCodigo;
+      input.value = digits.slice(comCodigo.length - 1);
+    } else {
+      input.value = limparNumeroWhatsapp(document.getElementById('f_whatsapp_pais').value, digits);
+    }
+    updateWhatsappPreview('f', false);
   }
 
   toggleDistritoField('f');
+  updateWhatsappPreview('f', false);
 
   async function handleNovoAnuncio(event){
     event.preventDefault();
@@ -279,6 +382,14 @@
 
     if (document.getElementById('f_lancamento_futuro').checked && !document.getElementById('f_disponivel_de').value) {
       errorEl.textContent = 'Você marcou como lançamento futuro — informe a data em que o imóvel ficará disponível.';
+      return false;
+    }
+
+    // confere o WhatsApp antes de enviar fotos, pra não subir foto à toa
+    const erroWhatsapp = normalizeWhatsappInput('f');
+    if (erroWhatsapp) {
+      errorEl.textContent = erroWhatsapp;
+      document.getElementById('f_whatsapp_numero').focus();
       return false;
     }
 
@@ -327,6 +438,8 @@
     document.getElementById('novoAnuncioForm').reset();
     toggleDistritoField('f');
     toggleLancamentoFuturo('f');
+    updateWhatsappPreview('f', false);
+    prefillWhatsappDoCadastro(user);
     loadMyListings();
     return false;
   }
@@ -602,6 +715,12 @@
     event.preventDefault();
     const errorEl = document.getElementById('editListingError');
     errorEl.textContent = '';
+    const erroWhatsapp = normalizeWhatsappInput('el');
+    if (erroWhatsapp) {
+      errorEl.textContent = erroWhatsapp;
+      document.getElementById('el_whatsapp_numero').focus();
+      return false;
+    }
     const payload = {
       titulo: document.getElementById('el_titulo').value,
       cidade: document.getElementById('el_cidade').value,

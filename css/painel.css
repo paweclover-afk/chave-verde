@@ -126,6 +126,15 @@
   }
   .form-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   .field-hint{font-size:0.8rem; font-weight:400; color:#5C5C50;}
+  /* campo de WhatsApp: país + número, com prévia do número final */
+  .wa-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .wa-row select{flex:0 0 180px;}
+  .wa-row input{flex:1 1 170px; min-width:0;}
+  .wa-preview{font-size:0.82rem; color:#5C5C50; margin-top:-8px; min-height:1.3em;}
+  .wa-preview strong{color:var(--pine-dark); white-space:nowrap;}
+  .wa-preview a{color:var(--pine-dark); font-weight:600; text-decoration:underline; white-space:nowrap;}
+  .wa-preview-erro{color:#B33A2E; font-weight:500;}
+  @media (max-width:600px){ .wa-row select, .wa-row input{flex:1 1 100%;} }
   @media (max-width:600px){ .form-row{grid-template-columns:1fr;} }
 
   /* ---------- editar anúncio ---------- */

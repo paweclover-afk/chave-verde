@@ -258,18 +258,18 @@
           <textarea id="f_descricao" rows="3"></textarea>
         </label>
         <label>Seu WhatsApp
-          <div style="display:flex; gap:8px;">
-            <select id="f_whatsapp_pais" style="flex:0 0 120px;">
-              <option value="+353">🇮🇪 +353</option>
-              <option value="+55">🇧🇷 +55</option>
-              <option value="+351">🇵🇹 +351</option>
-              <option value="+44">🇬🇧 +44</option>
-              <option value="">Outro</option>
+          <div class="wa-row">
+            <select id="f_whatsapp_pais" onchange="updateWhatsappPreview('f', false)">
+              <option value="+353">Irlanda +353</option>
+              <option value="+55">Brasil +55</option>
+              <option value="+351">Portugal +351</option>
+              <option value="+44">Reino Unido +44</option>
+              <option value="">Outro país</option>
             </select>
-            <input type="tel" id="f_whatsapp_numero" required inputmode="numeric" autocomplete="tel-national" placeholder="Ex: 851234567" style="flex:1;">
+            <input type="tel" id="f_whatsapp_numero" required inputmode="tel" autocomplete="tel-national" placeholder="Ex: 85 123 4567" aria-describedby="f_whatsapp_preview" oninput="updateWhatsappPreview('f', false)" onblur="normalizeWhatsappInput('f')">
           </div>
         </label>
-        <p style="font-size:0.78rem; color:#5C5C50; margin-top:-8px;">Escolha o país e digite o DDD + número, sem o 0 na frente. Ex: Irlanda 851234567 · Brasil 31999998888. Se escolher "Outro", digite o número completo com código do país.</p>
+        <p class="wa-preview" id="f_whatsapp_preview" aria-live="polite"></p>
         <p class="auth-error" id="novoAnuncioError"></p>
         <button type="submit" class="btn btn-primary" style="width:100%;">Publicar anúncio</button>
       </form>
@@ -453,18 +453,18 @@
         <textarea id="el_descricao" rows="3"></textarea>
       </label>
       <label>Seu WhatsApp
-        <div style="display:flex; gap:8px;">
-          <select id="el_whatsapp_pais" style="flex:0 0 120px;">
-            <option value="+353">🇮🇪 +353</option>
-            <option value="+55">🇧🇷 +55</option>
-            <option value="+351">🇵🇹 +351</option>
-            <option value="+44">🇬🇧 +44</option>
-            <option value="">Outro</option>
+        <div class="wa-row">
+          <select id="el_whatsapp_pais" onchange="updateWhatsappPreview('el', false)">
+            <option value="+353">Irlanda +353</option>
+            <option value="+55">Brasil +55</option>
+            <option value="+351">Portugal +351</option>
+            <option value="+44">Reino Unido +44</option>
+            <option value="">Outro país</option>
           </select>
-          <input type="tel" id="el_whatsapp_numero" required inputmode="numeric" autocomplete="tel-national" placeholder="Ex: 851234567" style="flex:1;">
+          <input type="tel" id="el_whatsapp_numero" required inputmode="tel" autocomplete="tel-national" placeholder="Ex: 85 123 4567" aria-describedby="el_whatsapp_preview" oninput="updateWhatsappPreview('el', false)" onblur="normalizeWhatsappInput('el')">
         </div>
       </label>
-      <p style="font-size:0.78rem; color:#5C5C50; margin-top:-8px;">Escolha o país e digite o DDD + número, sem o 0 na frente.</p>
+      <p class="wa-preview" id="el_whatsapp_preview" aria-live="polite"></p>
       <p class="auth-error" id="editListingError"></p>
       <button type="submit" class="btn btn-primary" style="width:100%;">Salvar alterações</button>
     </form>
