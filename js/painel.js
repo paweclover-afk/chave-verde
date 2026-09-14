@@ -428,8 +428,8 @@
 
     const fileInput = document.getElementById('f_fotos');
     const allFiles = Array.from(fileInput.files || []);
-    if (allFiles.length > 5) {
-      errorEl.textContent = 'Você selecionou ' + allFiles.length + ' fotos, mas o limite grátis é de 5. Publique com até 5 fotos agora — depois você pode desbloquear até 20 fotos por €5.';
+    if (allFiles.length > 10) {
+      errorEl.textContent = 'Você selecionou ' + allFiles.length + ' fotos, mas o limite grátis é de 10. Publique com até 10 fotos agora — depois você pode desbloquear até 20 fotos por €5.';
       return false;
     }
     let fotosUrls = [];
@@ -487,7 +487,7 @@
     }[item.status] || item.status;
 
     const fotosCount = getFotosArray(item).length;
-    const limiteFotos = item.fotos_extra_pagas ? 20 : 5;
+    const limiteFotos = item.fotos_extra_pagas ? 20 : 10;
     const fotosBtn = `<button class="btn btn-ghost btn-small" onclick="openEditFotos(${item.id})">Editar fotos (${fotosCount}/${limiteFotos})</button>`;
 
     const destacado = isDestacado(item);
@@ -572,7 +572,7 @@
   function renderEditFotosGrid(){
     const grid = document.getElementById('editFotosGrid');
     const emptyEl = document.getElementById('editFotosEmpty');
-    const limite = editingFotosExtraPagas ? 20 : 5;
+    const limite = editingFotosExtraPagas ? 20 : 10;
     emptyEl.style.display = editingFotos.length === 0 ? 'block' : 'none';
 
     grid.innerHTML = editingFotos.map((url, i) => `
@@ -631,7 +631,7 @@
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) { errorEl.textContent = 'Sessão expirada, entre novamente.'; return; }
 
-    const limite = editingFotosExtraPagas ? 20 : 5;
+    const limite = editingFotosExtraPagas ? 20 : 10;
     const espacoLivre = limite - editingFotos.length;
     if (espacoLivre <= 0) return;
 
