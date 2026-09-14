@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
     };
     const produto = produtos[tipoFinal];
 
-    const siteUrl = process.env.SITE_URL || 'https://chave-verde.vercel.app';
+    const siteUrl = process.env.SITE_URL || 'https://chaveverde.com';
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
