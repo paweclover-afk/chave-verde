@@ -46,7 +46,7 @@
     </nav>
     <div style="display:flex; align-items:center; gap:12px;">
       <a class="btn btn-ghost header-entrar" href="#" id="openAuthBtn" onclick="openAuth('login'); return false;">Entrar</a>
-      <a class="btn btn-primary header-anunciar" href="#" onclick="openAuth('signup'); return false;">Anunciar sem burocracia</a>
+      <a class="btn btn-primary header-anunciar" href="#" onclick="openAuth('signup'); return false;">Anunciar<span class="cta-long"> sem burocracia</span></a>
       <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Abrir menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
@@ -65,11 +65,11 @@
 
     <form id="loginForm" class="auth-form" onsubmit="return handleLogin(event)">
       <label>Email
-        <input type="email" id="loginEmail" required placeholder="seu@email.com">
+        <input type="email" id="loginEmail" required autocomplete="email" placeholder="seu@email.com">
       </label>
       <label>Senha
         <div class="pw-wrap">
-          <input type="password" id="loginPassword" required placeholder="Sua senha">
+          <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="Sua senha">
           <button type="button" class="pw-toggle" onclick="togglePw(this)" aria-label="Mostrar senha" tabindex="-1">
             <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
             <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 4.2A10.4 10.4 0 0 1 12 4c6.5 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.1 3.9"/><path d="M6.1 6.1C3.2 8 1.5 11 1.5 11S5.5 19 12 19c1 0 2-.2 2.9-.5"/></svg>
@@ -84,7 +84,7 @@
 
     <form id="signupForm" class="auth-form" style="display:none;" onsubmit="return handleSignup(event)">
       <label>Nome
-        <input type="text" id="signupNome" required placeholder="Seu nome">
+        <input type="text" id="signupNome" required autocomplete="name" placeholder="Seu nome">
       </label>
       <label>Você é
         <select id="signupTipo" required>
@@ -94,14 +94,14 @@
         </select>
       </label>
       <label>WhatsApp
-        <input type="text" id="signupWhatsapp" required placeholder="+353 ...">
+        <input type="tel" id="signupWhatsapp" required autocomplete="tel" inputmode="tel" placeholder="+353 ...">
       </label>
       <label>Email
-        <input type="email" id="signupEmail" required placeholder="seu@email.com">
+        <input type="email" id="signupEmail" required autocomplete="email" placeholder="seu@email.com">
       </label>
       <label>Senha
         <div class="pw-wrap">
-          <input type="password" id="signupPassword" required placeholder="Crie uma senha" minlength="6">
+          <input type="password" id="signupPassword" required autocomplete="new-password" placeholder="Crie uma senha" minlength="6">
           <button type="button" class="pw-toggle" onclick="togglePw(this)" aria-label="Mostrar senha" tabindex="-1">
             <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
             <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 4.2A10.4 10.4 0 0 1 12 4c6.5 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.1 3.9"/><path d="M6.1 6.1C3.2 8 1.5 11 1.5 11S5.5 19 12 19c1 0 2-.2 2.9-.5"/></svg>
@@ -116,7 +116,7 @@
     <form id="forgotForm" class="auth-form" style="display:none;" onsubmit="return handleForgotPassword(event)">
       <p style="font-size:0.9rem; color:#3A3A32; margin-bottom:2px;">Digite seu email e enviamos um link pra você criar uma senha nova.</p>
       <label>Email
-        <input type="email" id="forgotEmail" required placeholder="seu@email.com">
+        <input type="email" id="forgotEmail" required autocomplete="email" placeholder="seu@email.com">
       </label>
       <p class="auth-error" id="forgotError"></p>
       <p class="auth-note" id="forgotSuccess" style="color:var(--pine-dark); font-weight:600; min-height:1em;"></p>
@@ -201,10 +201,14 @@
         <p class="eyebrow-hero">Feito por brasileiros, pra brasileiros na Irlanda</p>
         <h1>Encontre seu quarto, casa ou apartamento sem enrolação — ou anuncie sem burocracia.</h1>
         <p class="lede">Não precisa ser landlord pra publicar aqui: estudante repassando a vaga, morador dividindo a casa ou dono do imóvel, todo mundo pode anunciar. Chega de rolar grupo de WhatsApp lotado de anúncio repetido e gente pedindo depósito antes de mostrar o lugar. Aqui são só anúncios revisados pela nossa equipe, em português, direto ao ponto.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#anuncios">Ver anúncios disponíveis</a>
+          <a class="btn btn-ghost" href="#" onclick="openAuth('signup'); return false;">Anunciar grátis</a>
+        </div>
         <p class="hero-note">Sem "proof of income"? Sem problema — filtramos quem já aceita esse perfil.</p>
       </div>
       <div class="hero-image-wrap">
-        <img src="assets/hero-chaves.png" alt="Mulher sorrindo segurando as chaves do novo lar" class="hero-image">
+        <img src="assets/hero-chaves.webp" width="590" height="525" fetchpriority="high" alt="Mulher sorrindo segurando as chaves do novo lar" class="hero-image">
       </div>
     </div>
   </section>

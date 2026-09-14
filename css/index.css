@@ -247,10 +247,11 @@
   .listing-whats-btn{
     display:flex; align-items:center; justify-content:center; gap:8px;
     width:100%; margin-top:14px; padding:10px 0; border-radius:6px;
-    background:#25D366; color:#fff; text-decoration:none;
+    min-height:44px;
+    background:#0F7A3D; color:#fff; text-decoration:none;
     font-weight:600; font-size:0.9rem; border:none; cursor:pointer;
   }
-  .listing-whats-btn:hover{filter:brightness(0.95);}
+  .listing-whats-btn:hover{background:#0B6331;}
   .listing-whats-btn svg{width:16px; height:16px; flex-shrink:0;}
 
   /* ---------- página de detalhes do anúncio ---------- */
@@ -403,7 +404,7 @@
 
   .menu-toggle{
     display:none; background:none; border:1px solid var(--line); border-radius:8px;
-    padding:7px; cursor:pointer; color:var(--pine-dark); align-items:center; justify-content:center;
+    padding:10px; cursor:pointer; color:var(--pine-dark); align-items:center; justify-content:center;
   }
   .menu-toggle svg{width:22px; height:22px;}
   .nav-mobile-only{display:none;}
@@ -472,7 +473,7 @@
     font-size:0.88rem; font-weight:600; color:var(--pine-dark);
   }
   .auth-form input, .auth-form select{
-    font-family:'Work Sans',sans-serif; font-size:0.98rem;
+    font-family:'Work Sans',sans-serif; font-size:1rem;
     padding:11px 12px; border-radius:6px; border:1px solid var(--line);
     background:#fff; color:var(--ink);
   }
@@ -552,9 +553,9 @@
   }
   .listing-disponibilidade{font-size:0.82rem; color:var(--teal); font-weight:600; margin-top:6px;}
   .report-btn{
-    display:inline-flex; align-items:center; gap:6px; margin-top:18px; background:none; border:none;
-    color:#8a8a7c; font-size:0.85rem; cursor:pointer;
-    font-family:'Work Sans',sans-serif; padding:0;
+    display:inline-flex; align-items:center; gap:6px; margin-top:6px; background:none; border:none;
+    color:#6E6E62; font-size:0.85rem; cursor:pointer;
+    font-family:'Work Sans',sans-serif; padding:12px 0; min-height:44px;
   }
   .report-btn svg{width:15px; height:15px;}
   .report-btn:hover{color:var(--clay);}
@@ -584,7 +585,7 @@
   }
   .report-chip.active{background:var(--pine-dark); color:var(--paper); border-color:var(--pine-dark);}
   .report-modal textarea{
-    width:100%; font-family:'Work Sans',sans-serif; font-size:0.95rem;
+    width:100%; font-family:'Work Sans',sans-serif; font-size:1rem;
     padding:11px 12px; border-radius:8px; border:1px solid var(--line);
     background:#fff; color:var(--ink); resize:vertical; min-height:80px;
   }
@@ -605,3 +606,42 @@
     padding:6px 14px; font-family:'Work Sans',sans-serif;
   }
   .city-pill button:hover{background:var(--pine-dark); color:var(--paper); border-color:var(--pine-dark);}
+
+  /* ---------- celular ---------- */
+  @media (max-width: 600px){
+    .wrap{padding:0 20px;}
+    .nav{padding:10px 0;}
+    .brand{font-size:1.1rem; white-space:nowrap;}
+    .brand svg{width:22px; height:22px;}
+    .cta-long{display:none;}
+    .header-anunciar{font-size:0.88rem; padding:10px 16px; min-height:44px;}
+
+    .hero{padding:28px 0 44px;}
+    .hero-grid{gap:24px;}
+    .hero h1{font-size:1.85rem; max-width:none;}
+    .hero .lede{font-size:1rem; margin-top:14px;}
+    .hero-ctas{margin-top:22px; gap:10px;}
+    .hero-ctas .btn{flex:1 1 100%; min-height:48px;}
+    .hero-image-wrap{margin-top:0;}
+    .hero-image{width:200px;}
+
+    section{padding:52px 0;}
+    .section-head{margin-bottom:24px;}
+
+    /* filtros numa linha só, com rolagem lateral */
+    .city-bar{
+      flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto;
+      margin:0 -20px 20px; padding:2px 20px 8px; scrollbar-width:none;
+    }
+    .city-bar::-webkit-scrollbar{display:none;}
+    .city-bar > *{flex:0 0 auto;}
+    .city-pill{white-space:nowrap;}
+    .city-pill button{min-height:36px;}
+    .distrito-select{font-size:16px; min-height:44px;}
+
+    .listing-photo{aspect-ratio:4/3;}
+    .listing-info{padding:16px;}
+
+    footer ul{gap:0;}
+    footer li a{display:inline-block; padding:12px 0;}
+  }

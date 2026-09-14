@@ -222,7 +222,7 @@
       <article class="listing-card">
         ${renderCardPhotoArea(item, fotos)}
         <div class="listing-info">
-          <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
+          <p class="listing-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}</p>
           <h3 class="listing-title" style="cursor:pointer;" onclick="openListingDetail(${item.id})">${escapeHtml(item.titulo)}</h3>
           <p class="listing-meta">${escapeHtml(item.tipo_quarto)}</p>
           ${renderAnunciante(item)}
@@ -470,7 +470,7 @@
     const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem PPS</span>' : '';
     const genero = item.genero ? `<span class="postcard-tag">${escapeHtml(item.genero)}</span>` : '';
     const thumbs = fotos.map((url, i) => `
-      <div class="detail-thumb${i === 0 ? ' active' : ''}" style="background-image:url('${url}')" onclick="selectDetailThumb(this, '${url}', ${i})"></div>
+      <div class="detail-thumb${i === 0 ? ' active' : ''}" data-index="${i}" onclick="selectDetailThumb(this, ${i})"></div>
     `).join('');
 
     document.getElementById('detailContent').innerHTML = `
@@ -479,7 +479,7 @@
         ${fotos.length > 1 ? `<div class="detail-thumbs">${thumbs}</div>` : ''}
       </div>
       <div>
-        <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}${item.eircode ? ' · ' + escapeHtml(item.eircode) : ''}</p>
+        <p class="detail-city">${escapeHtml(item.cidade)}${item.distrito ? ' ' + escapeHtml(item.distrito) : ''}</p>
         <h2 class="detail-title">${escapeHtml(item.titulo)}</h2>
         <p class="detail-meta">${escapeHtml(item.tipo_quarto)}</p>
         <div class="detail-tags">${badge}${genero}</div>
@@ -487,7 +487,7 @@
         ${formatDisponibilidade(item) ? `<p class="listing-disponibilidade" style="margin-top:12px;">${formatDisponibilidade(item)}</p>` : ''}
         ${item.descricao ? `<p class="detail-desc">${escapeHtml(item.descricao)}</p>` : ''}
         <p class="detail-price">€${formatEuro(item.valor)} <span>/mês</span></p>
-        <a class="btn btn-primary listing-whats-btn" style="background:#25D366; margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener">
+        <a class="btn listing-whats-btn" style="margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener">
           ${whatsIconSvg()} Falar no WhatsApp
         </a>
         <button type="button" class="report-btn" onclick="openReport(${item.id})">
@@ -496,6 +496,10 @@
         </button>
       </div>
     `;
+    // URL aplicada via JS (não interpolada no HTML) pra evitar XSS pelo campo fotos_url
+    document.querySelectorAll('#detailContent .detail-thumb').forEach(el => {
+      el.style.backgroundImage = 'url(' + JSON.stringify(fotos[Number(el.dataset.index)]) + ')';
+    });
     setDetailMainPhoto(fotos[0], 0);
   }
 
@@ -533,10 +537,10 @@
     alert('Denúncia enviada. Nossa equipe vai analisar. Obrigado por ajudar a manter o Chave Verde seguro!');
   }
 
-  function selectDetailThumb(el, url, index){
+  function selectDetailThumb(el, index){
     document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    setDetailMainPhoto(url, index);
+    setDetailMainPhoto(detailFotos[index], index);
   }
 
   // ======= VISUALIZADOR DE FOTO EM TELA CHEIA =======

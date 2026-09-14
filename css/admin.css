@@ -86,7 +86,7 @@
     font-size:0.88rem; font-weight:600; color:var(--pine-dark);
   }
   .auth-form input, .auth-form select, .auth-form textarea{
-    font-family:'Work Sans',sans-serif; font-size:0.98rem;
+    font-family:'Work Sans',sans-serif; font-size:1rem;
     padding:11px 12px; border-radius:6px; border:1px solid var(--line);
     background:#fff; color:var(--ink); width:100%;
   }
