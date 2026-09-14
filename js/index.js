@@ -549,7 +549,7 @@
       return;
     }
     closeReport();
-    alert('Denúncia enviada. Nossa equipe vai analisar. Obrigado por ajudar a manter o Chave Verde seguro!');
+    mostrarAviso('Denúncia enviada. Nossa equipe vai analisar. Obrigado por ajudar a manter o Chave Verde seguro!', 'sucesso');
   }
 
   function selectDetailThumb(el, index){

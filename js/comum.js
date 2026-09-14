@@ -154,3 +154,48 @@ async function comprimirImagem(file){
   const ponto = nome.lastIndexOf('.');
   return new File([blob], (ponto > 0 ? nome.slice(0, ponto) : nome) + '.jpg', { type: 'image/jpeg' });
 }
+
+
+// ======= AVISO (toast) — substitui os alert() feios =======
+function mostrarAviso(mensagem, tipo){
+  tipo = tipo === 'erro' ? 'erro' : 'sucesso';
+  if (!document.getElementById('aviso-estilos')) {
+    const st = document.createElement('style');
+    st.id = 'aviso-estilos';
+    st.textContent = [
+      "#avisoContainer{position:fixed;left:0;right:0;bottom:22px;z-index:200;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;padding:0 16px;}",
+      ".aviso{pointer-events:auto;max-width:440px;width:100%;display:flex;gap:12px;align-items:flex-start;background:var(--paper,#F6F1E4);color:var(--ink,#1B2A1E);border:1px solid var(--line,rgba(27,42,30,0.14));border-left:5px solid var(--sun,#E8A33D);border-radius:10px;padding:14px 16px;box-shadow:0 10px 30px rgba(27,42,30,0.18);font-family:'Work Sans',sans-serif;font-size:0.95rem;line-height:1.4;animation:avisoIn .25s ease;}",
+      ".aviso.erro{border-left-color:var(--clay,#C1502E);}",
+      ".aviso .ico{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;margin-top:1px;background:var(--pine,#1F4D3A);}",
+      ".aviso.erro .ico{background:var(--clay,#C1502E);}",
+      ".aviso .fechar{margin-left:auto;background:none;border:none;cursor:pointer;color:#8a8a7c;font-size:1.2rem;line-height:1;padding:0 2px;}",
+      "@keyframes avisoIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}",
+      "@media (prefers-reduced-motion:reduce){.aviso{animation:none;}}"
+    ].join('');
+    document.head.appendChild(st);
+  }
+  let cont = document.getElementById('avisoContainer');
+  if (!cont) {
+    cont = document.createElement('div');
+    cont.id = 'avisoContainer';
+    document.body.appendChild(cont);
+  }
+  const el = document.createElement('div');
+  el.className = 'aviso ' + tipo;
+  el.setAttribute('role', 'status');
+  const ico = document.createElement('span');
+  ico.className = 'ico';
+  ico.textContent = tipo === 'erro' ? '!' : '\u2713';
+  const txt = document.createElement('span');
+  txt.style.flex = '1';
+  txt.textContent = mensagem;
+  const btn = document.createElement('button');
+  btn.className = 'fechar';
+  btn.setAttribute('aria-label', 'Fechar');
+  btn.textContent = '\u00d7';
+  const remover = function(){ el.remove(); };
+  btn.onclick = remover;
+  el.appendChild(ico); el.appendChild(txt); el.appendChild(btn);
+  cont.appendChild(el);
+  setTimeout(remover, tipo === 'erro' ? 7000 : 5000);
+}

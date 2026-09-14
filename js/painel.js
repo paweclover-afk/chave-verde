@@ -489,6 +489,9 @@
     const fotosCount = getFotosArray(item).length;
     const limiteFotos = item.fotos_extra_pagas ? 20 : 10;
     const fotosBtn = `<button class="btn btn-ghost btn-small" onclick="openEditFotos(${item.id})">Editar fotos (${fotosCount}/${limiteFotos})</button>`;
+    const desbloquearFotosBtn = item.fotos_extra_pagas
+      ? ''
+      : `<button class="btn btn-sun btn-small" onclick="startExtraFotosCheckout(${item.id})">Desbloquear +10 fotos (€5)</button>`;
 
     const destacado = isDestacado(item);
     const destaqueLabel = destacado ? 'Renovar destaque' : 'Destacar';
@@ -512,6 +515,7 @@
           ${item.status !== 'Alugado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Alugado')">Marcar como alugado</button>` : ''}
           <button class="btn btn-ghost btn-small" onclick="openEditListing(${item.id})">Editar</button>
           ${fotosBtn}
+          ${desbloquearFotosBtn}
           ${destaqueBtn}
           <button class="btn btn-ghost btn-small btn-danger" onclick="deleteListing(${item.id})">Apagar</button>
         </div>
@@ -531,10 +535,10 @@
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert('Não foi possível iniciar o pagamento: ' + (data.error || ''));
+        mostrarAviso('Não foi possível iniciar o pagamento: ' + (data.error || ''), 'erro');
       }
     } catch (err) {
-      alert('Erro ao iniciar pagamento: ' + err.message);
+      mostrarAviso('Erro ao iniciar pagamento: ' + err.message, 'erro');
     }
   }
 
@@ -553,7 +557,7 @@
 
   async function openEditFotos(id){
     const { data, error } = await supabaseClient.from('quartos').select('fotos_url, fotos_extra_pagas').eq('id', id).single();
-    if (error || !data) { alert('Não foi possível carregar as fotos desse anúncio.'); return; }
+    if (error || !data) { mostrarAviso('Não foi possível carregar as fotos desse anúncio.', 'erro'); return; }
     editingListingId = id;
     editingFotos = getFotosArray(data);
     editingFotosExtraPagas = !!data.fotos_extra_pagas;
@@ -665,15 +669,15 @@
       const data = await res.json();
       if (data.ok) {
         if (data.tipo === 'destaque') {
-          alert('Destaque ativado! Seu anúncio vai aparecer no topo da lista da sua cidade por 2 semanas.');
+          mostrarAviso('Destaque ativado! Seu anúncio vai aparecer no topo da lista da sua cidade por 2 semanas.', 'sucesso');
         } else {
-          alert('Pagamento confirmado! Agora você pode adicionar até 20 fotos nesse anúncio.');
+          mostrarAviso('Pagamento confirmado! Agora você pode adicionar até 20 fotos nesse anúncio.', 'sucesso');
         }
       } else {
-        alert('Não foi possível confirmar o pagamento: ' + (data.error || ''));
+        mostrarAviso('Não foi possível confirmar o pagamento: ' + (data.error || ''), 'erro');
       }
     } catch (err) {
-      alert('Erro ao confirmar pagamento: ' + err.message);
+      mostrarAviso('Erro ao confirmar pagamento: ' + err.message, 'erro');
     }
     history.replaceState({}, '', window.location.pathname);
     loadMyListings();
@@ -787,7 +791,7 @@
     if (!error) {
       loadMyListings();
     } else {
-      alert('Não foi possível apagar o anúncio: ' + error.message);
+      mostrarAviso('Não foi possível apagar o anúncio: ' + error.message, 'erro');
     }
   }
 
