@@ -48,7 +48,7 @@
   }
   .nav{
     display:flex; align-items:center; justify-content:space-between;
-    padding:18px 0;
+    padding-top:18px; padding-bottom:18px; /* sem zerar a margem lateral do .wrap */
   }
   .brand{
     display:flex; align-items:center; gap:10px;
@@ -56,6 +56,7 @@
     color:var(--pine-dark); text-decoration:none;
   }
   .brand svg{width:26px; height:26px;}
+  .nav-actions{display:flex; align-items:center; gap:12px;}
   .nav-links{display:flex; align-items:center; gap:28px;}
   .nav-links a{font-size:0.95rem; text-decoration:none; color:var(--ink); opacity:0.85;}
   .nav-links a:hover{opacity:1;}
@@ -89,7 +90,6 @@
     margin-top:22px; font-size:1.12rem; max-width:46ch; color:#3A3A32;
   }
   .hero-ctas{display:flex; gap:14px; margin-top:34px; flex-wrap:wrap;}
-  .hero-cta-mobile{display:none;} /* no computador o "Anunciar grátis" já está no cabeçalho */
   .hero-note{margin-top:18px; font-size:0.88rem; color:#5C5C50;}
 
   /* postcard mock */
@@ -422,10 +422,8 @@
     .nav-links.open{display:flex;}
     .nav-links a{padding:13px 0; font-size:1rem; border-bottom:1px solid var(--line);}
     .nav-links a:last-child{border-bottom:none;}
-    .nav-mobile-only{display:block;}
     .menu-toggle{display:inline-flex;}
-    .header-entrar{display:none;}
-    .header-anunciar{font-size:0.8rem; padding:9px 12px;}
+    .header-entrar, .header-anunciar{font-size:0.85rem; padding:9px 14px;}
     .hero{padding:52px 0 64px;}
     section{padding:64px 0;}
   }
@@ -611,19 +609,16 @@
   /* ---------- celular ---------- */
   @media (max-width: 600px){
     .wrap{padding:0 20px;}
-    .nav{padding:10px 0;}
+    .nav{padding-top:10px; padding-bottom:10px;}
     .brand{font-size:1.1rem; white-space:nowrap;}
     .brand svg{width:22px; height:22px;}
-    .cta-long{display:none;}
-    .header-anunciar{font-size:0.88rem; padding:10px 16px; min-height:44px;}
+    .nav-actions{gap:6px;}
+    .header-entrar, .header-anunciar{font-size:0.82rem; padding:9px 11px; min-height:42px;}
 
     .hero{padding:28px 0 44px;}
     .hero-grid{gap:24px;}
     .hero h1{font-size:1.85rem; max-width:none;}
     .hero .lede{font-size:1rem; margin-top:14px;}
-    .hero-ctas{margin-top:22px; gap:10px;}
-    .hero-ctas .btn{flex:1 1 100%; min-height:48px;}
-    .hero-ctas .hero-cta-mobile{display:inline-flex;}
     .hero-image-wrap{margin-top:0;}
     .hero-image{width:200px;}
 
@@ -646,4 +641,13 @@
 
     footer ul{gap:0;}
     footer li a{display:inline-block; padding:12px 0;}
+  }
+
+  /* celulares pequenos: logo só com o ícone pra caber Entrar + Anunciar grátis + menu */
+  @media (max-width: 420px){
+    .brand-name{
+      position:absolute; width:1px; height:1px; overflow:hidden;
+      clip:rect(0 0 0 0); white-space:nowrap;
+    }
+    .brand svg{width:28px; height:28px;}
   }

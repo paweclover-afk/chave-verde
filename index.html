@@ -35,7 +35,7 @@
         <path d="M12 2L3 9V21H21V9L12 2Z" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
         <path d="M9 21V13H15V21" stroke="#1F4D3A" stroke-width="1.6" stroke-linejoin="round"/>
       </svg>
-      Chave Verde
+      <span class="brand-name">Chave Verde</span>
     </a>
     <nav class="nav-links" id="navLinks">
       <a href="#anuncios" onclick="closeMobileMenu()">Anúncios</a>
@@ -44,9 +44,9 @@
       <a href="#duvidas" onclick="closeMobileMenu()">Dúvidas</a>
       <a href="#" class="nav-mobile-only" onclick="closeMobileMenu(); openAuth('login'); return false;">Entrar</a>
     </nav>
-    <div style="display:flex; align-items:center; gap:12px;">
+    <div class="nav-actions">
       <a class="btn btn-ghost header-entrar" href="#" id="openAuthBtn" onclick="openAuth('login'); return false;">Entrar</a>
-      <a class="btn btn-primary header-anunciar" href="#" onclick="openAuth('signup'); return false;">Anunciar<span class="cta-long">&nbsp;grátis</span></a>
+      <a class="btn btn-primary header-anunciar" href="#" onclick="openAuth('signup'); return false;">Anunciar&nbsp;grátis</a>
       <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Abrir menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
@@ -201,10 +201,6 @@
         <p class="eyebrow-hero">Feito por brasileiros, pra brasileiros na Irlanda</p>
         <h1>Encontre seu quarto, casa ou apartamento sem enrolação — ou anuncie sem burocracia.</h1>
         <p class="lede">Não precisa ser landlord pra publicar aqui: estudante repassando a vaga, morador dividindo a casa ou dono do imóvel, todo mundo pode anunciar. Chega de rolar grupo de WhatsApp lotado de anúncio repetido e gente pedindo depósito antes de mostrar o lugar. Aqui são só anúncios revisados pela nossa equipe, em português, direto ao ponto.</p>
-        <div class="hero-ctas">
-          <a class="btn btn-primary" href="#anuncios">Ver anúncios disponíveis</a>
-          <a class="btn btn-ghost hero-cta-mobile" href="#" onclick="openAuth('signup'); return false;">Anunciar grátis</a>
-        </div>
         <p class="hero-note">Sem "proof of income"? Sem problema — filtramos quem já aceita esse perfil.</p>
       </div>
       <div class="hero-image-wrap">
