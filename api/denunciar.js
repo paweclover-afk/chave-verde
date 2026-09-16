@@ -51,6 +51,7 @@ module.exports = async (req, res) => {
 
     res.status(200).json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('denunciar:', err);
+    res.status(500).json({ error: 'Erro ao enviar a denúncia. Tente novamente.' });
   }
 };
