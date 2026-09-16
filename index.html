@@ -147,6 +147,7 @@
       <button type="button" class="report-chip" onclick="selectReportReason(this)">Conteúdo impróprio</button>
     </div>
     <textarea id="reportMotivo" maxlength="500" placeholder="Conte mais detalhes (opcional se você já escolheu um motivo acima)"></textarea>
+    <div id="reportTurnstile" style="margin-top:12px;"></div>
     <p class="report-error" id="reportError"></p>
     <button type="button" class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="enviarDenuncia()">Enviar denúncia</button>
   </div>
@@ -457,6 +458,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0" integrity="sha384-JBR+x8blGwjDRO63aHCGiZMD4VNiTR4ZUGA+N6ZKLf3zNt1fK8IBpcgPaMrxqWBp" crossorigin="anonymous"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
 <script src="js/comum.js"></script>
 <script src="js/index.js"></script>
 

@@ -510,13 +510,23 @@
     setDetailMainPhoto(fotos[0], 0);
   }
 
+  const TURNSTILE_SITE_KEY = '0x4AAAAAAE4kuQI5RCcrC277';
   let reportAnuncioId = null;
+  let reportTurnstileId = null;
   function openReport(anuncioId){
     reportAnuncioId = anuncioId;
     document.getElementById('reportMotivo').value = '';
     document.getElementById('reportError').textContent = '';
     document.querySelectorAll('#reportReasons .report-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('reportOverlay').classList.add('open');
+    // CAPTCHA invisível (Turnstile) — mantém a denúncia anônima e barra bots
+    if (window.turnstile) {
+      if (reportTurnstileId === null) {
+        reportTurnstileId = window.turnstile.render('#reportTurnstile', { sitekey: TURNSTILE_SITE_KEY });
+      } else {
+        window.turnstile.reset(reportTurnstileId);
+      }
+    }
   }
   function closeReport(){
     document.getElementById('reportOverlay').classList.remove('open');
@@ -540,13 +550,25 @@
       return;
     }
     motivo = motivo.slice(0, 500); // o banco também limita (trigger + constraint)
-    const { error } = await supabaseClient.from('denuncias').insert({ anuncio_id: reportAnuncioId, motivo });
-    if (error) {
-      errorEl.textContent = 'Não foi possível enviar agora. Tente de novo em instantes.';
+    const token = (window.turnstile && reportTurnstileId !== null) ? window.turnstile.getResponse(reportTurnstileId) : '';
+    if (!token) {
+      errorEl.textContent = 'Aguarde a verificação de segurança carregar e tente de novo.';
       return;
     }
-    closeReport();
-    mostrarAviso('Denúncia enviada. Nossa equipe vai analisar. Obrigado por ajudar a manter o Chave Verde seguro!', 'sucesso');
+    try {
+      const res = await fetch('/api/denunciar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anuncio_id: reportAnuncioId, motivo, token })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'erro');
+      closeReport();
+      mostrarAviso('Denúncia enviada. Nossa equipe vai analisar. Obrigado por ajudar a manter o Chave Verde seguro!', 'sucesso');
+    } catch (err) {
+      errorEl.textContent = 'Não foi possível enviar agora. Tente de novo em instantes.';
+      if (window.turnstile && reportTurnstileId !== null) window.turnstile.reset(reportTurnstileId);
+    }
   }
 
   function selectDetailThumb(el, index){
