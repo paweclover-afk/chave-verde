@@ -483,7 +483,7 @@
       'Ativo': 'Ativo',
       'Pausado': 'Pausado',
       'Alugado': 'Alugado',
-      'Pendente': 'Aguardando revisão'
+      'Pendente': 'Aguardando revisão (nossa equipe revisa manualmente, um por um)'
     }[item.status] || item.status;
 
     const fotosCount = getFotosArray(item).length;

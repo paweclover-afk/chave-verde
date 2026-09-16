@@ -221,7 +221,7 @@
 
   function renderPublicCard(item){
     listingsCache[item.id] = item;
-    const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem PPS</span>' : '';
+    const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem comprovante de renda</span>' : '';
     const genero = item.genero ? `<span class="postcard-tag">${escapeHtml(item.genero)}</span>` : '';
     const tipo = item.tipo_quarto && !tituloJaTemTipo(item.titulo, item.tipo_quarto) ? `<span class="postcard-tag">${escapeHtml(tipoImovelLabel(item.tipo_quarto))}</span>` : '';
     const fotos = getFotosArray(item);
@@ -474,7 +474,7 @@
   function renderListingDetail(item){
     const fotos = getFotosArray(item);
     detailFotos = fotos;
-    const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem PPS</span>' : '';
+    const badge = item.aceita_sem_pps ? '<span class="postcard-tag">Aceita sem comprovante de renda</span>' : '';
     const genero = item.genero ? `<span class="postcard-tag">${escapeHtml(item.genero)}</span>` : '';
     const tipo = item.tipo_quarto && !tituloJaTemTipo(item.titulo, item.tipo_quarto) ? `<span class="postcard-tag">${escapeHtml(tipoImovelLabel(item.tipo_quarto))}</span>` : '';
     const thumbs = fotos.map((url, i) => `
@@ -497,6 +497,7 @@
         <a class="btn listing-whats-btn" style="margin-top:20px;" href="${whatsappLink(item)}" target="_blank" rel="noopener" onclick="registrarCliqueWhats(${item.id})">
           ${whatsIconSvg()} Falar no WhatsApp
         </a>
+        <p style="font-size:0.82rem; color:#5C5C50; margin-top:10px;">⚠️ Sempre visite o imóvel antes de fechar negócio ou fazer qualquer pagamento.</p>
         <button type="button" class="report-btn" onclick="openReport(${item.id})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4a1 1 0 0 1 1-1h11l-2 4 2 4H5"/></svg>
           Denunciar este anúncio
@@ -717,7 +718,7 @@
     const { error } = await supabaseClient.from('avaliacoes').insert({ nome, nota: avaliacaoNota, comentario });
     if (error) { err.textContent = 'Não foi possível enviar agora. Tente de novo em instantes.'; return; }
     closeAvaliacao();
-    mostrarAviso('Obrigado pela avaliação! Ela aparece no site após uma revisão rápida.', 'sucesso');
+    mostrarAviso('Obrigado pela avaliação! Ela aparece no site após passar pela nossa moderação.', 'sucesso');
   }
 
   function toggleFaq(btn){
