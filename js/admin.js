@@ -119,7 +119,7 @@
 
   // ======= ANÚNCIOS =======
   let allAnuncios = [];
-  let statusFilter = 'Pendente';
+  let statusFilter = 'Ativo';
 
   function setStatusFilter(status){
     statusFilter = status;
@@ -140,8 +140,6 @@
       return;
     }
     allAnuncios = data || [];
-    const pendCount = allAnuncios.filter(a => a.status === 'Pendente').length;
-    document.getElementById('countPendente').textContent = pendCount ? `(${pendCount})` : '';
     renderAnunciosList();
   }
 
@@ -189,7 +187,6 @@
           </div>
         </div>
         <div class="admin-card-actions">
-          ${item.status === 'Pendente' ? `<button class="btn btn-primary btn-small" onclick="quickSetStatus(${item.id}, 'Ativo')">Aprovar</button>` : ''}
           ${item.status !== 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="quickSetStatus(${item.id}, 'Pausado')">Pausar</button>` : ''}
           ${item.status === 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="quickSetStatus(${item.id}, 'Ativo')">Reativar</button>` : ''}
           ${item.status !== 'Alugado' ? `<button class="btn btn-ghost btn-small" onclick="quickSetStatus(${item.id}, 'Alugado')">Marcar alugado</button>` : ''}
@@ -251,7 +248,7 @@
     document.getElementById('el_tipo_quarto').value = item.tipo_quarto || 'Individual';
     document.getElementById('el_valor').value = item.valor || 0;
     document.getElementById('el_genero').value = item.genero || '';
-    document.getElementById('el_status').value = item.status || 'Pendente';
+    document.getElementById('el_status').value = item.status === 'Pendente' ? 'Ativo' : (item.status || 'Ativo');
     document.getElementById('el_aceita_sem_pps').checked = !!item.aceita_sem_pps;
     document.getElementById('el_fotos_extra_pagas').checked = !!item.fotos_extra_pagas;
     document.getElementById('el_disponivel_de').value = item.disponivel_de || '';
@@ -429,7 +426,7 @@
     const nome = u?.nome || u?.email || 'essa conta';
     if (!confirm(jaTem
       ? `Remover o selo de verificado de "${nome}"?`
-      : `Dar o selo de verificado pra "${nome}"? Isso mostra pra quem procura que a equipe confirmou que essa pessoa é confiável.`)) return;
+      : `Dar o selo de verificado pra "${nome}"? O selo indica contato adicional com esta pessoa; não comprova o imóvel nem garante a negociação.`)) return;
     try {
       if (jaTem) {
         const { error } = await supabaseClient.from('verificados').delete().eq('user_id', id);

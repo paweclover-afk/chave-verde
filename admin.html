@@ -82,7 +82,7 @@
     <div id="dashboard" style="display:none;">
       <div class="page-head">
         <h1>Painel administrativo</h1>
-        <p>Aprove, edite e gerencie os anúncios e as contas de usuários do Chave Verde.</p>
+        <p>Gerencie anúncios publicados, denúncias e contas de usuários do Chave Verde.</p>
       </div>
 
       <div class="admin-tabs">
@@ -97,8 +97,7 @@
       <!-- PAINEL ANÚNCIOS -->
       <div id="panelAnuncios">
         <div class="filter-bar">
-          <button class="pill-btn active" data-status="Pendente" onclick="setStatusFilter('Pendente')">Pendentes <span id="countPendente"></span></button>
-          <button class="pill-btn" data-status="Ativo" onclick="setStatusFilter('Ativo')">Ativos</button>
+          <button class="pill-btn active" data-status="Ativo" onclick="setStatusFilter('Ativo')">Ativos</button>
           <button class="pill-btn" data-status="Pausado" onclick="setStatusFilter('Pausado')">Pausados</button>
           <button class="pill-btn" data-status="Alugado" onclick="setStatusFilter('Alugado')">Alugados</button>
           <button class="pill-btn" data-status="" onclick="setStatusFilter('')">Todos</button>
@@ -260,7 +259,6 @@
         </label>
         <label>Status
           <select id="el_status">
-            <option>Pendente</option>
             <option>Ativo</option>
             <option>Pausado</option>
             <option>Alugado</option>

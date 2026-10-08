@@ -382,7 +382,7 @@
     }
     select.style.display = 'inline-block';
     select.innerHTML = '<option value="">Todos os distritos</option>' +
-      distritos.map(d => `<option value="${d}">${currentCityLabel || ''} ${d}</option>`).join('');
+      distritos.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(currentCityLabel)} ${escapeHtml(d)}</option>`).join('');
     select.value = '';
   }
 

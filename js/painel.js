@@ -460,7 +460,7 @@
       disponivel_ate: document.getElementById('f_lancamento_futuro').checked && !document.getElementById('f_tempo_combinar').checked ? (document.getElementById('f_disponivel_ate').value || null) : null,
       fotos_url: fotosUrls.join('\n'),
       descricao: document.getElementById('f_descricao').value,
-      status: 'Pendente'
+      status: 'Ativo'
     };
 
     const { error } = await supabaseClient.from('quartos').insert([payload]);
@@ -475,6 +475,7 @@
     atualizarContadorTitulo('f');
     prefillWhatsappDoCadastro(user);
     loadMyListings();
+    mostrarAviso('Anúncio publicado. Ele já está visível no site.', 'sucesso');
     return false;
   }
 
@@ -483,7 +484,7 @@
       'Ativo': 'Ativo',
       'Pausado': 'Pausado',
       'Alugado': 'Alugado',
-      'Pendente': 'Aguardando revisão (normalmente em até 24 horas)'
+      'Pendente': 'Ainda não publicado (anúncio antigo)'
     }[item.status] || item.status;
 
     const fotosCount = getFotosArray(item).length;
@@ -511,6 +512,7 @@
           </div>
         </div>
         <div class="listing-actions">
+          ${item.status === 'Pendente' ? `<button class="btn btn-primary btn-small" onclick="setListingStatus(${item.id}, 'Ativo')">Publicar agora</button>` : ''}
           ${item.status !== 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Pausado')">Pausar</button>` : ''}
           ${item.status === 'Pausado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Ativo')">Reativar</button>` : ''}
           ${item.status !== 'Alugado' ? `<button class="btn btn-ghost btn-small" onclick="setListingStatus(${item.id}, 'Alugado')">Marcar como alugado</button>` : ''}
@@ -603,9 +605,8 @@
     }
   }
 
-  async function persistEditingFotos(resetStatus){
+  async function persistEditingFotos(){
     const payload = { fotos_url: editingFotos.join('\n') };
-    if (resetStatus) payload.status = 'Pendente';
     const { error } = await supabaseClient.from('quartos').update(payload).eq('id', editingListingId);
     if (error) { document.getElementById('editFotosError').textContent = 'Não foi possível salvar: ' + error.message; return false; }
     return true;
@@ -617,7 +618,7 @@
     const [item] = editingFotos.splice(index, 1);
     editingFotos.splice(newIndex, 0, item);
     renderEditFotosGrid();
-    await persistEditingFotos(false);
+    await persistEditingFotos();
   }
 
   async function removeFoto(index){
@@ -625,7 +626,7 @@
     if (!ok) return;
     editingFotos.splice(index, 1);
     renderEditFotosGrid();
-    await persistEditingFotos(false);
+    await persistEditingFotos();
   }
 
   async function addFotosToEdit(fileList){
@@ -649,7 +650,7 @@
       const novasUrls = await uploadFotos(aUsar, user.id);
       editingFotos = editingFotos.concat(novasUrls);
       renderEditFotosGrid();
-      await persistEditingFotos(true);
+      await persistEditingFotos();
     } catch (err) {
       errorEl.textContent = 'Erro ao enviar fotos: ' + err.message;
     }
@@ -719,7 +720,8 @@
 
   async function setListingStatus(id, novoStatus){
     const { error } = await supabaseClient.from('quartos').update({ status: novoStatus }).eq('id', id);
-    if (!error) { loadMyListings(); }
+    if (error) { mostrarAviso('Não foi possível alterar o anúncio: ' + error.message, 'erro'); return; }
+    loadMyListings();
   }
 
   // ======= EDITAR ANÚNCIO (título, cidade, preço, descrição etc.) =======
