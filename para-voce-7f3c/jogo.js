@@ -39,6 +39,8 @@
       button.addEventListener('click', () => {
         el('choices').querySelectorAll('button').forEach(choice => { choice.disabled = true; });
         button.classList.add('selected');
+        // A última resposta já conclui a missão, mesmo se fechar antes de continuar.
+        if (current === 6) { try { localStorage.setItem(storageKey, '7'); } catch (_) {} }
         el('reply').textContent = step.replies[index];
         el('next').hidden = false;
         el('next').focus();
