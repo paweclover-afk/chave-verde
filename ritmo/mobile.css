@@ -169,3 +169,5 @@ pre.mealtext{overflow-wrap:anywhere;word-break:normal}
 .exerciseoptions{margin:0 0 18px}.exerciseoptions>summary{min-height:48px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:13px;line-height:1.6}.exerciseoptions>summary small{display:block;font-weight:400;color:#61715e;font-size:11px;line-height:1.7;overflow-wrap:anywhere}.exerciseoptions[open]>.entryhelp{margin-top:14px}.exerciseoptions>.contextfields{margin-bottom:10px}
 
 .apploading{min-height:100dvh;display:grid;place-content:center;gap:16px;text-align:center;padding:24px}.apploading p{font-size:15px}
+
+.loadform input[type="number"]{appearance:textfield;-moz-appearance:textfield}.loadform input[type="number"]::-webkit-inner-spin-button,.loadform input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
