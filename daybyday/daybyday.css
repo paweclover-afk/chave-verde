@@ -38,3 +38,5 @@
 
 .personal-app #register{width:100%;margin-top:12px;min-height:48px}
 @media(max-width:900px){.personal-app main{padding-bottom:28px}.personal-app #app-shell>aside{padding:14px 18px}}
+
+.personal-app #recover,.personal-app #resend{width:100%;min-height:48px;margin-top:12px}
