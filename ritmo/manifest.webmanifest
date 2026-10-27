@@ -1,10 +1,10 @@
 {
  "id":"/ritmo/",
- "name":"Ritmo · DayByDay",
+ "name":"Ritmo",
  "short_name":"Ritmo",
  "description":"Sua rotina diária, treinos e refeições em um espaço privado.",
  "lang":"pt-BR",
- "start_url":"/ritmo/#daybyday",
+ "start_url":"/ritmo/",
  "scope":"/ritmo/",
  "display":"standalone",
  "background_color":"#0e1512",

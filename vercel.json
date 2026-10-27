@@ -89,6 +89,32 @@
           "value": "private, no-store, max-age=0"
         }
       ]
+    },
+    {
+      "headers": [
+        {
+          "value": "noindex, nofollow, noarchive",
+          "key": "X-Robots-Tag"
+        },
+        {
+          "value": "private, no-store, max-age=0",
+          "key": "Cache-Control"
+        }
+      ],
+      "source": "/daybyday/:path*"
+    },
+    {
+      "headers": [
+        {
+          "value": "noindex, nofollow, noarchive",
+          "key": "X-Robots-Tag"
+        },
+        {
+          "value": "private, no-store, max-age=0",
+          "key": "Cache-Control"
+        }
+      ],
+      "source": "/daybyday"
     }
   ],
   "rewrites": [
