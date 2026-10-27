@@ -1,14 +1,14 @@
 (function(){
  'use strict';
- let saved;try{saved=localStorage.getItem('daybyday-theme');}catch{}
+ let saved;try{saved=localStorage.getItem('daybyday-theme-v2');}catch{}
  const root=document.documentElement;root.dataset.theme=saved==='light'?'light':'dark';
- function updateTheme(){const dark=root.dataset.theme==='dark',button=document.getElementById('theme-toggle');if(button){button.textContent=dark?'☀ Tema claro':'☾ Tema escuro';button.setAttribute('aria-pressed',String(dark));button.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');}document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#0e1512':'#f5f6f2');}
+ function updateTheme(){const dark=root.dataset.theme==='dark',button=document.getElementById('theme-toggle');if(button){button.textContent=dark?'☾ Escuro ativo · trocar':'☀ Claro ativo · trocar';button.setAttribute('aria-pressed',String(dark));button.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');}document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#0e1512':'#f5f6f2');}
  updateTheme();let promptEvent=null;
  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;const native=document.getElementById('install-native');if(native)native.hidden=false;});
  window.addEventListener('appinstalled',()=>{promptEvent=null;document.getElementById('install-app').hidden=true;document.getElementById('install-help').close();});
  window.addEventListener('DOMContentLoaded',()=>{
   updateTheme();const dialog=document.getElementById('install-help'),install=document.getElementById('install-app');
-  document.getElementById('theme-toggle').onclick=()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('daybyday-theme',root.dataset.theme);}catch{}updateTheme();};
+  document.getElementById('theme-toggle').onclick=()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('daybyday-theme-v2',root.dataset.theme);}catch{}updateTheme();};
   if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone)install.hidden=true;
   install.onclick=()=>{document.getElementById('install-native').hidden=!promptEvent;document.getElementById('install-status').textContent='';dialog.showModal();};
   document.getElementById('install-close').onclick=()=>dialog.close();
