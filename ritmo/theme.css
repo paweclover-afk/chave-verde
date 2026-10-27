@@ -1,0 +1,59 @@
+/* Theme controls remain available before and after login. */
+:root{color-scheme:light}
+.app-tools{display:flex;justify-content:flex-end;gap:9px;padding:max(12px,env(safe-area-inset-top,0px)) 20px 12px;flex-wrap:wrap;background:var(--bg)}
+.app-tools button{min-height:44px;font-size:13px;color:var(--ink);font-weight:600}
+.loginpanel{min-height:calc(100dvh - 72px)}
+.install-step{padding:16px;margin:14px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel-soft,#f5f7ef)}
+.install-step h4{margin:0 0 10px;font-size:16px}
+.install-step ol{padding-left:21px;margin:0;line-height:1.9;font-size:14px}
+#install-help{width:470px;max-height:85dvh;overflow:auto;color:var(--ink)}
+#install-help .title{gap:12px;align-items:flex-start}#install-close{min-width:44px;min-height:44px}
+#install-native .primary{width:100%;min-height:48px}
+#install-status{font-size:14px;line-height:1.7}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0e1512;--ink:#edf3ec;--muted:#a8b7ac;--green:#c0d99a;--lime:#d9ed9d;--line:#33433a;--panel:#18221c;--panel-soft:#202e24;--control:#111c16;--selected:#314631}
+[data-theme=dark] body{background:var(--bg);color:var(--ink)}
+[data-theme=dark] .card,[data-theme=dark] #app-shell>aside,[data-theme=dark] dialog{background:var(--panel);border-color:var(--line);color:var(--ink)}
+[data-theme=dark] .secondary,[data-theme=dark] input,[data-theme=dark] select,[data-theme=dark] textarea,[data-theme=dark] .day,[data-theme=dark] .waterbuttons button{background:var(--control);color:var(--ink);border-color:var(--line)}
+[data-theme=dark] input::placeholder,[data-theme=dark] textarea::placeholder{color:#8e9f92;opacity:1}
+[data-theme=dark] .primary{background:#c0d99a;color:#152017;font-weight:700}
+[data-theme=dark] .hero{background:#233b2b;color:var(--ink);border:1px solid #3e5742}
+[data-theme=dark] .hero p{color:#bfcec2}
+[data-theme=dark] .hero .herostart{color:#152017}
+[data-theme=dark] .tag,[data-theme=dark] .avatar{background:#2b3d2b;color:#d0e4ab}
+[data-theme=dark] .sidebottom,[data-theme=dark] .cloudbar,[data-theme=dark] .workout,[data-theme=dark] .water,[data-theme=dark] .meal,[data-theme=dark] .mealchoice,[data-theme=dark] .prescription,[data-theme=dark] .loadform,[data-theme=dark] .comparison,[data-theme=dark] .cardio,[data-theme=dark] .entryhelp,[data-theme=dark] .sessionnav,[data-theme=dark] .exerciseoptions>summary,[data-theme=dark] .historysummary>div,[data-theme=dark] .steps button{background:var(--panel-soft);border-color:var(--line);color:var(--ink)}
+[data-theme=dark] .cloudbar .secondary{background:var(--control)}
+[data-theme=dark] .cloudbar small,[data-theme=dark] .steps small,[data-theme=dark] .eventtools button,[data-theme=dark] .eventbody small,[data-theme=dark] .foot,[data-theme=dark] .mobile-records td[data-label]::before,[data-theme=dark] th{color:var(--muted)}
+[data-theme=dark] nav button{color:var(--muted)}
+[data-theme=dark] nav button.active,[data-theme=dark] .day.selected,[data-theme=dark] .workouttabs button.active{background:var(--selected);color:#e4f0cc;border-color:#729359}
+[data-theme=dark] .day b,[data-theme=dark] .day.selected b{color:var(--ink)}
+[data-theme=dark] .mobile-nav{background:#152019f5;border-color:var(--line);box-shadow:0 -5px 24px #0003}
+[data-theme=dark] .check{background:var(--control);border-color:#667b60;color:#fff}
+[data-theme=dark] .check.done{background:#637d46;border-color:#9dbf75}
+[data-theme=dark] .event,[data-theme=dark] .mealchoice details{border-color:var(--line)}
+[data-theme=dark] .eventicon{background:#2b3d2b}
+[data-theme=dark] .workouttabs button{background:var(--control);color:#d0e4ab}
+[data-theme=dark] .recordstatus,[data-theme=dark] .recorddate{color:#c0d99a}
+[data-theme=dark] a,[data-theme=dark] .historylink,[data-theme=dark] .importlabel,[data-theme=dark] .guide strong{color:#c0d99a}
+[data-theme=dark] .bar{background:#314131}
+[data-theme=dark] #loginerror,[data-theme=dark] .danger,[data-theme=dark] #cloudstatus[data-kind=error]{color:#ffb5a7}
+[data-theme=dark] #cloudstatus[data-kind=pending]{color:#efce83}
+[data-theme=dark] .toast{background:#2e4934;border:1px solid #6e8b58;color:#f0f6eb}
+[data-theme=dark] dialog::backdrop{background:#000a}
+[data-theme=dark] .passwordfield button{background:#2b3d2b;color:#e0edcd}
+[data-theme=dark] .db-intro{background:linear-gradient(125deg,#233728,#18221c)}
+[data-theme=dark] .db-progress{background:var(--panel-soft)}
+[data-theme=dark] .db-progress .title strong:last-child{color:#d9ed9d}
+[data-theme=dark] .db-progress progress{accent-color:#c0d99a;background:#3a4c3c}
+[data-theme=dark] .db-progress progress::-webkit-progress-bar{background:#3a4c3c}
+[data-theme=dark] .db-progress progress::-webkit-progress-value{background:#c0d99a}
+[data-theme=dark] .db-progress progress::-moz-progress-bar{background:#c0d99a}
+[data-theme=dark] .db-item{background:var(--control);border-color:var(--line);border-left-color:var(--db-color,#8d9a93)}
+[data-theme=dark] .db-body small,[data-theme=dark] .db-body .db-time{color:#b2c2b5}
+[data-theme=dark] .db-done{background:#253627}
+[data-theme=dark] .db-done .db-body strong,[data-theme=dark] .db-monthcheck:has(input:checked) span{color:#b0c5ab}
+[data-theme=dark] .db-checklabel input[type=checkbox],[data-theme=dark] .db-monthcheck input[type=checkbox]{accent-color:#c0d99a}
+[data-theme=dark] .db-calday{background:var(--control);color:var(--ink);border-color:var(--line)}
+[data-theme=dark] .db-calday.active{background:var(--selected);border-color:#8eac68;color:#e4f0cc}
+[data-theme=dark] .mobile-records tr[data-mobile-record]{background:var(--panel-soft)}
+@media(max-width:600px){.app-tools{padding-left:16px;padding-right:16px;gap:8px}.app-tools button{font-size:12px;padding:10px 13px}#install-help{max-width:calc(100vw - 24px);padding:20px}.install-step{padding:14px}.install-step ol{font-size:14px}}
+@media(display-mode:standalone){.app-tools{padding-top:max(12px,env(safe-area-inset-top,0px))}}
