@@ -39,6 +39,10 @@
       normalize(s.rows,e.timed);seen.add(id);
     }
     const st=data.state;
+    if(st.daybyday!==undefined){
+      if(!object(st.daybyday))throw Error('Histórico DayByDay inválido.');
+      for(const [d,v] of Object.entries(st.daybyday)){if(!validDate(d)||v?.monthly!==undefined&&!d.endsWith('-01'))throw Error('Data DayByDay inválida.');validateDaybyday(v);}
+    }
     if(!object(st.agenda)||!object(st.mobility)||!object(st.mealchoices)||!object(st.water)||!object(st.selections)||!text(st.trainingTime,5)||!/^\d{2}:\d{2}$/.test(st.trainingTime))throw Error('Agenda inválida no backup.');
     for(const [d,events] of Object.entries(st.agenda)){
       if(!validDate(d)||!Array.isArray(events)||events.length>500)throw Error('Agenda inválida.');
@@ -51,6 +55,19 @@
     if(data.legacy.days!==undefined&&!object(data.legacy.days))throw Error('Registros anteriores inválidos.');
     return data;
   }
-  const api={dateKey,number,normalize,summary,context,previous,validateBackup};
+  function validateDaybyday(v){
+    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly'].includes(k)))throw Error('DayByDay inválido.');
+    if(v.items!==undefined){
+      if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
+      const ids=new Set();
+      for(const x of v.items){
+        if(!x||typeof x!=='object'||typeof x.id!=='string'||!x.id||x.id.length>100||ids.has(x.id)||typeof x.name!=='string'||!x.name.trim()||x.name.length>160||typeof x.details!=='string'||x.details.length>500||!/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time)||typeof x.done!=='boolean'||!['rest','health','study','work','self','english','pt','cook'].includes(x.category))throw Error('Atividade DayByDay inválida.');
+        ids.add(x.id);
+      }
+    }
+    if(v.monthly!==undefined&&(!Array.isArray(v.monthly)||v.monthly.length!==12||v.monthly.some(x=>typeof x!=='boolean')))throw Error('Checklist mensal inválido.');
+    return v;
+  }
+  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.Tracker=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -1,0 +1,37 @@
+/* DayByDay: daily records and monthly checklists share the private account. */
+#daybyday{max-width:1100px;margin:auto}
+#daybyday .card{margin-bottom:20px}
+.db-intro{background:linear-gradient(120deg,#edf4e7,#fff9eb)}
+.db-intro h2{font-size:30px;margin:15px 0 8px;letter-spacing:-1px}
+.db-actions{display:flex;gap:8px;flex-wrap:wrap}
+.db-progress{padding:20px;background:#f2f5ee;border-radius:14px;margin:20px 0}
+.db-progress .title{margin-bottom:12px;display:flex;justify-content:space-between;gap:12px}
+.db-progress .title strong:last-child{color:#244e3d;font-size:24px}
+.db-progress progress{width:100%;height:12px;border:0;border-radius:20px;overflow:hidden;background:#dce5d4;accent-color:#244e3d;display:block}
+.db-progress progress::-webkit-progress-bar{background:#dce5d4;border-radius:20px}
+.db-progress progress::-webkit-progress-value{background:#244e3d;border-radius:20px}
+.db-progress progress::-moz-progress-bar{background:#244e3d;border-radius:20px}
+.db-progress p{margin:10px 0 0}
+.db-timeline{display:grid;gap:10px}
+.db-item{display:flex;align-items:center;gap:15px;border:1px solid var(--line);border-left:4px solid var(--db-color,#8d9a93);border-radius:13px;padding:14px;background:#fff}
+.db-health{--db-color:#588a56}.db-study{--db-color:#638dc1}.db-work{--db-color:#c29a4d}.db-self{--db-color:#ba8295}.db-english{--db-color:#569eaa}.db-pt{--db-color:#c38a64}.db-cook{--db-color:#4d9d8c}
+.db-checklabel{display:flex;align-items:center;gap:14px;flex:1;min-width:0;margin:0;cursor:pointer;min-height:50px}
+.db-checklabel input[type=checkbox],.db-monthcheck input[type=checkbox]{appearance:auto;width:25px;height:25px;min-height:25px;max-width:25px;flex:0 0 25px;margin:0;accent-color:#244e3d;padding:0}
+.db-body{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
+.db-body strong{font-size:16px;line-height:1.4}
+.db-body small{color:#647268;font-weight:400;line-height:1.5}
+.db-body .db-time{font-size:11px;letter-spacing:.3px;color:#45614e;font-weight:600}
+.db-done{background:#f0f5ed}.db-done .db-body strong{text-decoration:line-through;color:#647268}
+.db-tools{display:flex;gap:6px}.db-tools button{font-size:12px;min-height:44px;padding:8px 11px}
+.db-monthgroups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:15px}
+.db-monthgroup{border:1px solid var(--line);border-radius:13px;padding:18px}
+.db-monthgroup h4{margin:0 0 12px;font-size:15px}
+.db-monthcheck{display:flex;align-items:center;gap:12px;min-height:50px;cursor:pointer;font-size:14px;font-weight:400;line-height:1.5;margin:4px 0}
+.db-monthcheck:has(input:checked) span{text-decoration:line-through;color:#647268}
+.db-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:18px}
+.db-calday{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border:1px solid var(--line);border-radius:10px;background:#f7f8f3;color:var(--ink);min-height:64px;min-width:0}
+.db-calday.active{background:#244e3d;color:#fff;border-color:#244e3d}
+.db-calday small{font-size:11px}
+.db-editor{width:470px;max-width:calc(100vw - 24px);max-height:85dvh;overflow:auto}
+.db-editor input,.db-editor select{font-size:16px;min-height:48px}
+@media(max-width:600px){#daybyday .card{padding:17px}.db-intro h2{font-size:27px}.db-daily>.title{display:block}.db-actions{margin-top:13px}.db-item{display:block;padding:12px}.db-tools{margin:10px 0 0 39px}.db-monthgroups{grid-template-columns:1fr}.db-progress{padding:16px}.db-calendar{gap:5px}.db-calday{padding:10px 2px}.db-editor .actions{display:flex;flex-wrap:wrap}.db-editor .actions button{flex:1}}
