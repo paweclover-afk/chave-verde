@@ -37,3 +37,5 @@
 @media(max-width:600px){#daybyday .card{padding:17px}.db-intro h2{font-size:27px}.db-daily>.title{display:block}.db-actions{margin-top:13px}.db-item{display:block;padding:12px}.db-tools{margin:10px 0 0 39px}.db-monthgroups{grid-template-columns:1fr}.db-progress{padding:16px}.db-calendar{gap:5px}.db-calday{padding:10px 2px}.db-editor .actions{display:flex;flex-wrap:wrap}.db-editor .actions button{flex:1}}
 
 #overviewmonth{margin-top:22px}.db-weekday{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.db-monthname{text-transform:capitalize;color:var(--ink);font-weight:600}.db-monthheading{gap:12px;flex-wrap:wrap}.db-monthheading .db-actions{margin:0}.db-calday{min-height:70px}.db-calday strong{font-size:17px}.db-calday small{font-size:12px}
+
+.personal-message{width:500px;max-width:calc(100vw - 28px);max-height:85dvh;overflow:auto}.personal-message h2{font-size:23px;line-height:1.4;margin:0 0 22px}.personal-message .primary{width:100%;margin-top:24px;min-height:48px}

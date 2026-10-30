@@ -21,7 +21,7 @@
  }
  async function boot(){
    try{
-    const data=await api('load');owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
+    let data=await api('load');let greeting=null;try{greeting=(await api('message',{event:crypto.randomUUID()})).message;if(greeting)data=await api('load');}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
     const state={agenda:{},water:{},mobility:{},mealchoices:{},selections:{},notes:{},daybyday:{},foodPlans:{},trainingTime:'19:30',sessions:[]};
     for(const row of data.days){revisions[row.day]=row.revision;synced[row.day]=fingerprint(row.payload);}
     try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.owner===owner){for(const [day,item] of Object.entries(cached.pending||{})){if(fingerprint(item.payload)===synced[day])continue;pending[day]=item;if(item.revision!==(revisions[day]||0))blocked=true;}}}catch{badge('Não foi possível ler alterações locais. Exporte um backup antes de sair.','error');}
@@ -30,6 +30,7 @@
     window.RitmoCloud={initialState:state,queueState,flush,pending:()=>Object.keys(pending).length,blocked:()=>blocked,audit:day=>api('audit&day='+encodeURIComponent(day))};
     document.getElementById('accountname').textContent=data.user.email;login.hidden=true;shell.hidden=true;document.getElementById('app-loading').hidden=false;
     await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;
+    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent='Li sua mensagem ❤️';close.type='button';close.onclick=()=>dialog.close();dialog.onclose=()=>dialog.remove();dialog.append(title,text,close);document.body.append(dialog);dialog.showModal();}
     badge(blocked?'Conflito entre aparelhos. Exporte um backup antes de recarregar.':Object.keys(pending).length?'Há alterações aguardando envio.':'✓ Registros carregados da sua conta',blocked?'error':'saved');if(!blocked)flush();
    }catch(e){document.getElementById('app-loading').hidden=true;login.hidden=false;shell.hidden=true;if(e.status!==401)document.getElementById('loginerror').textContent=e.message;}
  }
