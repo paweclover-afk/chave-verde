@@ -152,7 +152,7 @@ function daybydayItems(d=key()){
  }
  if(d>='2026-10-29'){let changed=false;for(const x of state.daybyday[d].items){const time=x.id==='breakfast'?'11:00':x.id==='lunch'?'16:00':x.id==='dinner'?(state.mealchoices[d]?.[3]===7?'20:00':'21:00'):null;if(time&&x.time!==time){x.time=time;changed=true;}}const before=state.daybyday[d].items.length;state.daybyday[d].items=state.daybyday[d].items.filter(x=>x.id!=='snack'||x.done);if(changed||before!==state.daybyday[d].items.length)persist();}
  const extraPlan=Object.values(state.foodPlans||{}).filter(p=>p.routineExtrasFrom&&p.routineExtrasFrom<=d&&Array.isArray(p.routineExtras)).sort((a,b)=>b.routineExtrasFrom.localeCompare(a.routineExtrasFrom))[0];
- if(extraPlan){let changed=false;for(const x of extraPlan.routineExtras)if(!state.daybyday[d].items.some(y=>y.id===x.id)){state.daybyday[d].items.push({...x,done:false});changed=true;}if(changed)persist();}
+ if(extraPlan){let changed=false;for(const x of extraPlan.routineExtras){const existing=state.daybyday[d].items.find(y=>y.id===x.id);if(!existing){state.daybyday[d].items.push({...x,done:false});changed=true;}else if((x.configRevision||0)>(existing.configRevision||0)){const done=existing.done;Object.assign(existing,x,{done});changed=true;}}if(changed)persist();}
  return state.daybyday[d].items;
 }
 const daybydayCategories={rest:'Descanso e rotina',health:'Saúde',study:'Estudos',work:'Trabalho',self:'Autocuidado',english:'Idiomas',pt:'Português',cook:'Cozinha'};
