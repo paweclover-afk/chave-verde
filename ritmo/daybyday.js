@@ -111,12 +111,10 @@ const weekly = {
 };
 
 const monthly = [
-  {w:"Semana 1",i:["Gravar áudio 10 min em inglês","Revisar finanças","Definir novo objetivo do mês"]},
-  {w:"Semana 2",i:["Redação em inglês","Curso de Instagram","Estudar negociações"]},
-  {w:"Semana 3",i:["Meditar","Aprender sobre investimentos","Pesquisar método de aprendizagem"]},
-  {w:"Semana 4",i:["Revisar finanças","Definir novo objetivo","Filme em inglês (se ainda não viu)"]}
+ {w:'Semana 1',i:['Revisar registros de refeições','Conferir registros dos treinos','Organizar horários da próxima semana']},
+ {w:'Semana 2',i:['Revisar registros de refeições','Conferir registros dos treinos','Organizar horários da próxima semana']},
+ {w:'Semana 3',i:['Revisar registros de refeições','Conferir registros dos treinos','Organizar horários da próxima semana']},
+ {w:'Semana 4',i:['Revisar registros de refeições','Conferir registros dos treinos','Revisar a rotina do mês']}
 ];
-
-
 return {weekly,monthly,days:['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']};
 })();

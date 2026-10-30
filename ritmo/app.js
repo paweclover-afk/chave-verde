@@ -137,8 +137,18 @@ $('auditload').onclick=async()=>{const date=key();$('auditlist').textContent='Co
 $('moremenu-toggle').onclick=()=>$('moremenu').showModal();$('closemore').onclick=()=>$('moremenu').close();
 function daybydayItems(d=key()){
  state.daybyday[d]??={};
- if(!state.daybyday[d].items){const day=new Date(d+'T12:00:00').getDay();state.daybyday[d].items=DayByDay.weekly[DayByDay.days[day]].map((x,i)=>({id:'model-'+i,time:x.t,name:x.n,details:x.d,category:x.c.replace('cat-',''),done:false}));persist();}
- return state.daybyday[d].items;
+ if(!state.daybyday[d].items){
+ const dow=new Date(d+'T12:00:00').getDay(),w=P.workouts.find(x=>x.day===dow);
+ state.daybyday[d].items=[
+ {id:'breakfast',time:'08:00',name:'Café da manhã',details:'Consultar quantidades e alternativas na aba Alimentação.',category:'health'},
+ {id:'lunch',time:'13:00',name:'Almoço',details:'Seguir as porções do plano alimentar.',category:'health'},
+ {id:'snack',time:'18:00',name:'Lanche da tarde',details:'Escolher uma opção do plano alimentar.',category:'health'},
+ {id:'mobility',time:'18:45',name:'Mobilidade e alongamentos',details:'Sequência do treinador. Horário sugerido e ajustável.',category:'health'},
+ {id:'workout',time:'19:00',name:w?w.title:'Cardio · descanso da musculação',details:w?'Treino do plano + cardio 30 min, 120–140 bpm. Consulte Treinos e cargas.':'Cardio 40 min, 120–140 bpm, conforme plano.',category:'health'},
+ {id:'dinner',time:'22:30',name:'Jantar',details:'Seguir quantidades e alternativas do plano alimentar.',category:'health'},
+ {id:'reading',time:'23:00',name:'Leitura',details:'Seu momento de leitura.',category:'study'}
+ ].map(x=>({...x,done:false}));persist();
+ }return state.daybyday[d].items;
 }
 const daybydayCategories={rest:'Descanso e rotina',health:'Saúde',study:'Estudos',work:'Trabalho',self:'Autocuidado',english:'Idiomas',pt:'Português',cook:'Cozinha'};
 function daybydayProgress(title,done,total){
@@ -147,7 +157,7 @@ function daybydayProgress(title,done,total){
 function renderDaybyday(){
  const content=$('daybydaycontent'),d=key(),items=daybydayItems(),done=items.filter(x=>x.done).length,month=d.slice(0,7),anchor=month+'-01';content.replaceChildren();
  const intro=el('div',undefined,'card db-intro');intro.append(el('span','DAYBYDAY','tag'),el('h2','Um dia de cada vez.'),el('p','Marque as atividades conforme realizar. Use o calendário acima para consultar ou registrar outro dia.','smallnote'));
- const source=el('details');source.append(el('summary','Sobre esta rotina'),el('p','Atividades e horários reproduzidos do modelo que você enviou. A agenda inclui estudos, trabalho, autocuidado e exercícios. Os treinos e refeições prescritos da Leonarda continuam nas abas Treino e Refeições. Você pode editar esta rotina para cada data.','smallnote'));intro.append(source);content.append(intro);
+ const source=el('details');source.append(el('summary','Sobre esta rotina'),el('p','Rotina da Leonarda baseada nos planos enviados: refeições às 08h, 13h, 18h e 22h30, treino às 19h e leitura às 23h. A mobilidade às 18h45 é uma sugestão ajustável. Consulte as porções e os exercícios nas abas Alimentação e Treinos. As marcações desta lista são independentes da agenda do Ritmo.','smallnote'));intro.append(source);content.append(intro);
  const daily=el('section',undefined,'card db-daily'),title=el('div',undefined,'title'),actions=el('div',undefined,'db-actions'),add=el('button','+ Atividade','secondary'),reset=el('button','Desmarcar o dia','secondary');
  add.onclick=()=>editDaybyday();reset.disabled=!done;reset.onclick=()=>{if(!confirm('Desmarcar apenas as atividades DayByDay de '+dateLabel(d)+'?'))return;const snapshot=structuredClone(items);items.forEach(x=>x.done=false);persist();render();toast('Marcações do dia removidas.',()=>{state.daybyday[d].items=snapshot;persist();render();});};actions.append(add,reset);title.append(el('h3',selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})),actions);daily.append(title,daybydayProgress('Realização do dia',done,items.length));
  const list=el('div',undefined,'db-timeline');
@@ -167,4 +177,4 @@ function editDaybyday(item){
  const name=field('Atividade','text',item?.name||'',160),time=field('Horário','time',item?.time||'08:00'),details=field('Detalhes (opcional)','text',item?.details||'',500);details.required=false;const label=el('label','Categoria'),category=el('select');for(const [value,title] of Object.entries(daybydayCategories)){const opt=el('option',title);opt.value=value;category.append(opt);}category.value=item?.category||'rest';label.append(category);form.append(label);const actions=el('div',undefined,'actions'),cancel=el('button','Cancelar','secondary'),save=el('button','Salvar atividade','primary');cancel.type='button';cancel.onclick=()=>dialog.close();save.type='submit';actions.append(cancel,save);form.append(actions);dialog.append(form);document.body.append(dialog);dialog.onclose=()=>dialog.remove();form.onsubmit=e=>{e.preventDefault();if(!name.value.trim()){name.setCustomValidity('Informe o nome da atividade.');name.reportValidity();return;}const items=daybydayItems(d);if(!item&&items.length>=100){toast('Limite de 100 atividades nesta data.');return;}const record={id:item?.id||crypto.randomUUID(),name:name.value.trim(),time:time.value,details:details.value.trim(),category:category.value,done:item?.done||false};state.daybyday[d].items=item?items.map(x=>x.id===item.id?record:x):[...items,record];persist();dialog.close();render();toast('Atividade DayByDay salva.');};name.oninput=()=>name.setCustomValidity('');dialog.showModal();
 }
 
-if(location.hash==='#daybyday'){history.replaceState(null,'','#overview');}
+if(location.hash==='#daybyday')switchView('daybyday');
