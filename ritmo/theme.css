@@ -10,50 +10,62 @@
 #install-help .title{gap:12px;align-items:flex-start}#install-close{min-width:44px;min-height:44px}
 #install-native .primary{width:100%;min-height:48px}
 #install-status{font-size:14px;line-height:1.7}
-:root[data-theme=dark]{color-scheme:dark;--bg:#050505;--ink:#f2f2f2;--muted:#adadad;--green:#c0d99a;--lime:#d9ed9d;--line:#303030;--panel:#111111;--panel-soft:#1a1a1a;--control:#0b0b0b;--selected:#272727}
+:root[data-theme=dark]{color-scheme:dark;--bg:#050505;--ink:#f2f2f2;--muted:#c4bbc1;--green:#f9a8d4;--lime:#fbcfe8;--line:#303030;--panel:#111111;--panel-soft:#1a1a1a;--control:#0b0b0b;--selected:#382030}
 [data-theme=dark] body{background:var(--bg);color:var(--ink)}
 [data-theme=dark] .card,[data-theme=dark] #app-shell>aside,[data-theme=dark] dialog{background:var(--panel);border-color:var(--line);color:var(--ink)}
 [data-theme=dark] .secondary,[data-theme=dark] input,[data-theme=dark] select,[data-theme=dark] textarea,[data-theme=dark] .day,[data-theme=dark] .waterbuttons button{background:var(--control);color:var(--ink);border-color:var(--line)}
 [data-theme=dark] input::placeholder,[data-theme=dark] textarea::placeholder{color:#969696;opacity:1}
-[data-theme=dark] .primary{background:#c0d99a;color:#152017;font-weight:700}
+[data-theme=dark] .primary{background:#f9a8d4;color:#240b19;font-weight:700}
 [data-theme=dark] .hero{background:#181818;color:var(--ink);border:1px solid #353535}
 [data-theme=dark] .hero p{color:#c5c5c5}
-[data-theme=dark] .hero .herostart{color:#152017}
-[data-theme=dark] .tag,[data-theme=dark] .avatar{background:#232323;color:#d0e4ab}
+[data-theme=dark] .hero .herostart{color:#240b19}
+[data-theme=dark] .tag,[data-theme=dark] .avatar{background:#232323;color:#fbcfe8}
 [data-theme=dark] .sidebottom,[data-theme=dark] .cloudbar,[data-theme=dark] .workout,[data-theme=dark] .water,[data-theme=dark] .meal,[data-theme=dark] .mealchoice,[data-theme=dark] .prescription,[data-theme=dark] .loadform,[data-theme=dark] .comparison,[data-theme=dark] .cardio,[data-theme=dark] .entryhelp,[data-theme=dark] .sessionnav,[data-theme=dark] .exerciseoptions>summary,[data-theme=dark] .historysummary>div,[data-theme=dark] .steps button{background:var(--panel-soft);border-color:var(--line);color:var(--ink)}
 [data-theme=dark] .cloudbar .secondary{background:var(--control)}
 [data-theme=dark] .cloudbar small,[data-theme=dark] .steps small,[data-theme=dark] .eventtools button,[data-theme=dark] .eventbody small,[data-theme=dark] .foot,[data-theme=dark] .mobile-records td[data-label]::before,[data-theme=dark] th{color:var(--muted)}
 [data-theme=dark] nav button{color:var(--muted)}
-[data-theme=dark] nav button.active,[data-theme=dark] .day.selected,[data-theme=dark] .workouttabs button.active{background:var(--selected);color:#e4f0cc;border-color:#729359}
+[data-theme=dark] nav button.active,[data-theme=dark] .day.selected,[data-theme=dark] .workouttabs button.active{background:var(--selected);color:#fce7f3;border-color:#db75ac}
 [data-theme=dark] .day b,[data-theme=dark] .day.selected b{color:var(--ink)}
 [data-theme=dark] .mobile-nav{background:#111111f5;border-color:var(--line);box-shadow:0 -5px 24px #0003}
-[data-theme=dark] .check{background:var(--control);border-color:#667b60;color:#fff}
-[data-theme=dark] .check.done{background:#637d46;border-color:#9dbf75}
+[data-theme=dark] .check{background:var(--control);border-color:#93617d;color:#fff}
+[data-theme=dark] .check.done{background:#b94483;border-color:#ed9cc8}
 [data-theme=dark] .event,[data-theme=dark] .mealchoice details{border-color:var(--line)}
 [data-theme=dark] .eventicon{background:#232323}
-[data-theme=dark] .workouttabs button{background:var(--control);color:#d0e4ab}
-[data-theme=dark] .recordstatus,[data-theme=dark] .recorddate{color:#c0d99a}
-[data-theme=dark] a,[data-theme=dark] .historylink,[data-theme=dark] .importlabel,[data-theme=dark] .guide strong{color:#c0d99a}
+[data-theme=dark] .workouttabs button{background:var(--control);color:#fbcfe8}
+[data-theme=dark] .recordstatus,[data-theme=dark] .recorddate{color:#f9a8d4}
+[data-theme=dark] a,[data-theme=dark] .historylink,[data-theme=dark] .importlabel,[data-theme=dark] .guide strong{color:#f9a8d4}
 [data-theme=dark] .bar{background:#303030}
 [data-theme=dark] #loginerror,[data-theme=dark] .danger,[data-theme=dark] #cloudstatus[data-kind=error]{color:#ffb5a7}
 [data-theme=dark] #cloudstatus[data-kind=pending]{color:#efce83}
 [data-theme=dark] .toast{background:#252525;border:1px solid #555555;color:#f0f0f0}
 [data-theme=dark] dialog::backdrop{background:#000a}
-[data-theme=dark] .passwordfield button{background:#232323;color:#e0edcd}
+[data-theme=dark] .passwordfield button{background:#232323;color:#fce7f3}
 [data-theme=dark] .db-intro{background:linear-gradient(125deg,#202020,#101010)}
 [data-theme=dark] .db-progress{background:var(--panel-soft)}
-[data-theme=dark] .db-progress .title strong:last-child{color:#d9ed9d}
-[data-theme=dark] .db-progress progress{accent-color:#c0d99a;background:#333333}
+[data-theme=dark] .db-progress .title strong:last-child{color:#fbcfe8}
+[data-theme=dark] .db-progress progress{accent-color:#f9a8d4;background:#333333}
 [data-theme=dark] .db-progress progress::-webkit-progress-bar{background:#333333}
-[data-theme=dark] .db-progress progress::-webkit-progress-value{background:#c0d99a}
-[data-theme=dark] .db-progress progress::-moz-progress-bar{background:#c0d99a}
+[data-theme=dark] .db-progress progress::-webkit-progress-value{background:#f9a8d4}
+[data-theme=dark] .db-progress progress::-moz-progress-bar{background:#f9a8d4}
 [data-theme=dark] .db-item{background:var(--control);border-color:var(--line);border-left-color:var(--db-color,#8d9a93)}
 [data-theme=dark] .db-body small,[data-theme=dark] .db-body .db-time{color:#b8b8b8}
-[data-theme=dark] .db-done{background:#1c211b}
-[data-theme=dark] .db-done .db-body strong,[data-theme=dark] .db-monthcheck:has(input:checked) span{color:#b6c5ac}
-[data-theme=dark] .db-checklabel input[type=checkbox],[data-theme=dark] .db-monthcheck input[type=checkbox]{accent-color:#c0d99a}
+[data-theme=dark] .db-done{background:#24131f}
+[data-theme=dark] .db-done .db-body strong,[data-theme=dark] .db-monthcheck:has(input:checked) span{color:#e8bdd5}
+[data-theme=dark] .db-checklabel input[type=checkbox],[data-theme=dark] .db-monthcheck input[type=checkbox]{accent-color:#f9a8d4}
 [data-theme=dark] .db-calday{background:var(--control);color:var(--ink);border-color:var(--line)}
-[data-theme=dark] .db-calday.active{background:var(--selected);border-color:#8eac68;color:#e4f0cc}
+[data-theme=dark] .db-calday.active{background:var(--selected);border-color:#ed9cc8;color:#fce7f3}
 [data-theme=dark] .mobile-records tr[data-mobile-record]{background:var(--panel-soft)}
 @media(max-width:600px){.app-tools{padding-left:16px;padding-right:16px;gap:8px}.app-tools button{font-size:12px;padding:10px 13px}#install-help{max-width:calc(100vw - 24px);padding:20px}.install-step{padding:14px}.install-step ol{font-size:14px}}
 @media(display-mode:standalone){.app-tools{padding-top:max(12px,env(safe-area-inset-top,0px))}}
+
+/* Solid text colors on black surfaces, including inputs and saved records. */
+[data-theme=dark] body{font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
+[data-theme=dark] h1,[data-theme=dark] h2,[data-theme=dark] h3,[data-theme=dark] h4,[data-theme=dark] label,[data-theme=dark] td,[data-theme=dark] pre,[data-theme=dark] summary{color:#f7f2f5;opacity:1}
+[data-theme=dark] p,[data-theme=dark] .smallnote,[data-theme=dark] .label,[data-theme=dark] .value small,[data-theme=dark] .chartcaption{color:#c9bfc6;opacity:1}
+[data-theme=dark] input,[data-theme=dark] select,[data-theme=dark] textarea{-webkit-text-fill-color:#f7f2f5;caret-color:#f9a8d4;opacity:1}
+[data-theme=dark] input::placeholder,[data-theme=dark] textarea::placeholder{-webkit-text-fill-color:#aaa0a7;color:#aaa0a7;opacity:1}
+[data-theme=dark] .logo span,[data-theme=dark] .hero small{color:#f9a8d4}
+[data-theme=dark] .bar i,[data-theme=dark] .historychart i{background:#ed87bd}
+[data-theme=dark] .db-item{--db-color:#db75ac}
+[data-theme=dark] button:disabled{opacity:1;color:#bcb1b9;border-color:#454045;background:#29242a}
+[data-theme=dark] :focus-visible{outline-color:#f9a8d4}
