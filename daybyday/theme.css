@@ -57,3 +57,13 @@
 [data-theme=dark] .mobile-records tr[data-mobile-record]{background:var(--panel-soft)}
 @media(max-width:600px){.app-tools{padding-left:16px;padding-right:16px;gap:8px}.app-tools button{font-size:12px;padding:10px 13px}#install-help{max-width:calc(100vw - 24px);padding:20px}.install-step{padding:14px}.install-step ol{font-size:14px}}
 @media(display-mode:standalone){.app-tools{padding-top:max(12px,env(safe-area-inset-top,0px))}}
+
+/* Keep typed values readable, including browser autofill. */
+html[data-theme=dark] input:not([type=checkbox]):not([type=radio]),html[data-theme=dark] textarea,html[data-theme=dark] select{background-color:#101014!important;color:#f7f2f5!important;-webkit-text-fill-color:#f7f2f5!important;caret-color:#f7f2f5;opacity:1}
+html[data-theme=dark] input::placeholder,html[data-theme=dark] textarea::placeholder{color:#b8adb5!important;-webkit-text-fill-color:#b8adb5!important;opacity:1}
+html[data-theme=dark] input:-webkit-autofill,html[data-theme=dark] input:-webkit-autofill:hover,html[data-theme=dark] input:-webkit-autofill:focus,html[data-theme=dark] textarea:-webkit-autofill,html[data-theme=dark] select:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #101014 inset!important;box-shadow:0 0 0 1000px #101014 inset!important;-webkit-text-fill-color:#f7f2f5!important;caret-color:#f7f2f5}
+html[data-theme=dark] input:autofill,html[data-theme=dark] textarea:autofill,html[data-theme=dark] select:autofill{box-shadow:0 0 0 1000px #101014 inset!important;color:#f7f2f5!important}
+html[data-theme=dark] select option{background:#101014;color:#f7f2f5}
+html[data-theme=light] input:not([type=checkbox]):not([type=radio]),html[data-theme=light] textarea,html[data-theme=light] select{background-color:#fff!important;color:#182c25!important;-webkit-text-fill-color:#182c25!important;caret-color:#182c25;opacity:1}
+html[data-theme=light] input::placeholder,html[data-theme=light] textarea::placeholder{color:#667268!important;-webkit-text-fill-color:#667268!important;opacity:1}
+html[data-theme=light] input:-webkit-autofill,html[data-theme=light] textarea:-webkit-autofill,html[data-theme=light] select:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #fff inset!important;box-shadow:0 0 0 1000px #fff inset!important;-webkit-text-fill-color:#182c25!important;caret-color:#182c25}
