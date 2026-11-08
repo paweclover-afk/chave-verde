@@ -125,17 +125,23 @@ function addDebtForm(existing) {
   const frequency = financeField(form,'Frequência',{options:[['once','Pagamento único'],['week','Semanal'],['month','Mensal']]});
   const interval = financeField(form,'Pagar a cada quantas semanas ou meses?',{type:'number',min:1,max:52,step:1,value:1});
   const installment = financeField(form,'Valor de cada parcela',amountField);
-  const date = financeField(form,'Primeiro vencimento',{type:'date'});
+  const date = financeField(form,existing ? 'Data base do próximo vencimento' : 'Data base do primeiro vencimento',{type:'date'});
+  const preview = el('p',undefined,'smallnote');
+  form.append(preview);
+  const updatePreview = () => {
+    preview.textContent = date.value ? 'Pagamento na sexta-feira, '+dateLabel(T.fridayOnOrAfter(date.value))+'.' : 'Selecione uma data base para calcular a sexta-feira.';
+  };
+  date.oninput = updatePreview;
   const adjustFields = () => {
     const recurring = frequency.value !== 'once';
     for (const field of [interval,installment]) { field.parentElement.hidden = !recurring; field.required = recurring; }
     const today = new Date(), next = new Date(today);
-    if (frequency.value === 'week') next.setDate(next.getDate()+7);
     if (frequency.value === 'month') {
       next.setDate(1);next.setMonth(next.getMonth()+1);
       next.setDate(Math.min(today.getDate(),new Date(next.getFullYear(),next.getMonth()+1,0).getDate()));
     }
     date.value = T.dateKey(next);
+    updatePreview();
   };
   frequency.onchange = adjustFields;
   adjustFields();
@@ -150,7 +156,8 @@ function addDebtForm(existing) {
     adjustFields();
     interval.value = existing.interval;
     installment.value = (existing.installment / 100).toFixed(2);
-    date.value = T.debtDue(existing).day;
+    date.value = T.debtDue(existing).nominalDay;
+    updatePreview();
   }
   form.append(button);
   form.onsubmit = e => {
@@ -164,7 +171,7 @@ function addDebtForm(existing) {
           return;
         }
         const current = next.debts.find(d => d.id === existing.id);
-        const scheduleChanged = terms.firstDue !== T.debtDue(current).day ||
+        const scheduleChanged = terms.firstDue !== T.debtDue(current).nominalDay ||
           ['frequency','interval','installment'].some(field => terms[field] !== current[field]);
         if (!scheduleChanged) terms.firstDue = current.firstDue;
         Object.assign(current, terms);
@@ -314,7 +321,7 @@ function renderFinance() {
   const root = $('finance-section');
   const title = el('div',undefined,'heading');
   title.append(el('h1','Financeiro'));
-  const hint = el('p','Registre despesas, acompanhe o saldo de cada dívida e veja os próximos vencimentos. Uma parcela avança quando o valor previsto é pago.','smallnote');
+  const hint = el('p','Registre despesas, acompanhe o saldo de cada dívida e veja os próximos vencimentos. O vencimento cai na sexta-feira da data escolhida ou na seguinte. A próxima parcela aparece após quitar o valor previsto.','smallnote');
   const grid = el('div',undefined,'finance-grid');
   const debts = el('div'), expenses = el('div');
   debts.append(debtsCard(),addDebtForm());
@@ -326,7 +333,7 @@ function renderFinance() {
 function forecastCard() {
   const card = financeCard('Próximos 30 dias');
   const now = new Date(), end = new Date(now);
-  end.setDate(end.getDate()+30);
+  end.setDate(end.getDate()+29);
   const today = T.dateKey(now), until = T.dateKey(end), rows = [];
   for (const debt of ledger().debts) {
     const first = T.debtDue(debt);
