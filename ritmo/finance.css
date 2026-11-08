@@ -1,0 +1,17 @@
+.finance-tabs,.finance-actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.finance-tabs button.active{border-color:#ed9cc8;color:var(--green)}
+.finance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.finance-card{margin-bottom:18px}
+.finance-form{display:grid;gap:12px;margin-top:15px}
+.finance-form label{margin:0}
+.finance-form label[hidden]{display:none}
+.finance-form input,.finance-form select{min-height:44px}
+.finance-row{padding:18px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.finance-row h4{margin:0;font-size:17px}
+.finance-row .smallnote,.finance-reminder-list .smallnote{margin:6px 0 12px}
+.finance-row button{margin:4px 8px 4px 0;min-height:44px}
+.finance-due{color:var(--green);font-weight:700;margin:10px 0}
+.finance-dialog,#finance-reminders{width:min(480px,calc(100vw - 24px));max-height:85dvh;overflow:auto}
+.finance-reminder-list{max-height:55dvh;overflow:auto;padding-left:22px}
+.finance-reminder-list li{margin:14px 0}
+@media(max-width:760px){.finance-grid{grid-template-columns:minmax(0,1fr)}.finance-tabs button{flex:1}}
