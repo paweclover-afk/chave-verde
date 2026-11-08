@@ -56,7 +56,7 @@
     return data;
   }
   function validateDaybyday(v){
-    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly'].includes(k)))throw Error('DayByDay inválido.');
+    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','finance'].includes(k)))throw Error('DayByDay inválido.');
     if(v.items!==undefined){
       if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
       const ids=new Set();
@@ -65,9 +65,44 @@
         ids.add(x.id);
       }
     }
+    if(v.finance!==undefined)validateFinance(v.finance);
     if(v.monthly!==undefined&&(!Array.isArray(v.monthly)||v.monthly.length!==12||v.monthly.some(x=>typeof x!=='boolean')))throw Error('Checklist mensal inválido.');
     return v;
   }
-  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday};
+  const financeDay='2000-01-01';
+  const expenseCategories=['Supermercado','Lazer','Suplementos','Transporte','Moradia','Outros'];
+  const financeCurrencies=['BRL','EUR','GBP'];
+  const validFinanceDate=date=>typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&dateKey(new Date(date+'T12:00:00'))===date;
+  const validAmount=n=>Number.isSafeInteger(n)&&n>0&&n<=99999999999;
+  const paidAmount=debt=>debt.payments.reduce((sum,p)=>sum+p.amount,0);
+  function debtDue(debt){
+    const paid=paidAmount(debt),balance=debt.amount-paid;
+    if(balance<=0)return null;
+    const completed=debt.frequency==='once'?0:Math.floor(paid/debt.installment);
+    const date=new Date(debt.firstDue+'T12:00:00');
+    if(debt.frequency==='week')date.setDate(date.getDate()+7*debt.interval*completed);
+    if(debt.frequency==='month'){
+      const originalDay=date.getDate();
+      date.setDate(1);date.setMonth(date.getMonth()+debt.interval*completed);
+      const lastDay=new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
+      date.setDate(Math.min(originalDay,lastDay));
+    }
+    return {day:dateKey(date),balance,due:debt.frequency==='once'?balance:Math.min(balance,debt.installment-paid%debt.installment)};
+  }
+  function validateFinance(ledger){
+    const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
+    const text=(v,max)=>typeof v==='string'&&v.trim()&&v.length<=max;
+    if(!object(ledger)||!Array.isArray(ledger.debts)||!Array.isArray(ledger.expenses)||ledger.debts.length>100||ledger.expenses.length>800)throw Error('Registros financeiros inválidos ou acima do limite.');
+    const ids=new Set();
+    function unique(v){if(!object(v)||!text(v.id,100)||ids.has(v.id))return false;ids.add(v.id);return true;}
+    for(const d of ledger.debts){
+      if(!unique(d)||!text(d.name,100)||!financeCurrencies.includes(d.currency)||!['debt','consortium'].includes(d.kind)||!validAmount(d.amount)||!validFinanceDate(d.firstDue)||!['once','week','month'].includes(d.frequency)||!Number.isInteger(d.interval)||d.interval<1||d.interval>52||!validAmount(d.installment)||d.installment>d.amount||!Array.isArray(d.payments)||d.payments.length>500)throw Error('Dívida ou consórcio inválido.');
+      for(const p of d.payments)if(!unique(p)||!validAmount(p.amount)||!validFinanceDate(p.date))throw Error('Pagamento inválido.');
+      if(paidAmount(d)>d.amount)throw Error('Os pagamentos ultrapassam o saldo da dívida.');
+    }
+    for(const x of ledger.expenses)if(!unique(x)||!text(x.name,160)||!financeCurrencies.includes(x.currency)||!expenseCategories.includes(x.category)||!validAmount(x.amount)||!validFinanceDate(x.date))throw Error('Despesa inválida.');
+    return ledger;
+  }
+  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday,financeDay,expenseCategories,financeCurrencies,validateFinance,paidAmount,debtDue};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.Tracker=api;
 })(typeof window!=='undefined'?window:globalThis);
