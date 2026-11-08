@@ -115,9 +115,9 @@ function financeForm(card, buttonText) {
 }
 const currencyOptions = [['EUR','EUR · Euro'],['BRL','BRL · Real'],['GBP','GBP · Libra']];
 const amountField = {type:'number',min:'0.01',max:'999999999.99',step:'0.01'};
-function addDebtForm() {
-  const card = financeCard('Cadastrar dívida ou consórcio');
-  const {form,button} = financeForm(card,'Salvar dívida');
+function addDebtForm(existing) {
+  const card = financeCard(existing ? 'Editar acordo' : 'Cadastrar dívida ou consórcio');
+  const {form,button} = financeForm(card,existing ? 'Salvar acordo' : 'Salvar dívida');
   const kind = financeField(form,'Tipo',{options:[['debt','Dívida'],['consortium','Consórcio']]});
   const name = financeField(form,'Para quem devo ou nome do consórcio',{type:'text',maxLength:100,placeholder:'Ex.: Mãe, irmã ou consórcio do carro'});
   const currency = financeField(form,'Moeda',{options:currencyOptions});
@@ -139,13 +139,39 @@ function addDebtForm() {
   };
   frequency.onchange = adjustFields;
   adjustFields();
+  if (existing) {
+    kind.value = existing.kind;
+    name.value = existing.name;
+    currency.value = existing.currency;
+    currency.disabled = existing.payments.length > 0;
+    amount.value = (existing.amount / 100).toFixed(2);
+    amount.readOnly = true;
+    frequency.value = existing.frequency;
+    adjustFields();
+    interval.value = existing.interval;
+    installment.value = (existing.installment / 100).toFixed(2);
+    date.value = T.debtDue(existing).day;
+  }
   form.append(button);
   form.onsubmit = e => {
     e.preventDefault();
     try {
       const total = cents(amount), recurring = frequency.value !== 'once';
-      commitFinance(next => next.debts.push({id:crypto.randomUUID(),kind:kind.value,name:name.value.trim(),currency:currency.value,amount:total,frequency:frequency.value,interval:recurring?Number(interval.value):1,installment:recurring?cents(installment):total,firstDue:date.value,payments:[]}));
-      toast('Dívida cadastrada.');
+      const terms = {kind:kind.value,name:name.value.trim(),currency:currency.value,amount:total,frequency:frequency.value,interval:recurring?Number(interval.value):1,installment:recurring?cents(installment):total,firstDue:date.value};
+      commitFinance(next => {
+        if (!existing) {
+          next.debts.push({...terms,id:crypto.randomUUID(),payments:[]});
+          return;
+        }
+        const current = next.debts.find(d => d.id === existing.id);
+        const scheduleChanged = terms.firstDue !== T.debtDue(current).day ||
+          ['frequency','interval','installment'].some(field => terms[field] !== current[field]);
+        if (!scheduleChanged) terms.firstDue = current.firstDue;
+        Object.assign(current, terms);
+        if (scheduleChanged) current.scheduleBase = T.paidAmount(current);
+      });
+      card.closest('dialog')?.close();
+      toast(existing ? 'Acordo atualizado.' : 'Dívida cadastrada.');
     } catch (error) { toast(error.message); }
   };
   return card;
@@ -196,7 +222,19 @@ function debtsCard() {
       if (debt.frequency!=='once') row.append(el('p','Parcela de '+money(debt.installment,debt.currency)+' a cada '+debt.interval+' '+(debt.frequency==='week'?(debt.interval===1?'semana':'semanas'):(debt.interval===1?'mês':'meses')),'smallnote'));
       const pay = el('button','Registrar pagamento','primary');
       pay.onclick = () => payDebt(debt);
-      row.append(pay);
+      const edit = el('button','Editar acordo','secondary');
+      edit.onclick = () => {
+        const dialog = el('dialog',undefined,'finance-dialog');
+        dialog.setAttribute('aria-label','Editar acordo');
+        const formCard = addDebtForm(debt);
+        const close = el('button','Cancelar','secondary');
+        close.onclick = () => dialog.close();
+        dialog.append(formCard,close);
+        dialog.onclose = () => dialog.remove();
+        document.body.append(dialog);
+        dialog.showModal();
+      };
+      row.append(pay,edit);
     }
     if (debt.payments.length) {
       const details = el('details');
@@ -207,7 +245,11 @@ function debtsCard() {
       const undo = el('button','Estornar último registro','secondary');
       undo.onclick = () => {
         if (!confirm('Estornar o último pagamento registrado de '+debt.name+'?')) return;
-        try { commitFinance(next => next.debts.find(d=>d.id===debt.id).payments.pop()); toast('Pagamento estornado.'); }
+        try { commitFinance(next => {
+          const current=next.debts.find(d=>d.id===debt.id);
+          current.payments.pop();
+          if(current.scheduleBase!==undefined)current.scheduleBase=Math.min(current.scheduleBase,T.paidAmount(current));
+        }); toast('Pagamento estornado.'); }
         catch (error) { toast(error.message); }
       };
       details.append(undo);
@@ -278,5 +320,47 @@ function renderFinance() {
   debts.append(debtsCard(),addDebtForm());
   expenses.append(expensesCard(),addExpenseForm());
   grid.append(debts,expenses);
-  root.replaceChildren(title,hint,grid);
+  root.replaceChildren(title,hint,forecastCard(),grid);
+}
+
+function forecastCard() {
+  const card = financeCard('Próximos 30 dias');
+  const now = new Date(), end = new Date(now);
+  end.setDate(end.getDate()+30);
+  const today = T.dateKey(now), until = T.dateKey(end), rows = [];
+  for (const debt of ledger().debts) {
+    const first = T.debtDue(debt);
+    if (!first) continue;
+    const paidBefore = index => index === 0 ? 0 : first.due+(index-1)*debt.installment;
+    let low = 0, high = debt.frequency === 'once' ? 1 : Math.ceil(first.balance/debt.installment)+1;
+    while(low<high) {
+      const mid=Math.floor((low+high)/2), due=T.debtDue(debt,paidBefore(mid));
+      if(due && due.day<today) low=mid+1;
+      else high=mid;
+    }
+    let projected=Math.min(first.balance,paidBefore(low));
+    if (projected) rows.push({debt,due:{...first,due:projected},overdue:low});
+    while(projected<first.balance) {
+      const due=T.debtDue(debt,projected);
+      if(!due || due.day>until) break;
+      rows.push({debt,due});
+      projected+=due.due;
+    }
+  }
+  rows.sort((a,b)=>a.due.day.localeCompare(b.due.day));
+  card.append(el('p','Previsão de '+dateLabel(today)+' a '+dateLabel(until)+', incluindo parcelas em atraso.','smallnote'));
+  if (!rows.length) card.append(el('p','Nenhuma parcela prevista nesse período.','smallnote'));
+  for (const currency of T.financeCurrencies) {
+    const total=rows.filter(x=>x.debt.currency===currency).reduce((sum,x)=>sum+x.due.due,0);
+    if(total)card.append(el('p','A separar · '+money(total,currency),'finance-due'));
+  }
+  if(rows.length){
+    const details=el('details');
+    details.append(el('summary','Ver parcelas por vencimento'));
+    const list=el('ul',undefined,'finance-reminder-list');
+    for(const item of rows){const line=el('li');line.append(el('strong',item.debt.name),el('p',item.overdue>1?item.overdue+' parcelas em atraso · '+money(item.due.due,item.debt.currency):dueLine(item),'smallnote'));list.append(line);}
+    details.append(list);
+    card.append(details);
+  }
+  return card;
 }

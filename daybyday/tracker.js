@@ -75,10 +75,11 @@
   const validFinanceDate=date=>typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&dateKey(new Date(date+'T12:00:00'))===date;
   const validAmount=n=>Number.isSafeInteger(n)&&n>0&&n<=99999999999;
   const paidAmount=debt=>debt.payments.reduce((sum,p)=>sum+p.amount,0);
-  function debtDue(debt){
-    const paid=paidAmount(debt),balance=debt.amount-paid;
+  function debtDue(debt, projectedPayment=0){
+    const paid=paidAmount(debt)+projectedPayment,balance=debt.amount-paid;
+    const schedulePaid=Math.max(0,paid-(debt.scheduleBase||0));
     if(balance<=0)return null;
-    const completed=debt.frequency==='once'?0:Math.floor(paid/debt.installment);
+    const completed=debt.frequency==='once'?0:Math.floor(schedulePaid/debt.installment);
     const date=new Date(debt.firstDue+'T12:00:00');
     if(debt.frequency==='week')date.setDate(date.getDate()+7*debt.interval*completed);
     if(debt.frequency==='month'){
@@ -87,7 +88,7 @@
       const lastDay=new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
       date.setDate(Math.min(originalDay,lastDay));
     }
-    return {day:dateKey(date),balance,due:debt.frequency==='once'?balance:Math.min(balance,debt.installment-paid%debt.installment)};
+    return {day:dateKey(date),balance,due:debt.frequency==='once'?balance:Math.min(balance,debt.installment-schedulePaid%debt.installment)};
   }
   function validateFinance(ledger){
     const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
@@ -98,6 +99,7 @@
     for(const d of ledger.debts){
       if(!unique(d)||!text(d.name,100)||!financeCurrencies.includes(d.currency)||!['debt','consortium'].includes(d.kind)||!validAmount(d.amount)||!validFinanceDate(d.firstDue)||!['once','week','month'].includes(d.frequency)||!Number.isInteger(d.interval)||d.interval<1||d.interval>52||!validAmount(d.installment)||d.installment>d.amount||!Array.isArray(d.payments)||d.payments.length>500)throw Error('Dívida ou consórcio inválido.');
       for(const p of d.payments)if(!unique(p)||!validAmount(p.amount)||!validFinanceDate(p.date))throw Error('Pagamento inválido.');
+      if(d.scheduleBase!==undefined&&(!Number.isSafeInteger(d.scheduleBase)||d.scheduleBase<0||d.scheduleBase>paidAmount(d)))throw Error('Histórico do acordo inválido.');
       if(paidAmount(d)>d.amount)throw Error('Os pagamentos ultrapassam o saldo da dívida.');
     }
     for(const x of ledger.expenses)if(!unique(x)||!text(x.name,160)||!financeCurrencies.includes(x.currency)||!expenseCategories.includes(x.category)||!validAmount(x.amount)||!validFinanceDate(x.date))throw Error('Despesa inválida.');
