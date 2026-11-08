@@ -21,7 +21,7 @@
  }
  async function boot(){
    try{
-    let data=await api('load');let greeting=null;try{greeting=(await api('message',{event:crypto.randomUUID()})).message;if(greeting)data=await api('load');}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
+    let data=await api('load');let greeting=null;try{greeting=(await api('message',{event:crypto.randomUUID()})).message;if(greeting&&!greeting.requiresAck)data=await api('load');}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
     const state={agenda:{},water:{},mobility:{},mealchoices:{},selections:{},notes:{},daybyday:{},foodPlans:{},trainingTime:'19:30',sessions:[]};
     for(const row of data.days){revisions[row.day]=row.revision;synced[row.day]=fingerprint(row.payload);}
     try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.owner===owner){for(const [day,item] of Object.entries(cached.pending||{})){if(fingerprint(item.payload)===synced[day])continue;pending[day]=item;if(item.revision!==(revisions[day]||0))blocked=true;}}}catch{badge('Não foi possível ler alterações locais. Exporte um backup antes de sair.','error');}
@@ -30,7 +30,29 @@
     window.RitmoCloud={initialState:state,queueState,flush,pending:()=>Object.keys(pending).length,blocked:()=>blocked,audit:day=>api('audit&day='+encodeURIComponent(day))};
     document.getElementById('accountname').textContent=data.user.email;login.hidden=true;shell.hidden=true;document.getElementById('app-loading').hidden=false;
     await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;
-    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent='Li sua mensagem ❤️';close.type='button';close.onclick=()=>dialog.close();dialog.onclose=()=>{dialog.remove();window.showFinanceReminders?.();};dialog.append(title,text,close);document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.();
+    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent='Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
+      const error=document.createElement('p');
+      error.setAttribute('role','status');
+      dialog.addEventListener('cancel',event=>event.preventDefault());
+      close.onclick=async()=>{
+        close.disabled=true;error.textContent='';
+        try{
+          const day='2026-10-29';
+          await flush();
+          if(busy||pending[day])throw Error('Aguarde a sincronização e tente novamente.');
+          const result=await api('ack-message',{id:greeting.id,event:crypto.randomUUID()});
+          if(result.previousRevision===revisions[day]){
+            const snapshot=JSON.parse(synced[day]);
+            snapshot.foodPlan.message.acknowledgedAt=result.acknowledgedAt;
+            state.foodPlans[day].message.acknowledgedAt=result.acknowledgedAt;
+            revisions[day]=result.revision;synced[day]=fingerprint(snapshot);
+          }
+          dialog.close();
+        }catch(e){error.textContent=e.message;close.disabled=false;}
+      };
+      dialog.append(title,text,error,close);
+    }else{close.onclick=()=>dialog.close();dialog.append(title,text,close);}
+    dialog.onclose=()=>{dialog.remove();window.showFinanceReminders?.();};document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.();
     badge(blocked?'Conflito entre aparelhos. Exporte um backup antes de recarregar.':Object.keys(pending).length?'Há alterações aguardando envio.':'✓ Registros carregados da sua conta',blocked?'error':'saved');if(!blocked)flush();
    }catch(e){document.getElementById('app-loading').hidden=true;login.hidden=false;shell.hidden=true;if(e.status!==401)document.getElementById('loginerror').textContent=e.message;}
  }
