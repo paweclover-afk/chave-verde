@@ -52,7 +52,7 @@
       };
       dialog.append(title,text,error,close);
     }else{close.onclick=()=>dialog.close();dialog.append(title,text,close);}
-    dialog.onclose=()=>{dialog.remove();window.showFinanceReminders?.();};document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.();
+    dialog.onclose=()=>{dialog.remove();window.showFinanceReminders?.(owner);};document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.(owner);
     badge(blocked?'Conflito entre aparelhos. Exporte um backup antes de recarregar.':Object.keys(pending).length?'Há alterações aguardando envio.':'✓ Registros carregados da sua conta',blocked?'error':'saved');if(!blocked)flush();
    }catch(e){document.getElementById('app-loading').hidden=true;login.hidden=false;shell.hidden=true;if(e.status!==401)document.getElementById('loginerror').textContent=e.message;}
  }

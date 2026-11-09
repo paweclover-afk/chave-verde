@@ -36,7 +36,15 @@ function dueLine(item) {
     : item.due.day === today ? 'Vence hoje' : 'Vence em ' + dateLabel(item.due.day);
   return when + ' · ' + money(item.due.due, item.debt.currency);
 }
-function showFinanceReminders() {
+let lastFinanceReminder = '';
+function showFinanceReminders(owner) {
+  if (!owner) return;
+  const storageKey = 'ritmo-finance-reminder:' + owner;
+  const today = T.dateKey(new Date());
+  if (lastFinanceReminder === storageKey + ':' + today) return;
+  try {
+    if (localStorage.getItem(storageKey) === today) return;
+  } catch { /* The in-page check still applies if storage is unavailable. */ }
   const nextWeek = new Date();
   nextWeek.setDate(nextWeek.getDate() + 7);
   const upcoming = dueList().filter(item => item.due.day <= T.dateKey(nextWeek));
@@ -61,6 +69,10 @@ function showFinanceReminders() {
   actions.append(view, close);
   dialog.replaceChildren(title, el('p', 'Vencidos e próximos 7 dias.', 'smallnote'), list, actions);
   dialog.showModal();
+  lastFinanceReminder = storageKey + ':' + today;
+  try {
+    localStorage.setItem(storageKey, today);
+  } catch { /* The reminder is already visible. */ }
 }
 function financeCard(title) {
   const card = el('section', undefined, 'card finance-card');
