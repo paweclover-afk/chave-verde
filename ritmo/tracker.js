@@ -96,10 +96,36 @@
     const nominalDay=dateKey(date);
     return {day:fridayOnOrAfter(nominalDay),nominalDay,balance,due:debt.frequency==='once'?balance:Math.min(balance,debt.installment-schedulePaid%debt.installment)};
   }
+  function cashSummary(ledger,from,to,currency){
+    const rates=(ledger.income||[]).filter(entry=>entry.currency===currency).sort((a,b)=>b.from.localeCompare(a.from));
+    const dates=[];
+    const friday=new Date(fridayOnOrAfter(from)+'T12:00:00');
+    let income=0;
+    while(dateKey(friday)<=to){
+      const day=dateKey(friday);
+      const rate=rates.find(entry=>entry.from<=day);
+      if(rate?.amount){income+=rate.amount;dates.push(day);}
+      friday.setDate(friday.getDate()+7);
+    }
+    const within=date=>date>=from&&date<=to;
+    const expenses=ledger.expenses.filter(entry=>entry.currency===currency&&within(entry.date)).reduce((sum,entry)=>sum+entry.amount,0);
+    const payments=ledger.debts.filter(debt=>debt.currency===currency).flatMap(debt=>debt.payments).filter(payment=>within(payment.date)).reduce((sum,payment)=>sum+payment.amount,0);
+    return {income,expenses,payments,balance:income-expenses-payments,dates};
+  }
   function validateFinance(ledger){
     const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
     const text=(v,max)=>typeof v==='string'&&v.trim()&&v.length<=max;
     if(!object(ledger)||!Array.isArray(ledger.debts)||!Array.isArray(ledger.expenses)||ledger.debts.length>100||ledger.expenses.length>800)throw Error('Registros financeiros inválidos ou acima do limite.');
+    if(ledger.income!==undefined){
+      if(!Array.isArray(ledger.income)||ledger.income.length>100)throw Error('Histórico de recebimentos inválido.');
+      const rates=new Set();
+      for(const entry of ledger.income){
+        if(!object(entry)||!financeCurrencies.includes(entry.currency)||!validFinanceDate(entry.from)||fridayOnOrAfter(entry.from)!==entry.from||!(entry.amount===0||validAmount(entry.amount)))throw Error('Recebimento semanal inválido.');
+        const key=entry.currency+'|'+entry.from;
+        if(rates.has(key))throw Error('Recebimento semanal duplicado.');
+        rates.add(key);
+      }
+    }
     const ids=new Set();
     function unique(v){if(!object(v)||!text(v.id,100)||ids.has(v.id))return false;ids.add(v.id);return true;}
     for(const d of ledger.debts){
@@ -111,6 +137,6 @@
     for(const x of ledger.expenses)if(!unique(x)||!text(x.name,160)||!financeCurrencies.includes(x.currency)||!expenseCategories.includes(x.category)||!validAmount(x.amount)||!validFinanceDate(x.date))throw Error('Despesa inválida.');
     return ledger;
   }
-  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday,financeDay,expenseCategories,financeCurrencies,validateFinance,paidAmount,debtDue,fridayOnOrAfter};
+  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday,financeDay,expenseCategories,financeCurrencies,validateFinance,paidAmount,debtDue,fridayOnOrAfter,cashSummary};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.Tracker=api;
 })(typeof window!=='undefined'?window:globalThis);
