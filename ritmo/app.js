@@ -110,8 +110,8 @@ function evolutionGroups(){
  return Array.from(groups.values(),sessions=>sessions.sort((a,b)=>b.date.localeCompare(a.date)))
   .sort((a,b)=>b[0].date.localeCompare(a[0].date));
 }
-function evolutionDates(endDate=new Date()){
- return Array.from({length:30},(_,i)=>new Date(endDate.getFullYear(),endDate.getMonth(),endDate.getDate()-29+i,12));
+function evolutionDates(endDate=new Date(),length=30){
+ return Array.from({length},(_,i)=>new Date(endDate.getFullYear(),endDate.getMonth(),endDate.getDate()-length+1+i,12));
 }
 function renderEvolution(dates=evolutionDates(),grid=$('evolutioncards'),period=$('evolutionperiod')){
  const start=T.dateKey(dates[0]),end=T.dateKey(dates.at(-1));
@@ -125,80 +125,107 @@ function renderEvolution(dates=evolutionDates(),grid=$('evolutioncards'),period=
   const exerciseIds=new Set(workout.exercises.map(e=>e.id));
   const recordedDates=new Set([...sessions.values()].filter(s=>exerciseIds.has(s.exercise)).map(s=>s.date));
   const columns=[...days].filter(([date,weekday])=>weekday===workout.day||recordedDates.has(date)).map(([date])=>date);
-  const section=el('section',undefined,'evolution-workout');
-  const weekday=new Date(2026,0,4+workout.day,12).toLocaleDateString('pt-BR',{weekday:'long'});
-  const title=weekday+' · '+workout.title;
-  const wrap=el('div',undefined,'evolution-scroll'),table=el('table',undefined,'evolution-table');
-  wrap.tabIndex=0;
-  wrap.setAttribute('role','region');
-  wrap.setAttribute('aria-label',title);
-  const head=table.createTHead().insertRow();
-  for(const label of ['Exercício',...columns.map(d=>dateLabel(d).slice(0,5)),'Variação']){
-   const th=el('th',label);
-   th.scope='col';
-   head.append(th);
-  }
-  const body=table.createTBody();
+  const contextsByExercise=new Map();
   for(const exercise of workout.exercises){
-   const row=body.insertRow(),name=el('th',exercise.name);
-   name.scope='row';
-   row.append(name);
    const contexts=new Map();
    for(const date of columns){
-    const session=sessions.get(exercise.id+'|'+date),cell=row.insertCell();
-    const basis=session?.basis,shortBasis=basisLabels[basis]||basis;
-    const weight=session&&basis?.endsWith('(kg)')?T.summary(session).max:null;
-    if(weight===null){
-     cell.append(el('span',session?(basis==='Peso corporal / sem carga'||basis==='Elástico / sem kg'?shortBasis:'Sem carga em kg'):'Sem registro','evolution-square'));
-     continue;
-    }
+    const session=sessions.get(exercise.id+'|'+date);
+    if(!session?.basis?.endsWith('(kg)'))continue;
+    const weight=T.summary(session).max;
+    if(weight===null)continue;
     const context=T.context(session);
-    if(!contexts.has(context))contexts.set(context,{label:[session.variant==='Padrão'?'':session.variant,shortBasis].filter(Boolean).join(' · '),weights:[]});
-    const comparison=contexts.get(context);
-    comparison.weights.push(weight);
-    const square=el('span',undefined,'evolution-square has-load');
-    square.append(el('strong',fmt(weight)+' kg'),el('small',comparison.label));
-    cell.append(square);
+    if(!contexts.has(context))contexts.set(context,{label:[session.variant==='Padrão'?'':session.variant,basisLabels[session.basis]||session.basis].filter(Boolean).join(' · '),weights:[]});
+    contexts.get(context).weights.push(weight);
    }
-   const variations=row.insertCell();
-   for(const {label,weights} of contexts.values()){
-    if(weights.length<2)continue;
-    const delta=Number((weights.at(-1)-weights[0]).toFixed(2));
-    const square=el('span',undefined,'evolution-square'+(delta>0?' has-load':''));
-    square.append(el('strong',(delta>0?'+':'')+fmt(delta)+' kg'));
-    if(contexts.size>1)square.append(el('small',label));
-    variations.append(square);
-   }
-   if(!variations.childElementCount)variations.append(el('span',contexts.size>1?'Referências distintas':contexts.size?'1 carga lançada':'Sem comparação','evolution-square'));
+   contextsByExercise.set(exercise.id,contexts);
   }
-  wrap.append(table);
-  section.append(el('h4',title),wrap);
-  grid.append(section);
+  const printing=grid===$('evolution-print-grid');
+  const pageSize=printing?8:Math.max(1,columns.length);
+  const pageCount=Math.max(1,Math.ceil(columns.length/pageSize));
+  for(let page=0;page<pageCount;page++){
+   const pageDates=columns.slice(page*pageSize,(page+1)*pageSize);
+   const section=el('section',undefined,'evolution-workout');
+   const weekday=new Date(2026,0,4+workout.day,12).toLocaleDateString('pt-BR',{weekday:'long'});
+   const title=weekday+' · '+workout.title+(pageCount>1?' · Parte '+(page+1)+' de '+pageCount:'');
+   const wrap=el('div',undefined,'evolution-scroll'),table=el('table',undefined,'evolution-table');
+   wrap.tabIndex=0;
+   wrap.setAttribute('role','region');
+   wrap.setAttribute('aria-label',title);
+   const head=table.createTHead().insertRow();
+   for(const label of ['Exercício',...pageDates.map(d=>dateLabel(d).slice(0,printing?10:5)),'Variação no período']){
+    const th=el('th',label);
+    th.scope='col';
+    head.append(th);
+   }
+   const body=table.createTBody();
+   for(const exercise of workout.exercises){
+    const row=body.insertRow(),name=el('th',exercise.name);
+    name.scope='row';
+    row.append(name);
+    const contexts=contextsByExercise.get(exercise.id);
+    for(const date of pageDates){
+     const session=sessions.get(exercise.id+'|'+date),cell=row.insertCell();
+     const basis=session?.basis,shortBasis=basisLabels[basis]||basis;
+     const weight=session&&basis?.endsWith('(kg)')?T.summary(session).max:null;
+     if(weight===null){
+      cell.append(el('span',session?(basis==='Peso corporal / sem carga'||basis==='Elástico / sem kg'?shortBasis:'Sem carga em kg'):'Sem registro','evolution-square'));
+      continue;
+     }
+     const comparison=contexts.get(T.context(session));
+     const square=el('span',undefined,'evolution-square has-load');
+     square.append(el('strong',fmt(weight)+' kg'),el('small',comparison.label));
+     cell.append(square);
+    }
+    const variations=row.insertCell();
+    for(const {label,weights} of contexts.values()){
+     if(weights.length<2)continue;
+     const delta=Number((weights.at(-1)-weights[0]).toFixed(2));
+     const square=el('span',undefined,'evolution-square'+(delta>0?' has-load':''));
+     square.append(el('strong',(delta>0?'+':'')+fmt(delta)+' kg'));
+     if(contexts.size>1)square.append(el('small',label));
+     variations.append(square);
+    }
+    if(!variations.childElementCount)variations.append(el('span',contexts.size>1?'Referências distintas':contexts.size?'1 carga lançada':'Sem comparação','evolution-square'));
+   }
+   wrap.append(table);
+   section.append(el('h4',title),wrap);
+   grid.append(section);
+  }
  }
 }
-const pdfStart=$('evolution-pdf-start'),pdfEnd=$('evolution-pdf-date');
+const pdfPreset=$('evolution-pdf-preset'),pdfStart=$('evolution-pdf-start'),pdfEnd=$('evolution-pdf-date');
 function updatePdfPeriod(){
- pdfStart.max=pdfEnd.max=T.dateKey(new Date());
+ const custom=pdfPreset.value==='custom';
+ const today=new Date();
+ pdfStart.max=pdfEnd.max=T.dateKey(today);
+ $('evolution-pdf-custom').hidden=!custom;
+ pdfStart.disabled=pdfEnd.disabled=!custom;
  pdfEnd.setCustomValidity('');
  const status=$('evolution-pdf-period');
- if(!pdfStart.validity.valid||!pdfEnd.validity.valid){
-  status.textContent='Escolha duas datas até hoje.';
-  return [];
+ let dates;
+ if(custom){
+  if(!pdfStart.validity.valid||!pdfEnd.validity.valid){
+   status.textContent='Escolha duas datas até hoje.';
+   return [];
+  }
+  if(pdfStart.value>pdfEnd.value){
+   const message='A data final deve ser igual ou posterior à data de início.';
+   pdfEnd.setCustomValidity(message);
+   status.textContent=message;
+   return [];
+  }
+  const start=new Date(pdfStart.value+'T12:00:00'),end=new Date(pdfEnd.value+'T12:00:00');
+  dates=[];
+  for(let date=start;date<=end;date=new Date(date.getFullYear(),date.getMonth(),date.getDate()+1,12))dates.push(date);
+ }else{
+  dates=evolutionDates(today,Number(pdfPreset.value));
+  pdfStart.value=T.dateKey(dates[0]);
+  pdfEnd.value=T.dateKey(dates.at(-1));
  }
- const dates=evolutionDates(new Date(pdfEnd.value+'T12:00:00'));
- if(pdfStart.value>pdfEnd.value||pdfStart.value<T.dateKey(dates[0])){
-  const message=pdfStart.value>pdfEnd.value?'A data final deve ser igual ou posterior à data de início.':'Escolha um intervalo de até 30 dias.';
-  pdfEnd.setCustomValidity(message);
-  status.textContent=message;
-  return [];
- }
- const selectedDates=dates.filter(date=>T.dateKey(date)>=pdfStart.value);
- status.textContent=dateLabel(pdfStart.value)+' a '+dateLabel(pdfEnd.value)+' · '+selectedDates.length+(selectedDates.length===1?' dia':' dias');
- return selectedDates;
+ status.textContent=dateLabel(pdfStart.value)+' a '+dateLabel(pdfEnd.value)+' · '+dates.length+(dates.length===1?' dia':' dias');
+ return dates;
 }
-const defaultPdfDates=evolutionDates();
-pdfStart.value=T.dateKey(defaultPdfDates[0]);
-pdfEnd.value=T.dateKey(defaultPdfDates.at(-1));
+pdfPreset.onchange=updatePdfPeriod;
 for(const input of [pdfStart,pdfEnd]){
  input.oninput=updatePdfPeriod;
  input.onfocus=updatePdfPeriod;
