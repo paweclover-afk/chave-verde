@@ -113,8 +113,7 @@ function evolutionGroups(){
 function evolutionDates(endDate=new Date()){
  return Array.from({length:30},(_,i)=>new Date(endDate.getFullYear(),endDate.getMonth(),endDate.getDate()-29+i,12));
 }
-function renderEvolution(endDate,grid=$('evolutioncards'),period=$('evolutionperiod')){
- const dates=evolutionDates(endDate);
+function renderEvolution(dates=evolutionDates(),grid=$('evolutioncards'),period=$('evolutionperiod')){
  const start=T.dateKey(dates[0]),end=T.dateKey(dates.at(-1));
  period.textContent='Leonarda Cristina Di Vita · '+dateLabel(start)+' a '+dateLabel(end);
  grid.replaceChildren();
@@ -127,7 +126,8 @@ function renderEvolution(endDate,grid=$('evolutioncards'),period=$('evolutionper
   const recordedDates=new Set([...sessions.values()].filter(s=>exerciseIds.has(s.exercise)).map(s=>s.date));
   const columns=[...days].filter(([date,weekday])=>weekday===workout.day||recordedDates.has(date)).map(([date])=>date);
   const section=el('section',undefined,'evolution-workout');
-  const title=dates.find(date=>date.getDay()===workout.day).toLocaleDateString('pt-BR',{weekday:'long'})+' · '+workout.title;
+  const weekday=new Date(2026,0,4+workout.day,12).toLocaleDateString('pt-BR',{weekday:'long'});
+  const title=weekday+' · '+workout.title;
   const wrap=el('div',undefined,'evolution-scroll'),table=el('table',undefined,'evolution-table');
   wrap.tabIndex=0;
   wrap.setAttribute('role','region');
@@ -176,23 +176,39 @@ function renderEvolution(endDate,grid=$('evolutioncards'),period=$('evolutionper
   grid.append(section);
  }
 }
-const pdfDate=$('evolution-pdf-date');
+const pdfStart=$('evolution-pdf-start'),pdfEnd=$('evolution-pdf-date');
 function updatePdfPeriod(){
- pdfDate.max=T.dateKey(new Date());
- const dates=pdfDate.validity.valid?evolutionDates(new Date(pdfDate.value+'T12:00:00')):null;
- $('evolution-pdf-period').textContent=dates
-  ?dateLabel(T.dateKey(dates[0]))+' a '+dateLabel(T.dateKey(dates.at(-1)))
-  :'Escolha uma data final até hoje.';
+ pdfStart.max=pdfEnd.max=T.dateKey(new Date());
+ pdfEnd.setCustomValidity('');
+ const status=$('evolution-pdf-period');
+ if(!pdfStart.validity.valid||!pdfEnd.validity.valid){
+  status.textContent='Escolha duas datas até hoje.';
+  return [];
+ }
+ const dates=evolutionDates(new Date(pdfEnd.value+'T12:00:00'));
+ if(pdfStart.value>pdfEnd.value||pdfStart.value<T.dateKey(dates[0])){
+  const message=pdfStart.value>pdfEnd.value?'A data final deve ser igual ou posterior à data de início.':'Escolha um intervalo de até 30 dias.';
+  pdfEnd.setCustomValidity(message);
+  status.textContent=message;
+  return [];
+ }
+ const selectedDates=dates.filter(date=>T.dateKey(date)>=pdfStart.value);
+ status.textContent=dateLabel(pdfStart.value)+' a '+dateLabel(pdfEnd.value)+' · '+selectedDates.length+(selectedDates.length===1?' dia':' dias');
+ return selectedDates;
 }
-pdfDate.value=T.dateKey(new Date());
-pdfDate.oninput=updatePdfPeriod;
-pdfDate.onfocus=updatePdfPeriod;
+const defaultPdfDates=evolutionDates();
+pdfStart.value=T.dateKey(defaultPdfDates[0]);
+pdfEnd.value=T.dateKey(defaultPdfDates.at(-1));
+for(const input of [pdfStart,pdfEnd]){
+ input.oninput=updatePdfPeriod;
+ input.onfocus=updatePdfPeriod;
+}
 updatePdfPeriod();
 $('evolution-pdf-form').onsubmit=event=>{
  event.preventDefault();
- updatePdfPeriod();
- if(!pdfDate.reportValidity())return;
- renderEvolution(new Date(pdfDate.value+'T12:00:00'),$('evolution-print-grid'),$('evolution-print-period'));
+ const dates=updatePdfPeriod();
+ if(!dates.length)return;
+ renderEvolution(dates,$('evolution-print-grid'),$('evolution-print-period'));
  window.print();
 };
 function renderHistory(){
