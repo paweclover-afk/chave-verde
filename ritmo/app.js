@@ -110,16 +110,15 @@ function evolutionGroups(){
  return Array.from(groups.values(),sessions=>sessions.sort((a,b)=>b.date.localeCompare(a.date)))
   .sort((a,b)=>b[0].date.localeCompare(a[0].date));
 }
-function evolutionDates(){
- const today=new Date();
- return Array.from({length:30},(_,i)=>new Date(today.getFullYear(),today.getMonth(),today.getDate()-29+i,12));
+function evolutionDates(endDate=new Date()){
+ return Array.from({length:30},(_,i)=>new Date(endDate.getFullYear(),endDate.getMonth(),endDate.getDate()-29+i,12));
 }
-function renderEvolution(){
- const grid=$('evolutioncards'),dates=evolutionDates();
+function renderEvolution(endDate,grid=$('evolutioncards'),period=$('evolutionperiod')){
+ const dates=evolutionDates(endDate);
  const start=T.dateKey(dates[0]),end=T.dateKey(dates.at(-1));
- $('evolutionperiod').textContent='Leonarda Cristina Di Vita · '+dateLabel(start)+' a '+dateLabel(end);
+ period.textContent='Leonarda Cristina Di Vita · '+dateLabel(start)+' a '+dateLabel(end);
  grid.replaceChildren();
- $('exportevolution').disabled=!state.sessions.some(s=>s.date>=start&&s.date<=end);
+ if(grid===$('evolutioncards'))$('exportevolution').disabled=!state.sessions.some(s=>s.date>=start&&s.date<=end);
  const days=new Map(dates.map(date=>[T.dateKey(date),date.getDay()]));
  const sessions=new Map(state.sessions.filter(s=>days.has(s.date)).map(s=>[s.exercise+'|'+s.date,s]));
  const basisLabels={'Carga total (kg)':'Total','Peso da máquina (kg)':'Máquina','Por halter (kg)':'Por halter','Por lado (kg)':'Por lado','Peso corporal / sem carga':'Peso corporal','Elástico / sem kg':'Elástico'};
@@ -177,8 +176,23 @@ function renderEvolution(){
   grid.append(section);
  }
 }
-$('printevolution').onclick=()=>{
- renderEvolution();
+const pdfDate=$('evolution-pdf-date');
+function updatePdfPeriod(){
+ pdfDate.max=T.dateKey(new Date());
+ const dates=pdfDate.validity.valid?evolutionDates(new Date(pdfDate.value+'T12:00:00')):null;
+ $('evolution-pdf-period').textContent=dates
+  ?dateLabel(T.dateKey(dates[0]))+' a '+dateLabel(T.dateKey(dates.at(-1)))
+  :'Escolha uma data final até hoje.';
+}
+pdfDate.value=T.dateKey(new Date());
+pdfDate.oninput=updatePdfPeriod;
+pdfDate.onfocus=updatePdfPeriod;
+updatePdfPeriod();
+$('evolution-pdf-form').onsubmit=event=>{
+ event.preventDefault();
+ updatePdfPeriod();
+ if(!pdfDate.reportValidity())return;
+ renderEvolution(new Date(pdfDate.value+'T12:00:00'),$('evolution-print-grid'),$('evolution-print-period'));
  window.print();
 };
 function renderHistory(){
