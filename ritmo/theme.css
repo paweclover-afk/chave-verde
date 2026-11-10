@@ -111,6 +111,8 @@ html[data-theme=light] input:-webkit-autofill,html[data-theme=light] textarea:-w
  body>*:not(#app-shell),#app-shell>*:not(main),#app-shell>main>*:not(#history),#history>*:not(#evolution-print-report),.evolution-actions,.evolution-scrollhint{display:none!important}
  #evolution-print-report{display:block;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important;color:#252027!important}
  #evolution-print-report p{color:#554451!important}
+ #evolution-print-report h3,#evolution-print-report h4{color:#252027!important}
+ #evolution-print-report .evolution-square small{color:#592244!important}
  .evolution-workout+.evolution-workout{break-before:page}
  .evolution-workout h4{break-after:avoid}
  .evolution-scroll{overflow:visible}
