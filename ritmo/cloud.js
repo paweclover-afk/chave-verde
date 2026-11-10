@@ -30,7 +30,7 @@
     window.RitmoCloud={initialState:state,queueState,flush,pending:()=>Object.keys(pending).length,blocked:()=>blocked,audit:day=>api('audit&day='+encodeURIComponent(day))};
     document.getElementById('accountname').textContent=data.user.email;login.hidden=true;shell.hidden=true;document.getElementById('app-loading').hidden=false;
     await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;
-    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent='Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
+    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent=greeting.requiresAck?'Já li a mensagem':'Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
       const error=document.createElement('p');
       error.setAttribute('role','status');
       dialog.addEventListener('cancel',event=>event.preventDefault());
@@ -43,8 +43,10 @@
           const result=await api('ack-message',{id:greeting.id,event:crypto.randomUUID()});
           if(result.previousRevision===revisions[day]){
             const snapshot=JSON.parse(synced[day]);
-            snapshot.foodPlan.message.acknowledgedAt=result.acknowledgedAt;
-            state.foodPlans[day].message.acknowledgedAt=result.acknowledgedAt;
+            for(const configuration of [snapshot.foodPlan.message,state.foodPlans[day].message]){
+              const message=Array.isArray(configuration.schedule)?configuration.schedule.find(entry=>entry.id===greeting.id):configuration;
+              if(message)message.acknowledgedAt=result.acknowledgedAt;
+            }
             revisions[day]=result.revision;synced[day]=fingerprint(snapshot);
           }
           dialog.close();
