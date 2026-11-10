@@ -33,6 +33,90 @@ function agenda(){
  for(const e of old.filter(e=>Number(e.id)>5))state.agenda[k].push({...e,id:'legacy-'+e.id});persist();
  }return state.agenda[k];
 }
+const celebrationPhrases=[
+ 'Você fechou o dia com chave de ouro!',
+ 'Cada tarefa contou. Olha onde você chegou!',
+ 'Missão cumprida. Parabéns pelo seu dia!',
+ 'O que você planejou virou realidade.',
+ 'Hoje você cumpriu tudo o que se propôs a fazer.',
+ 'Seu esforço merece ser comemorado!',
+ 'Você deu um passo de cada vez e chegou aos 100%.',
+ 'Que satisfação ver tudo concluído!',
+ 'Sua constância apareceu em cada tarefa.',
+ 'Hoje você fez acontecer!',
+ 'A última tarefa fechou um dia inteiro de dedicação.',
+ 'Você cuidou do que era importante para você.',
+ 'Seu planejamento saiu do papel!',
+ 'Que orgulho do que você fez hoje!',
+ 'Hoje teve foco, dedicação e resultado.',
+ 'Você honrou o compromisso que fez consigo.',
+ 'Seu dia rendeu. Aproveite essa sensação!',
+ 'O esforço de hoje é motivo de orgulho.',
+ 'Você levou sua rotina até o fim!',
+ 'A lista está completa. A conquista é sua!',
+ 'Hoje você encontrou tempo para o que importa.',
+ 'Seu ritmo te trouxe até aqui.',
+ 'Você fez o que estava ao seu alcance e concluiu tudo.',
+ 'Hoje você mostrou o valor dos pequenos passos.',
+ 'Guarde a alegria de ver seu esforço dar resultado.',
+ 'Você concluiu a lista. Agora pode respirar fundo!',
+ 'Sua dedicação merece uma pausa para comemorar.',
+ 'Você começou, seguiu e terminou!',
+ 'Hoje você fez por você.',
+ 'Que bom ver seu esforço se transformar em progresso.',
+ 'Você fez uma tarefa de cada vez e completou o dia.',
+ 'Seu dia terminou com uma conquista para lembrar.',
+ 'Seu cuidado com a rotina deu resultado hoje.',
+ 'Você fez espaço para suas prioridades.',
+ 'Cada marcação conta um pouco do seu esforço.',
+ 'Dia completo. Aproveite o orgulho de ter chegado aqui!',
+ 'Você cumpriu o combinado com você.',
+ 'Hoje você foi até o fim no seu ritmo.',
+ 'Seu foco valeu a pena!',
+ 'Parabéns por terminar o que você começou.',
+ 'Você merece comemorar cada tarefa concluída.',
+ 'Hoje o plano ganhou vida nas suas mãos.',
+ 'Você fez caber o que era importante.',
+ 'Sua persistência fez diferença hoje.',
+ 'Você tem um bom motivo para sorrir hoje.',
+ 'O mérito de cada tarefa concluída é seu.',
+ 'Você encerrou a lista com 100%. Que conquista!',
+ 'Celebre o dia que você construiu, tarefa por tarefa.',
+ 'Seu esforço ficou visível. Parabéns!',
+ 'Tudo concluído. Esse momento é seu!'
+];
+let lastCelebrationPhrase=-1;
+function celebrateCompletion(items){
+ if(!items.length||!items.every(item=>item.done))return;
+ const count=celebrationPhrases.length;
+ lastCelebrationPhrase=(lastCelebrationPhrase+1+Math.floor(Math.random()*(count-1)))%count;
+ const dialog=el('dialog',undefined,'completion-celebration');
+ const heading=el('h2','100% das tarefas concluídas!');
+ heading.id='completion-heading';
+ dialog.setAttribute('aria-labelledby',heading.id);
+ const close=el('button','Comemorar!','primary');
+ close.type='button';
+ close.onclick=()=>dialog.close();
+ dialog.append(el('div','🏆','completion-trophy'),heading,el('p',celebrationPhrases[lastCelebrationPhrase]),close);
+ dialog.firstChild.setAttribute('aria-hidden','true');
+ dialog.onclose=()=>dialog.remove();
+ document.body.append(dialog);
+ dialog.showModal();
+ if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const confetti=el('div',undefined,'completion-confetti');
+ confetti.setAttribute('aria-hidden','true');
+ const colors=['#f472b6','#fbcfe8','#fbbf24','#a78bfa','#60a5fa'];
+ for(let i=0;i<40;i++){
+  const piece=el('i');
+  piece.style.setProperty('--confetti-x',Math.random()*100+'%');
+  piece.style.setProperty('--confetti-drift',Math.random()*180-90+'px');
+  piece.style.setProperty('--confetti-delay',Math.random()*.7+'s');
+  piece.style.backgroundColor=colors[i%colors.length];
+  confetti.append(piece);
+ }
+ dialog.append(confetti);
+ setTimeout(()=>confetti.remove(),2900);
+}
 function render(){
  const titles={finance:['Financeiro','Despesas, acordos e vencimentos da Leonarda.'],daybyday:['DayByDay','Sua rotina, um checkbox de cada vez.'],diary:['Meu diário','Seus registros de cada dia, guardados para consultar depois.'],overview:['Leonarda, no seu ritmo.','Comece pelo treino do dia e salve o que você fez.'],training:['Meu treino e minhas cargas','Confira a data, preencha as séries e toque em Salvar exercício.'],mobility:['Mobilidade e alongamentos','Veja a sequência e marque o que você fez.'],food:['Minhas refeições','Consulte os horários, as porções e as opções do seu plano.'],history:['Minha evolução','Veja como as cargas mudaram de um treino para o outro.']};
  $('pagetitle').textContent=titles[view][0];$('pageintro').textContent=titles[view][1];$('homehero').hidden=view!=='overview';document.querySelector('.stats').hidden=['daybyday','finance'].includes(view);document.querySelector('.datecard').hidden=view==='finance';$('add').hidden=view==='finance';$('add').textContent=view==='daybyday'?'+ Atividade DayByDay':'+ Nova atividade';
@@ -55,7 +139,12 @@ function render(){
 function renderAgenda(){
  const w=dayWorkout();$('workouttitle').textContent=w?w.title:'OFF de musculação';$('workoutdesc').textContent=w?'Divisão original do treinador + 30 min de cardio a 120–140 bpm.':'Sábado e domingo: 40 min de cardio a 120–140 bpm, conforme o plano.';
  $('events').replaceChildren();for(const item of [...agenda()].sort((a,b)=>a.time.localeCompare(b.time))){const row=el('div',undefined,'event'+(item.done?' completed':'')),body=el('div',undefined,'eventbody'),c=el('button',item.done?'✓':'','check'+(item.done?' done':''));
- body.append(el('strong',item.name),el('small',item.details));c.setAttribute('aria-label',(item.done?'Desmarcar ':'Concluir ')+item.name);c.setAttribute('aria-pressed',!!item.done);c.onclick=()=>{item.done=!item.done;persist();render();};
+ body.append(el('strong',item.name),el('small',item.details));c.setAttribute('aria-label',(item.done?'Desmarcar ':'Concluir ')+item.name);c.setAttribute('aria-pressed',!!item.done);c.onclick=()=>{
+  item.done=!item.done;
+  persist();
+  render();
+  if(item.done)celebrateCompletion(agenda());
+ };
  const tools=el('div',undefined,'eventtools'),edit=el('button','Editar'),del=el('button','Excluir');edit.setAttribute('aria-label','Editar '+item.name);del.setAttribute('aria-label','Excluir '+item.name);edit.onclick=()=>openActivity(item);del.onclick=()=>{const d=key(),snapshot={...item};state.agenda[d]=state.agenda[d].filter(x=>x.id!==item.id);persist();render();toast('Atividade removida.',()=>{state.agenda[d].push(snapshot);persist();render();});};tools.append(edit,del);
  row.append(el('div',item.time,'time'),el('div',{meal:'🥗',workout:'↗',habit:'〰'}[item.type]||'☀','eventicon'),body,c,tools);$('events').append(row);}
  const old=legacy.days?.[`${selected.getFullYear()}-${selected.getMonth()+1}-${selected.getDate()}`]||[];$('legacy').replaceChildren();if(!old.length)$('legacy').append(el('p','Nenhum registro anterior nesta data.','smallnote'));for(const x of old)$('legacy').append(el('p',`${x.time} · ${x.name}${x.done?' · concluído':''}`,'smallnote'));
@@ -357,7 +446,7 @@ function renderDaybyday(){
  add.onclick=()=>editDaybyday();reset.disabled=!done;reset.onclick=()=>{if(!confirm('Desmarcar apenas as atividades DayByDay de '+dateLabel(d)+'?'))return;const snapshot=structuredClone(items);items.forEach(x=>x.done=false);persist();render();toast('Marcações do dia removidas.',()=>{state.daybyday[d].items=snapshot;persist();render();});};actions.append(add,reset);title.append(el('h3',selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})),actions);daily.append(title,daybydayProgress('Realização do dia',done,required.length));
  const list=el('div',undefined,'db-timeline');
  for(const item of [...items].sort((a,b)=>a.time.localeCompare(b.time))){
-  const row=el('div',undefined,'db-item db-'+item.category+(item.done?' db-done':'')),label=el('label',undefined,'db-checklabel'),check=el('input'),body=el('span',undefined,'db-body'),tools=el('div',undefined,'db-tools'),edit=el('button','Editar','secondary'),remove=el('button','Excluir','secondary');check.type='checkbox';check.checked=item.done;check.onchange=()=>{item.done=check.checked;persist();render();const restored=document.querySelector('[data-db-id="'+CSS.escape(item.id)+'"]');restored?.focus();};check.dataset.dbId=item.id;check.setAttribute('aria-label',item.name+' às '+item.time);body.append(el('small',item.time+' · '+daybydayCategories[item.category]+(item.optional?' · Opcional':''),'db-time'),el('strong',item.name));if(item.details)body.append(el('small',item.details));label.append(check,body);edit.setAttribute('aria-label','Editar '+item.name);edit.onclick=()=>editDaybyday(item);remove.setAttribute('aria-label','Excluir '+item.name);remove.onclick=()=>{const snapshot=structuredClone(items);state.daybyday[d].items=items.filter(x=>x.id!==item.id);persist();render();toast('Atividade removida desta data.',()=>{state.daybyday[d].items=snapshot;persist();render();});};tools.append(edit,remove);row.append(label,tools);list.append(row);
+  const row=el('div',undefined,'db-item db-'+item.category+(item.done?' db-done':'')),label=el('label',undefined,'db-checklabel'),check=el('input'),body=el('span',undefined,'db-body'),tools=el('div',undefined,'db-tools'),edit=el('button','Editar','secondary'),remove=el('button','Excluir','secondary');check.type='checkbox';check.checked=item.done;check.onchange=()=>{item.done=check.checked;persist();render();const restored=document.querySelector('[data-db-id="'+CSS.escape(item.id)+'"]');restored?.focus();if(item.done&&!item.optional)celebrateCompletion(required);};check.dataset.dbId=item.id;check.setAttribute('aria-label',item.name+' às '+item.time);body.append(el('small',item.time+' · '+daybydayCategories[item.category]+(item.optional?' · Opcional':''),'db-time'),el('strong',item.name));if(item.details)body.append(el('small',item.details));label.append(check,body);edit.setAttribute('aria-label','Editar '+item.name);edit.onclick=()=>editDaybyday(item);remove.setAttribute('aria-label','Excluir '+item.name);remove.onclick=()=>{const snapshot=structuredClone(items);state.daybyday[d].items=items.filter(x=>x.id!==item.id);persist();render();toast('Atividade removida desta data.',()=>{state.daybyday[d].items=snapshot;persist();render();});};tools.append(edit,remove);row.append(label,tools);list.append(row);
  }
  if(!items.length)list.append(el('p','Nenhuma atividade nesta data. Toque em + Atividade para começar.','smallnote'));daily.append(list);content.append(daily);
  content.append(monthCalendar());

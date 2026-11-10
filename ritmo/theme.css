@@ -101,6 +101,30 @@ html[data-theme=light] input:-webkit-autofill,html[data-theme=light] textarea:-w
 #historydetails,#evolution-pdf-download{margin-top:16px;scroll-margin-top:18px}
 #evolution-pdf-form input{max-width:240px}
 #evolution-print-report{display:none}
+.completion-celebration{
+ position:fixed;inset:0;margin:auto;width:min(90vw,420px);max-height:85dvh;
+ padding:28px 22px;text-align:center;border:1px solid #ec4899;border-radius:20px;
+ box-shadow:0 16px 58px #0006;overflow:hidden
+}
+.completion-celebration::backdrop{background:#1b1026a8}
+.completion-celebration h2{margin:8px 0}
+.completion-celebration p{margin:10px 0 22px;color:var(--ink)}
+.completion-celebration button{min-height:44px}
+.completion-trophy{font-size:50px;line-height:1.2}
+.completion-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.completion-confetti i{
+ position:absolute;top:-14px;left:var(--confetti-x);width:8px;height:12px;
+ border-radius:2px;animation:completion-fall 2s var(--confetti-delay) ease-out both
+}
+.completion-confetti i:nth-child(3n){height:8px;border-radius:50%}
+@keyframes completion-fall{
+ from{transform:translateY(0) rotate(0);opacity:1}
+ to{transform:translate(var(--confetti-drift),340px) rotate(620deg);opacity:0}
+}
+@media(prefers-reduced-motion:no-preference){
+ .completion-trophy{animation:completion-pop .35s ease-out}
+ @keyframes completion-pop{from{transform:scale(.75);opacity:.5}to{transform:scale(1);opacity:1}}
+}
 @media(max-width:700px){
  .evolution-table tr>th:first-child{position:sticky;left:0;width:134px;background:var(--panel-soft,#f5f0f5)}
 }
