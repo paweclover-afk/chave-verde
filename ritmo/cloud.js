@@ -15,13 +15,12 @@
    return {remaining,elapsed:countdownTotal-remaining};
  }
  function createCountdown(){
-   const box=document.createElement('section'),title=document.createElement('strong');
+   const box=document.createElement('section');
    const bar=document.createElement('progress'),caption=document.createElement('small');
    box.className='daily-countdown';
-   title.textContent='Contagem até 20/03/2027';
    bar.max=countdownTotal;
-   bar.setAttribute('aria-label',title.textContent);
-   box.append(title,bar,caption);
+   bar.setAttribute('aria-label','Progresso');
+   box.append(bar,caption);
    return box;
  }
  function updateCountdowns(){
@@ -29,7 +28,7 @@
    const percent=Math.floor(elapsed/countdownTotal*100);
    for(const box of document.querySelectorAll('.daily-countdown')){
      box.querySelector('progress').value=elapsed;
-     box.querySelector('small').textContent='Faltam '+remaining+'/'+countdownTotal+' · '+percent+'%';
+     box.querySelector('small').textContent='Faltam '+remaining+'/'+countdownTotal+' '+percent+'%';
    }
  }
  async function api(action,body){const r=await fetch('/api/ritmo?action='+action,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})});let data;try{data=await r.json();}catch{throw Error('Não foi possível falar com o servidor.');}if(!r.ok){const e=Error(data.error||'Não foi possível salvar.');e.status=r.status;throw e;}return data;}
