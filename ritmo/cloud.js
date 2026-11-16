@@ -5,7 +5,7 @@
  function canonical(v){if(Array.isArray(v))return v.map(canonical);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])]));return v;}
  const fingerprint=v=>JSON.stringify(canonical(v));
  function badge(text,kind=''){status.textContent=text;status.dataset.kind=kind;}
- const countdownStart=Date.UTC(2026,10,16),countdownEnd=Date.UTC(2027,2,20);
+ const countdownStart=Date.UTC(2026,10,5),countdownEnd=Date.UTC(2027,2,20);
  const dayMs=86400000,countdownTotal=(countdownEnd-countdownStart)/dayMs;
  const countdownCalendar=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'});
  function countdownProgress(now=new Date()){
@@ -29,7 +29,7 @@
    const percent=Math.floor(elapsed/countdownTotal*100);
    for(const box of document.querySelectorAll('.daily-countdown')){
      box.querySelector('progress').value=elapsed;
-     box.querySelector('small').textContent='Faltam '+remaining+'/'+countdownTotal+' dias · '+percent+'%';
+     box.querySelector('small').textContent='Faltam '+remaining+'/'+countdownTotal+' · '+percent+'%';
    }
  }
  async function api(action,body){const r=await fetch('/api/ritmo?action='+action,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})});let data;try{data=await r.json();}catch{throw Error('Não foi possível falar com o servidor.');}if(!r.ok){const e=Error(data.error||'Não foi possível salvar.');e.status=r.status;throw e;}return data;}
