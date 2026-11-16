@@ -12,7 +12,7 @@
    const [year,month,day]=countdownCalendar.format(now).split('-').map(Number);
    const date=Date.UTC(year,month-1,day);
    const remaining=Math.max(0,Math.min(countdownTotal,(countdownEnd-date)/dayMs));
-   return {remaining,elapsed:countdownTotal-remaining};
+   return countdownTotal-remaining;
  }
  function createCountdown(){
    const box=document.createElement('section');
@@ -24,11 +24,11 @@
    return box;
  }
  function updateCountdowns(){
-   const {remaining,elapsed}=countdownProgress();
+   const elapsed=countdownProgress();
    const percent=Math.floor(elapsed/countdownTotal*100);
    for(const box of document.querySelectorAll('.daily-countdown')){
      box.querySelector('progress').value=elapsed;
-     box.querySelector('small').textContent='Faltam '+remaining+'/'+countdownTotal+' '+percent+'%';
+     box.querySelector('small').textContent=elapsed+'/'+countdownTotal+' '+percent+'%';
    }
  }
  async function api(action,body){const r=await fetch('/api/ritmo?action='+action,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})});let data;try{data=await r.json();}catch{throw Error('Não foi possível falar com o servidor.');}if(!r.ok){const e=Error(data.error||'Não foi possível salvar.');e.status=r.status;throw e;}return data;}
