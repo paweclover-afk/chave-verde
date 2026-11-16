@@ -5,6 +5,33 @@
  function canonical(v){if(Array.isArray(v))return v.map(canonical);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])]));return v;}
  const fingerprint=v=>JSON.stringify(canonical(v));
  function badge(text,kind=''){status.textContent=text;status.dataset.kind=kind;}
+ const countdownStart=Date.UTC(2026,10,16),countdownEnd=Date.UTC(2027,2,20);
+ const dayMs=86400000,countdownTotal=(countdownEnd-countdownStart)/dayMs;
+ const countdownCalendar=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'});
+ function countdownProgress(now=new Date()){
+   const [year,month,day]=countdownCalendar.format(now).split('-').map(Number);
+   const date=Date.UTC(year,month-1,day);
+   const remaining=Math.max(0,Math.min(countdownTotal,(countdownEnd-date)/dayMs));
+   return {remaining,elapsed:countdownTotal-remaining};
+ }
+ function createCountdown(){
+   const box=document.createElement('section'),title=document.createElement('strong');
+   const bar=document.createElement('progress'),caption=document.createElement('small');
+   box.className='daily-countdown';
+   title.textContent='Contagem até 20/03/2027';
+   bar.max=countdownTotal;
+   bar.setAttribute('aria-label',title.textContent);
+   box.append(title,bar,caption);
+   return box;
+ }
+ function updateCountdowns(){
+   const {remaining,elapsed}=countdownProgress();
+   const percent=Math.floor(elapsed/countdownTotal*100);
+   for(const box of document.querySelectorAll('.daily-countdown')){
+     box.querySelector('progress').value=elapsed;
+     box.querySelector('small').textContent='Faltam '+remaining+'/'+countdownTotal+' dias · '+percent+'%';
+   }
+ }
  async function api(action,body){const r=await fetch('/api/ritmo?action='+action,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})});let data;try{data=await r.json();}catch{throw Error('Não foi possível falar com o servidor.');}if(!r.ok){const e=Error(data.error||'Não foi possível salvar.');e.status=r.status;throw e;}return data;}
  function saveQueue(){try{localStorage.setItem(cacheKey,JSON.stringify({owner,pending}));return true;}catch{badge('Não foi possível guardar alterações neste aparelho. Exporte um backup.','error');return false;}}
  function collect(backup){
@@ -30,6 +57,7 @@
     window.RitmoCloud={initialState:state,queueState,flush,pending:()=>Object.keys(pending).length,blocked:()=>blocked,audit:day=>api('audit&day='+encodeURIComponent(day))};
     document.getElementById('accountname').textContent=data.user.email;login.hidden=true;shell.hidden=true;document.getElementById('app-loading').hidden=false;
     await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;
+    document.getElementById('daybyday').prepend(createCountdown());
     if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent=greeting.requiresAck?'Já li a mensagem':'Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
       const error=document.createElement('p');
       error.setAttribute('role','status');
@@ -54,7 +82,9 @@
       };
       dialog.append(title,text,error,close);
     }else{close.onclick=()=>dialog.close();dialog.append(title,text,close);}
+    close.before(createCountdown());
     dialog.onclose=()=>{dialog.remove();window.showFinanceReminders?.(owner);};document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.(owner);
+    updateCountdowns();
     badge(blocked?'Conflito entre aparelhos. Exporte um backup antes de recarregar.':Object.keys(pending).length?'Há alterações aguardando envio.':'✓ Registros carregados da sua conta',blocked?'error':'saved');if(!blocked)flush();
    }catch(e){document.getElementById('app-loading').hidden=true;login.hidden=false;shell.hidden=true;if(e.status!==401)document.getElementById('loginerror').textContent=e.message;}
  }
@@ -63,5 +93,7 @@
  document.getElementById('logout').onclick=async()=>{await flush();if(Object.keys(pending).length){badge('Ainda há alterações não enviadas. Aguarde a conexão ou exporte um backup antes de sair.','error');return;}try{await api('logout',{});localStorage.removeItem(cacheKey);location.reload();}catch{badge('Não foi possível sair. Tente novamente.','error');}};
  document.getElementById('retrycloud').onclick=flush;window.addEventListener('online',flush);setInterval(flush,15000);
  window.addEventListener('beforeunload',e=>{if(Object.keys(pending).length){e.preventDefault();e.returnValue='';}});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateCountdowns();});
+ setInterval(updateCountdowns,60000);
  boot();
 })();
