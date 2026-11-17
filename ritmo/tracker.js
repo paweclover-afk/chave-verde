@@ -60,7 +60,7 @@
     if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly'].includes(k)))throw Error('DayByDay inválido.');
     if(v.items!==undefined){
       if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
-      const ids=new Set();
+    const ids=new Set();
       for(const x of v.items){
         if(!x||typeof x!=='object'||typeof x.id!=='string'||!x.id||x.id.length>100||ids.has(x.id)||typeof x.name!=='string'||!x.name.trim()||x.name.length>160||typeof x.details!=='string'||x.details.length>500||!/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time)||typeof x.done!=='boolean'||!['rest','health','study','work','self','english','pt','cook'].includes(x.category))throw Error('Atividade DayByDay inválida.');
         ids.add(x.id);
@@ -124,6 +124,14 @@
         const key=entry.currency+'|'+entry.from;
         if(rates.has(key))throw Error('Recebimento semanal duplicado.');
         rates.add(key);
+      }
+    }
+      if(ledger.fixedBills!==undefined){
+      if(!Array.isArray(ledger.fixedBills)||ledger.fixedBills.length>100)throw Error('Limite de contas fixas excedido.');
+      const billIds=new Set();
+      for(const bill of ledger.fixedBills){
+        if(!object(bill)||!text(bill.id,100)||billIds.has(bill.id)||!text(bill.name,160)||!financeCurrencies.includes(bill.currency)||!validAmount(bill.amount)||!validFinanceDate(bill.from)||bill.to!==undefined&&(!validFinanceDate(bill.to)||bill.to<bill.from))throw Error('Conta fixa inválida.');
+        billIds.add(bill.id);
       }
     }
     const ids=new Set();

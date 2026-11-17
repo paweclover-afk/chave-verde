@@ -393,7 +393,7 @@ function budgetCard() {
     if(!populated)period.append(el('p','Sem recebimentos ou gastos no período.','smallnote'));
     columns.append(period);
   }
-  card.append(columns);
+  card.append(monthlyFixedBudget(T.dateKey(monthStart),T.dateKey(monthEnd)),columns);
   const details=el('details');
   details.open=!(ledger().income||[]).length;
   details.append(el('summary','Configurar recebimento semanal'));
@@ -417,4 +417,38 @@ function budgetCard() {
   };
   card.append(details);
   return card;
+}
+
+function monthlyFixedBudget(from,to) {
+  const box=el('section',undefined,'fixed-budget');
+  box.append(el('h3','Quanto sobra do salário no mês'),el('p','Previsão dos recebimentos das sextas do mês, descontando as contas fixas cadastradas abaixo. Cadastre cada conta uma vez.','smallnote'));
+  const bills=ledger().fixedBills||[];
+  const active=bills.filter(bill=>bill.from<=to&&(!bill.to||bill.to>=from));
+  for(const currency of T.financeCurrencies){
+    const income=T.cashSummary(ledger(),from,to,currency).income;
+    const fixed=active.filter(bill=>bill.currency===currency).reduce((sum,bill)=>sum+bill.amount,0);
+    if(!income&&!fixed)continue;
+    const summary=el('div',undefined,'finance-grid');
+    for(const [title,value,style] of [['Ganho mensal estimado',income,'fixed-income'],['Contas fixas do mês',fixed,'fixed-cost'],[income-fixed<0?'Falta para cobrir as contas':'Sobra após contas fixas',income-fixed,income-fixed<0?'fixed-deficit':'fixed-balance']]){
+      const tile=el('div',undefined,'finance-row '+style);
+      tile.append(el('small',title),el('h3',money(value,currency)));summary.append(tile);
+    }
+    box.append(summary);
+  }
+  box.append(el('p','A sobra acima considera somente as contas fixas. Os gastos variáveis e pagamentos registrados aparecem no saldo da semana e do mês abaixo.','smallnote'));
+  for(const bill of active){
+    const row=el('div',undefined,'finance-row'),remove=el('button','Encerrar a partir deste mês','secondary');
+    row.append(el('strong',bill.name+' · '+money(bill.amount,bill.currency)));
+    remove.type='button';
+    remove.onclick=()=>{if(!confirm('Encerrar '+bill.name+' a partir do mês selecionado?'))return;commitFinance(next=>{const existing=next.fixedBills.find(x=>x.id===bill.id);if(existing.from>=from)next.fixedBills=next.fixedBills.filter(x=>x.id!==bill.id);else{const end=new Date(from+'T12:00:00');end.setDate(0);existing.to=T.dateKey(end);}});};
+    row.append(remove);box.append(row);
+  }
+  const details=el('details');details.append(el('summary','Adicionar conta fixa mensal'));
+  const {form,button}=financeForm(details,'Salvar conta fixa');
+  const name=financeField(form,'Nome da conta',{type:'text',maxLength:160});
+  const currency=financeField(form,'Moeda',{options:currencyOptions});
+  const amount=financeField(form,'Valor mensal',amountField);
+  form.append(el('p','Esta conta entra na previsão todos os meses a partir do mês selecionado.','smallnote'),button);
+  form.onsubmit=event=>{event.preventDefault();try{const value=cents(amount),title=name.value.trim();if(!title)throw Error('Informe o nome da conta.');commitFinance(next=>{next.fixedBills??=[];next.fixedBills.push({id:crypto.randomUUID(),name:title,currency:currency.value,amount:value,from});});toast('Conta fixa mensal salva.');}catch(error){toast(error.message);}};
+  box.append(details);return box;
 }

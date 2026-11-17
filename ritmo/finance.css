@@ -15,3 +15,13 @@
 .finance-reminder-list{max-height:55dvh;overflow:auto;padding-left:22px}
 .finance-reminder-list li{margin:14px 0}
 @media(max-width:760px){.finance-grid{grid-template-columns:minmax(0,1fr)}.finance-tabs button{flex:1}}
+
+.fixed-budget{margin:18px 0;padding:16px;border:1px solid var(--line,#444);border-radius:12px}
+.fixed-budget .fixed-income{border-left:5px solid #54b8ff}
+.fixed-budget .fixed-cost{border-left:5px solid #ffbc59}
+.fixed-budget .fixed-balance{border-left:5px solid #57db9c}
+.fixed-budget .fixed-deficit{border-left:5px solid #ff6479}
+.fixed-budget .fixed-income h3{color:#90ceff}
+.fixed-budget .fixed-cost h3{color:#ffd08b}
+.fixed-budget .fixed-balance h3{color:#83edb8}
+.fixed-budget .fixed-deficit h3{color:#ff9eab}
