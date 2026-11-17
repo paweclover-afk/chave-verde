@@ -31,6 +31,20 @@
    countdown.querySelector('small').textContent=elapsed+'/'+countdownTotal+' '+percent+'%';
  }
  async function api(action,body){const r=await fetch('/api/ritmo?action='+action,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})});let data;try{data=await r.json();}catch{throw Error('Não foi possível falar com o servidor.');}if(!r.ok){const e=Error(data.error||'Não foi possível salvar.');e.status=r.status;throw e;}return data;}
+ function registerDeviceAccess(userId){
+   const storageKey='ritmo-device-'+userId;
+   try{
+     const url=new URL(location.href),label=url.searchParams.get('identificar-aparelho');
+     let device=JSON.parse(localStorage.getItem(storageKey)||'null');
+     if(['leonarda-phone','adilson-phone','adilson-computer'].includes(label)){
+       device={id:device?.id||crypto.randomUUID(),label};
+       localStorage.setItem(storageKey,JSON.stringify(device));
+       url.searchParams.delete('identificar-aparelho');
+       history.replaceState(history.state,'',url);
+     }
+     if(device?.id&&device.label)api('device-access',device).catch(()=>{});
+   }catch{}
+ }
  function saveQueue(){try{localStorage.setItem(cacheKey,JSON.stringify({owner,pending}));return true;}catch{badge('Não foi possível guardar alterações neste aparelho. Exporte um backup.','error');return false;}}
  function collect(backup){
    const s=backup.state,days=new Set([...Object.keys(s.agenda),...Object.keys(s.water),...Object.keys(s.mobility),...Object.keys(s.mealchoices),...Object.keys(s.selections),...Object.keys(s.notes||{}),...Object.keys(s.daybyday||{}),...Object.keys(s.foodPlans||{}),...backup.sessions.map(x=>x.date),...(s.finance?[Tracker.financeDay]:[])]),out={};
@@ -84,6 +98,7 @@
     close.before(countdown);
     dialog.onclose=()=>{if(dialog.contains(countdown))daybyday.prepend(countdown);dialog.remove();window.showFinanceReminders?.(owner);};document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.(owner);
     updateCountdown();
+    registerDeviceAccess(owner);
     badge(blocked?'Conflito entre aparelhos. Exporte um backup antes de recarregar.':Object.keys(pending).length?'Há alterações aguardando envio.':'✓ Registros carregados da sua conta',blocked?'error':'saved');if(!blocked)flush();
    }catch(e){document.getElementById('app-loading').hidden=true;login.hidden=false;shell.hidden=true;if(e.status!==401)document.getElementById('loginerror').textContent=e.message;}
  }
