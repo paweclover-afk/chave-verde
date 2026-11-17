@@ -11,7 +11,7 @@
   const date=d=>typeof d==='string'&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(d)&&!isNaN(Date.parse(d))&&key(new Date(d+'T12:00:00Z'))===d;
   const name=n=>typeof n==='string'&&n.trim().length>0&&n.length<=160;
   const currency=c=>['GBP','EUR','BRL'].includes(c);
-  for(const a of finance.accounts||[]){id(a);if(!name(a.name)||!amount(a.amount)||!currency(a.currency)||!date(a.start)||!['week','month','once'].includes(a.frequency))throw Error('Conta inválida.');}
+  for(const a of finance.accounts||[]){id(a);if(!name(a.name)||!amount(a.amount)||!currency(a.currency)||!date(a.start)||!['week','month','once'].includes(a.frequency)||a.installments!==undefined&&(!Number.isInteger(a.installments)||a.installments<1||a.installments>1200))throw Error('Conta inválida.');}
   for(const c of finance.cards||[]){id(c);if(!name(c.name)||!currency(c.currency)||![c.closing,c.due].every(n=>Number.isInteger(n)&&n>=1&&n<=31))throw Error('Cartão inválido.');}
   for(const p of finance.purchases||[]){id(p);if(!(finance.cards||[]).some(c=>c.id===p.card)||!name(p.name)||!amount(p.amount)||!date(p.date)||!Number.isInteger(p.installments)||p.installments<1||p.installments>120)throw Error('Compra inválida.');}
   for(const p of finance.billPayments||[]){id(p);if(typeof p.ref!=='string'||p.ref.length>200||!date(p.date)||!amount(p.amount))throw Error('Pagamento inválido.');}
@@ -20,8 +20,8 @@
   const end=monthDate(month,31),rows=[];
   for(const a of finance.accounts||[]){
    let day=a.start,index=0;
-   while(day<=end){
-    rows.push({ref:a.id+'@'+day,source:a,id:a.id,name:a.name,day,amount:a.amount,currency:a.currency,frequency:a.frequency,kind:'account'});
+   while(day<=end&&(a.installments===undefined||index<a.installments)){
+    rows.push({ref:a.id+'@'+day,source:a,id:a.id,name:a.name,day,amount:a.amount,currency:a.currency,frequency:a.frequency,installment:index+1,totalInstallments:a.installments,kind:'account'});
     if(a.frequency==='once')break;
     index++;
     if(a.frequency==='month')day=monthDate(nextMonth(a.start.slice(0,7),index),Number(a.start.slice(8)));

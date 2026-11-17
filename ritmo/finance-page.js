@@ -16,13 +16,20 @@ function editPlanAccount(account){
  ['amount','Valor', {...amountField,value:account?account.amount/100:''}],
  ['currency','Moeda',{options:currencyOptions,value:account?.currency||'GBP'}],
  ['frequency','Frequência',{options:[['week','Semanal'],['month','Mensal'],['once','Uma vez']],value:account?.frequency||'month'}],
+ ['installments','Quantidade de pagamentos (0 para continuar sem prazo)',{type:'number',min:0,max:1200,step:1,value:account?.installments||0}],
  ['start','Primeiro vencimento',{type:'date',value:account?.start||T.dateKey(new Date())}]
  ],f=>commitFinance(next=>{
  const record={id:account?.id||crypto.randomUUID(),name:f.name.value.trim(),amount:cents(f.amount),currency:f.currency.value,frequency:f.frequency.value,start:f.start.value};
+ const count=f.installments.valueAsNumber;
+ if(!Number.isInteger(count)||count<0||count>1200)throw Error('Informe de 0 a 1200 pagamentos.');
+ if(record.frequency==='once')record.installments=1;else if(count)record.installments=count;
  const payments=(next.billPayments||[]).filter(p=>p.ref.startsWith(record.id+'@'));
  if(account&&payments.length&&(record.start!==account.start||record.frequency!==account.frequency||record.currency!==account.currency))throw Error('Esta conta tem pagamentos. Mantenha moeda, frequência e primeiro vencimento para preservar os registros.');
  if(payments.some(p=>record.amount<(next.billPayments||[]).filter(x=>x.ref===p.ref).reduce((sum,x)=>sum+x.amount,0)))throw Error('Valor menor que pagamentos já registrados.');
- next.accounts??=[];next.accounts=next.accounts.filter(a=>a.id!==record.id);next.accounts.push(record);
+ next.accounts??=[];
+ const preview={...next,accounts:[record],billPayments:[]};
+ if(payments.length){const lastPayment=payments.map(p=>p.ref.split('@')[1]).sort().at(-1);const occurrences=FinancePlan.occurrences(preview,lastPayment.slice(0,7));if(payments.some(p=>!occurrences.some(r=>r.ref===p.ref)))throw Error('A quantidade informada exclui parcelas com pagamentos registrados.');}
+ next.accounts=next.accounts.filter(a=>a.id!==record.id);next.accounts.push(record);
  }));
 }
 function editPlanCard(card){
@@ -91,6 +98,7 @@ renderFinance=function(){
   if(financeFilter!=='all'&&financeFilter!==status)continue;
   const article=el('article',undefined,'finance-row');
   article.append(el('strong',row.name+' · '+money(row.amount,row.currency)),el('p',dateLabel(row.day)+' · '+({week:'Semanal',month:'Mensal',once:'Única'}[row.frequency])+' · '+({paid:'Paga',pending:'Pendente',overdue:'Atrasada'}[status]),'smallnote'));
+  if(row.totalInstallments)article.append(el('p','Parcela '+row.installment+' de '+row.totalInstallments,'smallnote'));
   if(row.day<from)article.append(el('p','Pendência de mês anterior','smallnote'));
   if(row.paid)article.append(el('p','Pago '+money(row.paid,row.currency)+' · Falta '+money(row.balance,row.currency)));
   if(row.balance){const pay=el('button','Registrar pagamento','primary');pay.onclick=()=>planPayment(row);article.append(pay);}
