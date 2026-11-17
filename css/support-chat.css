@@ -14,3 +14,5 @@
 #support-notice:not([hidden]){display:flex;width:100%;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;margin:0 0 12px;padding:14px 16px;border:1px solid #fface0;border-radius:12px;background:#ff91cc;color:#260b1a;text-align:left}
 #support-notice:focus-visible{outline:3px solid #fff;outline-offset:3px}
 #support-notice span{font-size:.9rem;font-weight:700}
+
+#support-open[data-unread]::before{content:'';display:inline-block;width:.65rem;height:.65rem;margin-inline-end:.4rem;border-radius:50%;background:#ff374f;vertical-align:middle}

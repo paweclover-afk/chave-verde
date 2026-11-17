@@ -63,6 +63,7 @@
 
   function showUnread(hasUnread) {
     button.textContent = hasUnread ? 'Suporte · Nova mensagem' : 'Suporte';
+    if (app === 'ritmo') button.toggleAttribute('data-unread',hasUnread);
     if (notice) notice.hidden = !hasUnread;
   }
 
