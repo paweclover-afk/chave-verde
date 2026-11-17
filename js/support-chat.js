@@ -3,6 +3,7 @@
   const app = document.currentScript.dataset.app;
   const shell = document.getElementById('app-shell');
   const button = document.getElementById('support-open');
+  const notice = document.getElementById('support-notice');
   const peer = app === 'ritmo' ? 'Suporte' : 'Leonarda';
   const dialog = document.createElement('dialog');
   dialog.className = 'support-dialog';
@@ -52,6 +53,11 @@
     if (end) list.scrollTop = list.scrollHeight;
   }
 
+  function showUnread(hasUnread) {
+    button.textContent = hasUnread ? 'Suporte · Nova mensagem' : 'Suporte';
+    if (notice) notice.hidden = !hasUnread;
+  }
+
   async function sync() {
     if (polling || shell.hidden || document.hidden) return;
     polling = true;
@@ -60,11 +66,11 @@
       if (shell.hidden) return;
       button.hidden = false;
       const unread = messages.filter(message => message.sender !== app && !message.read_at);
-      button.textContent = unread.length ? 'Suporte · Nova mensagem' : 'Suporte';
+      showUnread(unread.length > 0);
       render(messages);
       if (dialog.open && !document.hidden && unread.length) {
         await request({operation:'read',ids:unread.map(message => message.id)});
-        button.textContent = 'Suporte';
+        showUnread(false);
       }
       if (!submit.disabled) status.textContent = messages.length ? '' : 'A conversa começa aqui.';
     } catch (error) {
@@ -84,11 +90,13 @@
   }
 
   if (channel) channel.onmessage = refreshNow;
-  button.onclick = () => {
+  function openChat() {
     dialog.showModal();
     list.scrollTop = list.scrollHeight;
-    sync();
-  };
+    refreshNow();
+  }
+  button.onclick = openChat;
+  if (notice) notice.onclick = openChat;
   form.onsubmit = async event => {
     event.preventDefault();
     const text = field.value.trim();

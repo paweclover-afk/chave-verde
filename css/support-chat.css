@@ -10,3 +10,7 @@
 .support-dialog form{display:grid;gap:8px}
 .support-dialog textarea{width:100%;box-sizing:border-box;resize:vertical;padding:10px;border:1px solid currentColor;border-radius:8px;background:var(--bg,#101010);color:inherit;font:inherit}
 #support-open:not([hidden]){white-space:normal}
+
+#support-notice:not([hidden]){display:flex;width:100%;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;margin:0 0 12px;padding:14px 16px;border:1px solid #fface0;border-radius:12px;background:#ff91cc;color:#260b1a;text-align:left}
+#support-notice:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#support-notice span{font-size:.9rem;font-weight:700}
