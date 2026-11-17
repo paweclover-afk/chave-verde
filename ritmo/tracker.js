@@ -112,6 +112,20 @@
     const payments=ledger.debts.filter(debt=>debt.currency===currency).flatMap(debt=>debt.payments).filter(payment=>within(payment.date)).reduce((sum,payment)=>sum+payment.amount,0);
     return {income,expenses,payments,balance:income-expenses-payments,dates};
   }
+  function monthlyForecast(ledger,from,to,currency){
+    const totals=cashSummary(ledger,from,to,currency);
+    const fixed=(ledger.fixedBills||[]).filter(bill=>bill.currency===currency&&bill.from<=to&&(!bill.to||bill.to>=from)).reduce((sum,bill)=>sum+bill.amount,0);
+    let outstanding=0;
+    for(const debt of ledger.debts.filter(debt=>debt.currency===currency)){
+      let projected=0,due=debtDue(debt);
+      while(due&&due.day<=to){
+        outstanding+=due.due;
+        projected+=due.due;
+        due=debtDue(debt,projected);
+      }
+    }
+    return {...totals,fixed,outstanding,remaining:totals.balance-fixed-outstanding};
+  }
   function validateFinance(ledger){
     const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
     const text=(v,max)=>typeof v==='string'&&v.trim()&&v.length<=max;
@@ -145,6 +159,6 @@
     for(const x of ledger.expenses)if(!unique(x)||!text(x.name,160)||!financeCurrencies.includes(x.currency)||!expenseCategories.includes(x.category)||!validAmount(x.amount)||!validFinanceDate(x.date))throw Error('Despesa inválida.');
     return ledger;
   }
-  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday,financeDay,expenseCategories,financeCurrencies,validateFinance,paidAmount,debtDue,fridayOnOrAfter,cashSummary};
+  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday,financeDay,expenseCategories,financeCurrencies,validateFinance,paidAmount,debtDue,fridayOnOrAfter,cashSummary,monthlyForecast};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.Tracker=api;
 })(typeof window!=='undefined'?window:globalThis);

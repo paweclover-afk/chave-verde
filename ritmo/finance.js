@@ -421,21 +421,21 @@ function budgetCard() {
 
 function monthlyFixedBudget(from,to) {
   const box=el('section',undefined,'fixed-budget');
-  box.append(el('h3','Quanto sobra do salário no mês'),el('p','Previsão dos recebimentos das sextas do mês, descontando as contas fixas cadastradas abaixo. Cadastre cada conta uma vez.','smallnote'));
+  box.append(el('h3','Quanto sobra do salário no mês'),el('p','Cálculo automático com os recebimentos, gastos e acordos já registrados. Inclui parcelas pendentes até o fim do mês e parcelas atrasadas.','smallnote'));
   const bills=ledger().fixedBills||[];
   const active=bills.filter(bill=>bill.from<=to&&(!bill.to||bill.to>=from));
   for(const currency of T.financeCurrencies){
-    const income=T.cashSummary(ledger(),from,to,currency).income;
-    const fixed=active.filter(bill=>bill.currency===currency).reduce((sum,bill)=>sum+bill.amount,0);
-    if(!income&&!fixed)continue;
+    const forecast=T.monthlyForecast(ledger(),from,to,currency);
+    const {income,fixed,expenses,payments,outstanding,remaining}=forecast;
+    if(!income&&!fixed&&!expenses&&!payments&&!outstanding)continue;
     const summary=el('div',undefined,'finance-grid');
-    for(const [title,value,style] of [['Ganho mensal estimado',income,'fixed-income'],['Contas fixas do mês',fixed,'fixed-cost'],[income-fixed<0?'Falta para cobrir as contas':'Sobra após contas fixas',income-fixed,income-fixed<0?'fixed-deficit':'fixed-balance']]){
+    for(const [title,value,style] of [['Ganho mensal estimado',income,'fixed-income'],['Contas fixas mensais',fixed,'fixed-cost'],['Gastos já registrados',expenses,'fixed-cost'],['Parcelas já pagas no mês',payments,'fixed-cost'],['Parcelas a pagar até o fim do mês',outstanding,'fixed-cost'],[remaining<0?'Falta prevista no mês':'Sobra prevista do salário',remaining,remaining<0?'fixed-deficit':'fixed-balance']]){
       const tile=el('div',undefined,'finance-row '+style);
       tile.append(el('small',title),el('h3',money(value,currency)));summary.append(tile);
     }
     box.append(summary);
   }
-  box.append(el('p','A sobra acima considera somente as contas fixas. Os gastos variáveis e pagamentos registrados aparecem no saldo da semana e do mês abaixo.','smallnote'));
+  box.append(el('p','As parcelas já quitadas são descontadas pelos pagamentos registrados. A previsão soma as parcelas restantes até o fim do mês. As contas fixas adicionais são consideradas pelo valor mensal cadastrado.','smallnote'));
   for(const bill of active){
     const row=el('div',undefined,'finance-row'),remove=el('button','Encerrar a partir deste mês','secondary');
     row.append(el('strong',bill.name+' · '+money(bill.amount,bill.currency)));

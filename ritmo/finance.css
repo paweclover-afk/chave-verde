@@ -25,3 +25,10 @@
 .fixed-budget .fixed-cost h3{color:#ffd08b}
 .fixed-budget .fixed-balance h3{color:#83edb8}
 .fixed-budget .fixed-deficit h3{color:#ff9eab}
+
+.fixed-budget .finance-row.fixed-income{background:#102d46;color:#f3f9ff;border-color:#54b8ff}
+.fixed-budget .finance-row.fixed-cost{background:#352712;color:#fff7e8;border-color:#ffbc59}
+.fixed-budget .finance-row.fixed-balance{background:#103326;color:#effff6;border-color:#57db9c}
+.fixed-budget .finance-row.fixed-deficit{background:#3a1821;color:#fff2f5;border-color:#ff6479}
+.fixed-budget .finance-row h3{font-size:1.65rem;margin:8px 0;overflow-wrap:anywhere}
+.fixed-budget .finance-row small{color:inherit;opacity:1}
