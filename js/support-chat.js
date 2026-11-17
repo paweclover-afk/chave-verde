@@ -16,7 +16,15 @@
   const field = dialog.querySelector('textarea');
   const submit = form.querySelector('button');
   const time = new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'});
-  dialog.querySelector('label').textContent = app === 'ritmo' ? 'Relate seu problema' : 'Escreva para Leonarda';
+  const label = dialog.querySelector('label');
+  label.textContent = app === 'ritmo' ? 'Relate seu problema' : 'Escreva para Leonarda';
+  if (app === 'ritmo') {
+    const guidance = document.createElement('p');
+    guidance.id = 'support-guidance';
+    guidance.textContent = 'Seja direta e objetiva. Diga em qual tela o problema aconteceu, o que você tentou fazer e o que apareceu. Se houver uma mensagem de erro, copie o texto aqui.';
+    label.after(guidance);
+    field.setAttribute('aria-describedby',guidance.id);
+  }
   dialog.querySelector('header button').onclick = () => dialog.close();
 
   async function request(body) {
