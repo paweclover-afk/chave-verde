@@ -3,7 +3,7 @@
   const app = document.currentScript.dataset.app;
   const shell = document.getElementById('app-shell');
   const button = document.getElementById('support-open');
-  const peer = app === 'ritmo' ? 'Adilson' : 'Leonarda';
+  const peer = app === 'ritmo' ? 'Suporte' : 'Leonarda';
   const dialog = document.createElement('dialog');
   dialog.className = 'support-dialog';
   dialog.setAttribute('aria-labelledby','support-title');
@@ -15,7 +15,6 @@
   const field = dialog.querySelector('textarea');
   const submit = form.querySelector('button');
   const time = new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'});
-  dialog.querySelector('h2').textContent = 'Suporte com ' + peer;
   dialog.querySelector('label').textContent = app === 'ritmo' ? 'Relate seu problema' : 'Escreva para Leonarda';
   dialog.querySelector('header button').onclick = () => dialog.close();
 
@@ -29,7 +28,9 @@
     return response.json();
   }
 
+  const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('chaveverde-support') : null;
   let polling = false;
+  let refreshQueued = false;
   let latest = '';
   let draft;
   function render(messages) {
@@ -70,9 +71,19 @@
       if (dialog.open && !submit.disabled) status.textContent = error.message;
     } finally {
       polling = false;
+      if (refreshQueued) {
+        refreshQueued = false;
+        sync();
+      }
     }
   }
 
+  function refreshNow() {
+    if (polling) refreshQueued = true;
+    else sync();
+  }
+
+  if (channel) channel.onmessage = refreshNow;
   button.onclick = () => {
     dialog.showModal();
     list.scrollTop = list.scrollHeight;
@@ -87,6 +98,7 @@
     status.textContent = 'Enviando…';
     try {
       await request(draft);
+      channel?.postMessage('refresh');
       draft = undefined;
       field.value = '';
       status.textContent = '';
@@ -96,13 +108,12 @@
     } finally {
       submit.disabled = false;
     }
-    await sync();
-    list.scrollTop = list.scrollHeight;
+    refreshNow();
   };
 
   new MutationObserver(sync).observe(shell,{attributes:true,attributeFilter:['hidden']});
   document.addEventListener('visibilitychange',sync);
   window.addEventListener('focus',sync);
-  setInterval(sync,10000);
+  setInterval(sync,1000);
   sync();
 })();
