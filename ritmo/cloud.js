@@ -23,13 +23,12 @@
    box.append(bar,caption);
    return box;
  }
- function updateCountdowns(){
+ const countdown=createCountdown();
+ function updateCountdown(){
    const elapsed=countdownProgress();
    const percent=Math.floor(elapsed/countdownTotal*100);
-   for(const box of document.querySelectorAll('.daily-countdown')){
-     box.querySelector('progress').value=elapsed;
-     box.querySelector('small').textContent=elapsed+'/'+countdownTotal+' '+percent+'%';
-   }
+   countdown.querySelector('progress').value=elapsed;
+   countdown.querySelector('small').textContent=elapsed+'/'+countdownTotal+' '+percent+'%';
  }
  async function api(action,body){const r=await fetch('/api/ritmo?action='+action,{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})});let data;try{data=await r.json();}catch{throw Error('Não foi possível falar com o servidor.');}if(!r.ok){const e=Error(data.error||'Não foi possível salvar.');e.status=r.status;throw e;}return data;}
  function saveQueue(){try{localStorage.setItem(cacheKey,JSON.stringify({owner,pending}));return true;}catch{badge('Não foi possível guardar alterações neste aparelho. Exporte um backup.','error');return false;}}
@@ -56,7 +55,8 @@
     window.RitmoCloud={initialState:state,queueState,flush,pending:()=>Object.keys(pending).length,blocked:()=>blocked,audit:day=>api('audit&day='+encodeURIComponent(day))};
     document.getElementById('accountname').textContent=data.user.email;login.hidden=true;shell.hidden=true;document.getElementById('app-loading').hidden=false;
     await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;
-    document.getElementById('daybyday').prepend(createCountdown());
+    const daybyday=document.getElementById('daybyday');
+    daybyday.prepend(countdown);
     if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent=greeting.requiresAck?'Já li a mensagem':'Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
       const error=document.createElement('p');
       error.setAttribute('role','status');
@@ -81,9 +81,9 @@
       };
       dialog.append(title,text,error,close);
     }else{close.onclick=()=>dialog.close();dialog.append(title,text,close);}
-    close.before(createCountdown());
-    dialog.onclose=()=>{dialog.remove();window.showFinanceReminders?.(owner);};document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.(owner);
-    updateCountdowns();
+    close.before(countdown);
+    dialog.onclose=()=>{if(dialog.contains(countdown))daybyday.prepend(countdown);dialog.remove();window.showFinanceReminders?.(owner);};document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.(owner);
+    updateCountdown();
     badge(blocked?'Conflito entre aparelhos. Exporte um backup antes de recarregar.':Object.keys(pending).length?'Há alterações aguardando envio.':'✓ Registros carregados da sua conta',blocked?'error':'saved');if(!blocked)flush();
    }catch(e){document.getElementById('app-loading').hidden=true;login.hidden=false;shell.hidden=true;if(e.status!==401)document.getElementById('loginerror').textContent=e.message;}
  }
@@ -92,7 +92,7 @@
  document.getElementById('logout').onclick=async()=>{await flush();if(Object.keys(pending).length){badge('Ainda há alterações não enviadas. Aguarde a conexão ou exporte um backup antes de sair.','error');return;}try{await api('logout',{});localStorage.removeItem(cacheKey);location.reload();}catch{badge('Não foi possível sair. Tente novamente.','error');}};
  document.getElementById('retrycloud').onclick=flush;window.addEventListener('online',flush);setInterval(flush,15000);
  window.addEventListener('beforeunload',e=>{if(Object.keys(pending).length){e.preventDefault();e.returnValue='';}});
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateCountdowns();});
- setInterval(updateCountdowns,60000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateCountdown();});
+ setInterval(updateCountdown,60000);
  boot();
 })();
