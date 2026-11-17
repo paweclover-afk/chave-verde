@@ -306,7 +306,14 @@ function expensesCard() {
       try { commitFinance(next => { next.expenses=next.expenses.filter(x=>x.id!==expense.id); }); }
       catch (error) { toast(error.message); }
     };
-    row.append(remove);
+    const edit = el('button','Editar despesa','secondary');
+    edit.onclick=()=>planEditor('Editar despesa',[
+      ['name','Nome',{type:'text',maxLength:160,value:expense.name}],
+      ['amount','Valor',{...amountField,value:expense.amount/100}],
+      ['date','Data',{type:'date',value:expense.date}],
+      ['category','Categoria',{options:T.expenseCategories.map(x=>[x,x]),value:expense.category}]
+    ],fields=>commitFinance(next=>{const entry=next.expenses.find(x=>x.id===expense.id);Object.assign(entry,{name:fields.name.value.trim(),amount:cents(fields.amount),date:fields.date.value,category:fields.category.value});}));
+    row.append(edit,remove);
     card.append(row);
   }
   return card;

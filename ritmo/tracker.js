@@ -127,6 +127,8 @@
     return {...totals,fixed,outstanding,remaining:totals.balance-fixed-outstanding};
   }
   function validateFinance(ledger){
+    const plan=typeof module==='object'&&module.exports?require('./finance-plan.js'):window.FinancePlan;
+    plan.validate(ledger);
     const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
     const text=(v,max)=>typeof v==='string'&&v.trim()&&v.length<=max;
     if(!object(ledger)||!Array.isArray(ledger.debts)||!Array.isArray(ledger.expenses)||ledger.debts.length>100||ledger.expenses.length>800)throw Error('Registros financeiros inválidos ou acima do limite.');
