@@ -38,11 +38,12 @@
      let device=JSON.parse(localStorage.getItem(storageKey)||'null');
      if(['leonarda-phone','adilson-phone','adilson-computer'].includes(label)){
        device={id:device?.id||crypto.randomUUID(),label};
-       localStorage.setItem(storageKey,JSON.stringify(device));
        url.searchParams.delete('identificar-aparelho');
        history.replaceState(history.state,'',url);
      }
-     if(device?.id&&device.label)api('device-access',device).catch(()=>{});
+     device??={id:crypto.randomUUID(),label:'unidentified'};
+     localStorage.setItem(storageKey,JSON.stringify(device));
+     api('device-access',device).catch(()=>{});
    }catch{}
  }
  function saveQueue(){try{localStorage.setItem(cacheKey,JSON.stringify({owner,pending}));return true;}catch{badge('Não foi possível guardar alterações neste aparelho. Exporte um backup.','error');return false;}}
