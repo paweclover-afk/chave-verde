@@ -51,7 +51,9 @@
  function weeklyPlan(model,anchor){
   const actual=summary(model,'week',anchor),reserve=weeklyReserve(model,anchor);
   const expenses=actual.rows.filter(row=>row.frequency!=='month').reduce((sum,row)=>sum+row.amount,0);
-  return {...actual,reserve:reserve.weekly,total:expenses+reserve.weekly,balance:actual.income-expenses-reserve.weekly};
+  const month=period('month',anchor);
+  const rows=actual.rows.filter(row=>row.frequency!=='month').concat(occurrences(model.entries,month.from,month.to).filter(row=>row.frequency==='month').map(row=>({...row,amount:Math.ceil(row.amount*12/52)})));
+  return {...actual,rows,reserve:reserve.weekly,total:expenses+reserve.weekly,balance:actual.income-expenses-reserve.weekly};
  }
  const api={validate,occurrences,period,income,summary,addDays,addMonths,weeklyReserve,weeklyPlan};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.PersonalFinance=api;

@@ -114,14 +114,15 @@ function pfAlerts(model,summary){
  if(!limit)return;
  for(const level of [80,90])if(total/limit>=level/100){
  const key=period+':'+scope+':'+level;
- if(!model.alerts.includes(key)){newKeys.push(key);warnings.push({text:label+' atingiu '+level+'% no período de '+dateLabel(summary.from)+' a '+dateLabel(summary.to)+'.',level});}
+ if(!model.alerts.includes(key))newKeys.push(key);
+ if(level===90||total/limit<.9)warnings.push({text:label+' atingiu '+level+'% '+(personalMode==='week'?'da semana':'do mês')+' de '+dateLabel(summary.from)+' a '+dateLabel(summary.to)+'.',level,fresh:!model.alerts.includes(key)});
  }
  };
  examine('income',summary.total,summary.income,'Seu total comprometido');
  for(const category of model.categories)examine(category.id,summary.rows.filter(r=>r.category===category.id).reduce((s,r)=>s+r.amount,0),category.limit,'A categoria '+category.name);
  if(newKeys.length&&!window.RitmoCloud.blocked()){
   const updated=structuredClone(model);updated.alerts=[...updated.alerts,...newKeys].slice(-1000);const current=ledger();state.finance={...current,dashboards:{...current.dashboards,[current.dashboardCurrency]:updated}};persist();
-  for(const warning of warnings)if(typeof Notification!=='undefined'&&Notification.permission==='granted'){try{new Notification('Aviso financeiro',{body:warning.text,tag:period+warning.text});}catch{}}
+  for(const warning of warnings.filter(w=>w.fresh))if(typeof Notification!=='undefined'&&Notification.permission==='granted'){try{new Notification('Aviso financeiro',{body:warning.text,tag:period+warning.text});}catch{}}
  }
  return warnings;
 }
@@ -160,7 +161,7 @@ renderFinance=function(){
  }
  if(!reserve.bills.length)saving.append(el('p','Cadastre uma conta mensal, como aluguel, para calcular sua reserva.','pf-note'));
  saving.append(el('p','O vencimento continua entrando no total do período. Esta reserva serve para planejar o dinheiro a guardar.','pf-note'));
- const alerts=el('div');for(const warning of pfAlerts(model,summary)){const item=el('p',warning.text,'pf-warning pf-level-'+warning.level);item.setAttribute('role','alert');alerts.append(item);}
+ const alerts=el('div');for(const warning of pfAlerts(model,planning)){const item=el('p',warning.text,'pf-warning pf-level-'+warning.level);item.setAttribute('role','alert');alerts.append(item);}
  const add=pfButton('+ Adicionar gasto',()=>pfExpense(),'pf-primary pf-add');
  const categories=el('section',undefined,'pf-categories');categories.append(el('h2','Por categoria'));
  for(const category of model.categories){
