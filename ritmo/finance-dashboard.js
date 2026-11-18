@@ -46,7 +46,7 @@ function pfExpense(row){
  const date=financeField(form,'Data / primeiro vencimento',{type:'date',value:row?.day||personalAnchor});
  const category=financeField(form,'Categoria',{options:model.categories.map(c=>[c.id,c.name]),value:row?.category||'other'});
  const type=financeField(form,'Tipo de gasto',{options:[['once','Consumo diário / avulso'],['week','Conta fixa semanal'],['month','Conta fixa mensal']],value:entry?.frequency||'once'});
- const interval=financeField(form,'Repetir a cada quantas semanas ou meses?',{type:'number',min:1,max:120,step:1,value:entry?.interval||1});
+
  const duration=financeField(form,'Por quanto tempo?',{options:[['forever','Sem prazo para terminar'],['count','Número de cobranças'],['end','Até uma data']],value:entry?.end?'end':entry?.count?'count':'forever'});
  const count=financeField(form,'Quantidade de cobranças',{type:'number',min:1,max:1200,step:1,value:entry?.count||10});
  const end=financeField(form,'Último vencimento permitido',{type:'date',value:entry?.end||PersonalFinance.addMonths(personalAnchor,3)});
@@ -55,18 +55,18 @@ function pfExpense(row){
  const preview=el('p',undefined,'pf-preview');form.append(preview);
  const update=()=>{
  const recurring=type.value!=='once';
- for(const f of [interval,duration]){f.parentElement.hidden=!recurring;f.required=recurring;}
+ for(const f of [duration]){f.parentElement.hidden=!recurring;f.required=recurring;}
  count.parentElement.hidden=!recurring||duration.value!=='count';count.required=!count.parentElement.hidden;
  end.parentElement.hidden=!recurring||duration.value!=='end';end.required=!end.parentElement.hidden;
  if(!row)paid.value=recurring?'no':'yes';
- const n=interval.valueAsNumber||1;
+ const n=1;
  preview.textContent=personalMoney(Math.round((amount.valueAsNumber||0)*100))+(recurring?' a cada '+n+(type.value==='week'?' semana(s)':' mês(es)')+(duration.value==='count'?', por '+(count.value||0)+' cobranças':duration.value==='end'?', até '+dateLabel(end.value):', sem prazo final'):' em '+dateLabel(date.value));
  };
- for(const f of [type,interval,duration,count,end,amount,date])f.oninput=update;update();
+ for(const f of [type,duration,count,end,amount,date])f.oninput=update;update();
  return ()=>{
  const first=scope?.value==='one'?entry.start:date.value,recurring=type.value!=='once',number=recurring&&duration.value==='count'?count.valueAsNumber:recurring?0:1;
  if(scope?.value==='one'&&date.value!==row.day)throw Error('Para mudar a data inicial, escolha esta cobrança e as próximas.');
- const record={id:crypto.randomUUID(),name:name.value.trim(),amount:cents(amount),start:first,category:category.value,frequency:type.value,interval:recurring?interval.valueAsNumber:1,count:number,overrides:{}};
+ const record={id:crypto.randomUUID(),name:name.value.trim(),amount:cents(amount),start:first,category:category.value,frequency:type.value,interval:1,count:number,overrides:{}};
  if(recurring&&duration.value==='end')record.end=end.value;
  if(record.end&&record.end<record.start)throw Error('A data final precisa ser igual ou posterior ao início.');
  if(!record.name)throw Error('Informe a descrição.');
