@@ -140,8 +140,10 @@ renderFinance=function(){
  heading.append(pfButton(ledger().dashboardCurrency==='EUR'?'€ Euro':'R$ Real',()=>pfCurrency()));
  const toolbar=el('div',undefined,'pf-toolbar');
  for(const [mode,label] of [['week','Semana'],['month','Mês']])toolbar.append(pfButton(label,()=>{personalMode=mode;renderFinance();},personalMode===mode?'pf-primary':'pf-secondary'));
- const date=financeField(toolbar,'Consultar data',{type:'date',value:personalAnchor});date.onchange=()=>{if(date.value){personalAnchor=date.value;renderFinance();}};
- toolbar.append(pfButton('← Anterior',()=>{personalAnchor=personalMode==='week'?PersonalFinance.addDays(personalAnchor,-7):PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',-1);renderFinance();}),pfButton('Próximo →',()=>{personalAnchor=personalMode==='week'?PersonalFinance.addDays(personalAnchor,7):PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1);renderFinance();}),pfButton('Hoje',()=>{personalAnchor=T.dateKey(new Date());renderFinance();}));
+
+ toolbar.append(pfButton('← Anterior',()=>{personalAnchor=personalMode==='week'?PersonalFinance.addDays(personalAnchor,-7):PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',-1);renderFinance();}),pfButton('Próximo →',()=>{personalAnchor=personalMode==='week'?PersonalFinance.addDays(personalAnchor,7):PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1);renderFinance();}));
+ const periodLabel=el('p',(personalMode==='week'?'Semana de ':'Mês de ')+dateLabel(summary.from)+(personalMode==='week'?' a '+dateLabel(summary.to):''),'pf-note');
+ toolbar.append(periodLabel);
  const planning=personalMode==='week'?PersonalFinance.weeklyPlan(model,personalAnchor):summary;
  const dashboard=el('section',undefined,'pf-dashboard');
  for(const [label,value,cls] of [['Renda prevista',summary.income,'income'],[personalMode==='week'?'Gastos + reserva mensal':'Gastos e contas',planning.total,'cost'],['Saldo estimado',planning.balance,planning.balance<0?'negative':'balance']]){
