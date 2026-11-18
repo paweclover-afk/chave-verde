@@ -73,6 +73,9 @@ function pfExpense(row){
  savePersonal(next=>{
  if(row){
   const original=next.entries.find(e=>e.id===entry.id);
+  original.category=record.category;
+  for(const correction of Object.values(original.overrides))delete correction.category;
+
   if(scope.value==='one'){original.overrides[row.day]={...original.overrides[row.day],name:record.name,amount:record.amount,category:record.category,paid:paid.value==='yes'};return;}
   if(record.start<row.day)throw Error('A nova sequência precisa começar nesta cobrança ou depois dela.');
   original.end=PersonalFinance.addDays(row.day,-1);
