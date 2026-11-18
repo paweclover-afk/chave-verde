@@ -147,8 +147,13 @@ renderFinance=function(){
  for(const [mode,label] of [['week','Semana'],['month','Mês']])toolbar.append(pfButton(label,()=>{personalMode=mode;renderFinance();},personalMode===mode?'pf-primary':'pf-secondary'));
 
  toolbar.append(pfButton('← Anterior',()=>{personalAnchor=personalMode==='week'?PersonalFinance.addDays(personalAnchor,-7):PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',-1);renderFinance();}),pfButton('Próximo →',()=>{personalAnchor=personalMode==='week'?PersonalFinance.addDays(personalAnchor,7):PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1);renderFinance();}));
- const periodLabel=el('p',(personalMode==='week'?'Semana de ':'Mês de ')+dateLabel(summary.from)+(personalMode==='week'?' a '+dateLabel(summary.to):''),'pf-note');
- toolbar.append(periodLabel);
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const current=personalMode==='month'?summary.from.slice(0,7)===today.slice(0,7):today>=summary.from&&today<=summary.to;
+ const monthName=new Date(summary.from+'T12:00:00Z').toLocaleDateString('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'});
+ const periodLabel=el('section',undefined,'pf-period');periodLabel.setAttribute('aria-label','Período dos valores');periodLabel.setAttribute('aria-live','polite');
+ periodLabel.append(el('h2',personalMode==='month'?monthName:'Semana de '+dateLabel(summary.from)+' a '+dateLabel(summary.to)));
+ if(current)periodLabel.append(el('span',personalMode==='month'?'Mês atual':'Semana atual','pf-period-badge'));
+ periodLabel.append(el('small','Valores de '+dateLabel(summary.from)+' a '+dateLabel(summary.to)));
  const planning=personalMode==='week'?PersonalFinance.weeklyPlan(model,personalAnchor):summary;
  const dashboard=el('section',undefined,'pf-dashboard');
  for(const [label,value,cls] of [['Renda prevista',summary.income,'income'],[personalMode==='week'?'Gastos + reserva mensal':'Gastos e contas',planning.total,'cost'],['Sobra prevista',planning.balance,planning.balance<0?'negative':'balance']]){
@@ -206,7 +211,7 @@ renderFinance=function(){
  advanced.append(el('p','Este dashboard mantém um cadastro por moeda. Consulte os registros anteriores no histórico.','pf-note'));
  advanced.append(pfButton('Consultar histórico anterior',()=>{root.classList.remove('pf-app');originalFinanceView();const back=pfButton('Voltar ao novo resumo',()=>renderFinance(),'pf-primary');root.prepend(back);}));
  if(typeof Notification!=='undefined')advanced.append(pfButton('Ativar notificações neste dispositivo',async()=>{try{const permission=await Notification.requestPermission();toast(permission==='granted'?'Notificações autorizadas.':'Os avisos continuam disponíveis dentro do app.');}catch{toast('Este navegador usa os avisos dentro do app.');}}));
- root.replaceChildren(heading,toolbar,alerts,dashboard,add,saving,future,categories,advanced);
+ root.replaceChildren(heading,toolbar,periodLabel,alerts,dashboard,add,saving,future,categories,advanced);
 };function pfCurrency(){
  pfDialog('Moeda do dashboard',form=>{
   const currency=financeField(form,'Trabalhar com',{options:[['BRL','Real (R$)'],['EUR','Euro (€)']],value:ledger().dashboardCurrency});
