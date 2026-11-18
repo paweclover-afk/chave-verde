@@ -149,6 +149,13 @@ renderFinance=function(){
  const followingAnchor=PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1),following=PersonalFinance.summary(model,'month',followingAnchor);
  const future=el('section',undefined,'pf-future');future.append(el('strong','Próximo mês · '+followingAnchor.slice(0,7).split('-').reverse().join('/')),el('p','Renda '+personalMoney(following.income)+' · Comprometido '+personalMoney(following.total)+' · Saldo '+personalMoney(following.balance)));
  const progress=el('progress');progress.max=100;progress.value=summary.income?Math.min(100,summary.total/summary.income*100):0;progress.setAttribute('aria-label','Percentual da renda comprometida');future.append(progress,el('small',summary.income?Math.round(summary.total/summary.income*100)+'% da renda comprometida no período selecionado':'Cadastre sua renda para calcular a proporção.'));
+ const reserve=PersonalFinance.weeklyReserve(model,personalAnchor),saving=el('section',undefined,'pf-future pf-reserve');
+ saving.append(el('strong','Quanto guardar por semana'),el('h2',personalMoney(reserve.weekly)),el('p','Reserva estimada para as contas mensais do mês consultado. Valor mensal × 12 ÷ 52, arredondado para cima nos centavos.','pf-note'));
+ for(const bill of reserve.bills){
+  const line=el('div',undefined,'pf-line');line.append(el('span',bill.name+' · '+personalMoney(bill.monthly)+'/mês'),el('strong',personalMoney(bill.weekly)+'/semana'));saving.append(line);
+ }
+ if(!reserve.bills.length)saving.append(el('p','Cadastre uma conta mensal, como aluguel, para calcular sua reserva.','pf-note'));
+ saving.append(el('p','O vencimento continua entrando no total do período. Esta reserva serve para planejar o dinheiro a guardar.','pf-note'));
  const receipt=el('section',undefined,'pf-receipt');receipt.append(el('h2','SEU CUPOM '+(personalMode==='week'?'DA SEMANA':'DO MÊS')),el('p',dateLabel(summary.from)+' a '+dateLabel(summary.to),'pf-receipt-date'));
  for(const [label,value,style] of [['Renda '+(model.income?.frequency!==personalMode?'estimada':'informada'),summary.income,'pf-income'],['Gastos avulsos',summary.spent,''],['Contas fixas previstas',summary.fixed,''],['TOTAL COMPROMETIDO',summary.total,'pf-committed'],['Já pago',summary.paid,''],['Ainda a pagar',summary.total-summary.paid,''],['SALDO DISPONÍVEL',summary.balance,summary.balance<0?'pf-negative':'pf-positive']]){
  const line=el('div',undefined,'pf-line '+style);line.append(el('span',label),el('strong',personalMoney(value)));receipt.append(line);
@@ -174,7 +181,7 @@ renderFinance=function(){
  advanced.append(el('p','Este dashboard mantém um cadastro por moeda. Consulte os registros anteriores no histórico.','pf-note'));
  advanced.append(pfButton('Consultar histórico anterior',()=>{root.classList.remove('pf-app');originalFinanceView();const back=pfButton('Voltar ao novo resumo',()=>renderFinance(),'pf-primary');root.prepend(back);}));
  if(typeof Notification!=='undefined')advanced.append(pfButton('Ativar notificações neste dispositivo',async()=>{try{const permission=await Notification.requestPermission();toast(permission==='granted'?'Notificações autorizadas.':'Os avisos continuam disponíveis dentro do app.');}catch{toast('Este navegador usa os avisos dentro do app.');}}));
- root.replaceChildren(heading,toolbar,alerts,dashboard,add,future,receipt,categories,advanced);
+ root.replaceChildren(heading,toolbar,alerts,dashboard,add,saving,future,receipt,categories,advanced);
 };function pfCurrency(){
  pfDialog('Moeda do dashboard',form=>{
   const currency=financeField(form,'Trabalhar com',{options:[['BRL','Real (R$)'],['EUR','Euro (€)']],value:ledger().dashboardCurrency});
