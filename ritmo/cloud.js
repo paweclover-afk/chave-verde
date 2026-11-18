@@ -4,7 +4,7 @@
  const revisions={},synced={},pending={};let busy=false,blocked=false,cacheKey='',owner='',timer,lastBackup=null;
  function canonical(v){if(Array.isArray(v))return v.map(canonical);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])]));return v;}
  const fingerprint=v=>JSON.stringify(canonical(v));
- function badge(text,kind=''){status.textContent=text;status.dataset.kind=kind;}
+ function badge(text,kind=''){status.textContent=text;status.dataset.kind=kind;document.getElementById('retrycloud').textContent=blocked?'Atualizar registros':'Sincronizar';}
  const countdownStart=Date.UTC(2026,10,5),countdownEnd=Date.UTC(2027,2,20);
  const dayMs=86400000,countdownTotal=(countdownEnd-countdownStart)/dayMs;
  const countdownCalendar=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'});
@@ -59,6 +59,25 @@
    catch(e){if(e.status===409){blocked=true;badge(e.message,'error');}else if(e.status===401){badge('Sessão encerrada. Exporte um backup e entre novamente para enviar as alterações.','error');}else badge('Sem confirmação do servidor. Alterações guardadas neste aparelho; tentando novamente.','pending');}
    finally{busy=false;}
  }
+ function recoverConflict(){
+   if(busy)throw Error('Aguarde o salvamento terminar.');
+   const snapshot={owner,pending:structuredClone(pending),backup:lastBackup,createdAt:new Date().toISOString()};
+   const archiveKey=cacheKey+'-recovery-'+Date.now();
+   try{
+     localStorage.setItem(archiveKey,JSON.stringify(snapshot));
+   }catch{
+     throw Error('Não foi possível guardar a cópia de recuperação. Baixe um backup antes de atualizar.');
+   }
+   const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'});
+   const url=URL.createObjectURL(blob),link=document.createElement('a');
+   link.href=url;link.download='ritmo-recuperacao-'+new Date().toISOString().slice(0,10)+'.json';
+   document.body.append(link);link.click();link.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+   localStorage.setItem(cacheKey,JSON.stringify({owner,pending:{}}));
+   for(const day of Object.keys(pending))delete pending[day];
+   blocked=false;
+   location.reload();
+ }
  async function boot(){
    try{
     let data=await api('load');let greeting=null;try{greeting=(await api('message',{event:crypto.randomUUID()})).message;if(greeting&&!greeting.requiresAck)data=await api('load');}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
@@ -67,7 +86,7 @@
     try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.owner===owner){for(const [day,item] of Object.entries(cached.pending||{})){if(fingerprint(item.payload)===synced[day])continue;pending[day]=item;if(item.revision!==(revisions[day]||0))blocked=true;}}}catch{badge('Não foi possível ler alterações locais. Exporte um backup antes de sair.','error');}
     const rows=new Map(data.days.map(r=>[r.day,r.payload]));for(const [day,item] of Object.entries(pending))rows.set(day,item.payload);
     for(const [day,p] of rows){state.agenda[day]=p.agenda||[];state.water[day]=p.water||0;state.mobility[day]=p.mobility||Array(6).fill(false);state.mealchoices[day]=p.mealchoices||[0,3,5,6];state.selections[day]=p.selection||'off';state.notes[day]=p.notes||'';if(p.daybyday)state.daybyday[day]=p.daybyday;if(p.foodPlan)state.foodPlans[day]=p.foodPlan;if(p.finance&&day===Tracker.financeDay)state.finance=p.finance;state.sessions.push(...(p.sessions||[]));state.trainingTime=p.trainingTime||'19:30';}
-    window.RitmoCloud={initialState:state,queueState,flush,pending:()=>Object.keys(pending).length,blocked:()=>blocked,audit:day=>api('audit&day='+encodeURIComponent(day))};
+    window.RitmoCloud={initialState:state,queueState,flush,recoverConflict,pending:()=>Object.keys(pending).length,blocked:()=>blocked,audit:day=>api('audit&day='+encodeURIComponent(day))};
     document.getElementById('accountname').textContent=data.user.email;login.hidden=true;shell.hidden=true;document.getElementById('app-loading').hidden=false;
     await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;
     const daybyday=document.getElementById('daybyday');
@@ -106,7 +125,7 @@
  document.getElementById('togglepassword').onclick=()=>{const input=document.getElementById('loginpassword'),button=document.getElementById('togglepassword'),show=input.type==='password';input.type=show?'text':'password';button.textContent=show?'Ocultar':'Mostrar';button.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha');button.setAttribute('aria-pressed',String(show));};
  document.getElementById('loginform').onsubmit=async event=>{event.preventDefault();const button=document.getElementById('loginbutton'),error=document.getElementById('loginerror');button.disabled=true;error.textContent='Entrando…';try{await api('login',{email:document.getElementById('loginemail').value.trim(),password:document.getElementById('loginpassword').value});document.getElementById('loginpassword').value='';error.textContent='';await boot();}catch(e){error.textContent=e.message;}finally{button.disabled=false;}};
  document.getElementById('logout').onclick=async()=>{await flush();if(Object.keys(pending).length){badge('Ainda há alterações não enviadas. Aguarde a conexão ou exporte um backup antes de sair.','error');return;}try{await api('logout',{});localStorage.removeItem(cacheKey);location.reload();}catch{badge('Não foi possível sair. Tente novamente.','error');}};
- document.getElementById('retrycloud').onclick=flush;window.addEventListener('online',flush);setInterval(flush,15000);
+ document.getElementById('retrycloud').onclick=()=>{if(blocked){try{recoverConflict();}catch(error){badge(error.message,'error');}}else flush();};window.addEventListener('online',flush);setInterval(flush,15000);
  window.addEventListener('beforeunload',e=>{if(Object.keys(pending).length){e.preventDefault();e.returnValue='';}});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateCountdown();});
  setInterval(updateCountdown,60000);

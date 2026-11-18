@@ -6,7 +6,7 @@ function ledger() {
   return state.finance || {debts: [], expenses: []};
 }
 function commitFinance(change) {
-  if (window.RitmoCloud.blocked()) throw Error('Há um conflito de sincronização. Baixe o backup e recarregue antes de alterar os registros.');
+  if (window.RitmoCloud.blocked()) throw Error('Os registros foram atualizados em outro acesso. Toque em Atualizar registros para carregar a versão atual.');
   const next = structuredClone(ledger());
   change(next);
   T.validateFinance(next);

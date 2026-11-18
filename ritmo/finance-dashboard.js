@@ -23,8 +23,9 @@ function pfButton(text,action,style='pf-secondary'){const b=el('button',text,sty
 function pfDialog(title,build){
  const d=el('dialog',undefined,'pf-dialog'),form=el('form'),error=el('p',undefined,'pf-error'),close=pfButton('Cancelar',()=>d.close()),submit=el('button','Salvar','pf-primary');
  submit.type='submit';error.setAttribute('role','status');
- d.append(el('h2',title),form);const callback=build(form);form.append(error,submit,close);
- form.onsubmit=e=>{e.preventDefault();try{callback();d.close();}catch(ex){error.textContent=ex.message;}};
+ d.append(el('h2',title),form);const callback=build(form);const recover=pfButton('Atualizar registros',()=>{try{window.RitmoCloud.recoverConflict();}catch(ex){error.textContent=ex.message;}},'pf-primary');
+ recover.hidden=true;form.append(error,recover,submit,close);
+ form.onsubmit=e=>{e.preventDefault();try{callback();d.close();}catch(ex){error.textContent=ex.message;if(window.RitmoCloud.blocked()){recover.hidden=false;error.textContent+=' Uma cópia das alterações locais será guardada antes de atualizar. Após a atualização, abra o gasto e refaça a alteração que estava no formulário.';}}};
  d.onclose=()=>d.remove();document.body.append(d);d.showModal();
 }
 function pfIncome(){
