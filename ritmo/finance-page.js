@@ -15,11 +15,13 @@ function editPlanAccount(account){
  ['name','Nome',{type:'text',maxLength:160,value:account?.name||''}],
  ['amount','Valor', {...amountField,value:account?account.amount/100:''}],
  ['currency','Moeda',{options:currencyOptions,value:account?.currency||'GBP'}],
+ ['category','Categoria',{options:simpleCategories.map(x=>[x,x]),value:account?.category||'Moradia'}],
+ ['method','Forma de pagamento',{options:[['card','Cartão'],['pix','Pix'],['cash','Dinheiro'],['debit','Débito'],['other','Outro']],value:account?.method||'other'}],
  ['frequency','Frequência',{options:[['week','Semanal'],['month','Mensal'],['once','Uma vez']],value:account?.frequency||'month'}],
  ['installments','Quantidade de pagamentos (0 para continuar sem prazo)',{type:'number',min:0,max:1200,step:1,value:account?.installments||0}],
  ['start','Primeiro vencimento',{type:'date',value:account?.start||T.dateKey(new Date())}]
  ],f=>commitFinance(next=>{
- const record={id:account?.id||crypto.randomUUID(),name:f.name.value.trim(),amount:cents(f.amount),currency:f.currency.value,frequency:f.frequency.value,start:f.start.value};
+ const record={id:account?.id||crypto.randomUUID(),name:f.name.value.trim(),amount:cents(f.amount),currency:f.currency.value,frequency:f.frequency.value,start:f.start.value,category:f.category.value,method:f.method.value};
  const count=f.installments.valueAsNumber;
  if(!Number.isInteger(count)||count<0||count>1200)throw Error('Informe de 0 a 1200 pagamentos.');
  if(record.frequency==='once')record.installments=1;else if(count)record.installments=count;
@@ -76,20 +78,9 @@ renderFinance=function(){
  const header=financeCard('Seu mês financeiro');
  const picker=financeField(header,'Mês',{type:'month',value:month});
  picker.onchange=()=>{if(picker.value){financeMonth=picker.value;renderFinance();}};
- const summaries=el('div',undefined,'finance-grid fixed-budget');
- for(const currency of T.financeCurrencies){
-  const old=T.monthlyForecast(ledger(),from,to,currency);
-  const current=rows.filter(r=>r.currency===currency&&r.day>=from).reduce((s,r)=>s+r.amount,0);
-  const overdue=rows.filter(r=>r.currency===currency&&r.day<from).reduce((s,r)=>s+r.balance,0);
-  const cost=old.fixed+old.expenses+old.payments+old.outstanding+current+overdue,balance=old.income-cost;
-  if(!cost&&!old.income)continue;
-  for(const [label,value,style] of [['Ganho mensal previsto',old.income,'fixed-income'],['Custo mensal total',cost,'fixed-cost'],['Saldo previsto no fim do mês',balance,balance<0?'fixed-deficit':'fixed-balance']]){
-   const tile=el('section',undefined,'finance-row '+style);tile.append(el('small',label+' · '+currency),el('h3',money(value,currency)));summaries.append(tile);
-  }
- }
- header.append(summaries,el('p','Ganho previsto − custo mensal total = saldo previsto. Inclui contas e faturas do mês, gastos registrados, pagamentos e parcelas de acordos. Pendências anteriores entram pelo saldo ainda devido.','smallnote'));
+ header.append(financeReceipt(month,rows));
  const actions=el('div',undefined,'finance-actions');
- for(const [label,action] of [['Adicionar conta',()=>editPlanAccount()],['Compra no cartão',()=>editPlanPurchase()],['Adicionar cartão',()=>editPlanCard()],['Gasto avulso',()=>{const d=el('dialog',undefined,'support-dialog');d.append(addExpenseForm());const close=el('button','Fechar','secondary');close.onclick=()=>d.close();d.append(close);document.body.append(d);d.onclose=()=>d.remove();d.showModal();}]]){const b=el('button',label,'secondary');b.onclick=action;actions.append(b);}
+ for(const [label,action] of [['+ Adicionar gasto',()=>editSimpleSpending()],['Renda',()=>editSimpleIncome()],['Contas fixas',()=>editPlanAccount()],['Compra no cartão',()=>editPlanPurchase()],['Adicionar cartão',()=>editPlanCard()]]){const b=el('button',label,label==='+ Adicionar gasto'?'primary':'secondary');b.onclick=action;actions.append(b);}
  const list=financeCard('Contas e compromissos');
  const filter=financeField(list,'Mostrar',{options:[['all','Todas'],['pending','Pendentes'],['paid','Pagas'],['overdue','Atrasadas']],value:financeFilter});
  filter.onchange=()=>{financeFilter=filter.value;renderFinance();};
@@ -102,7 +93,11 @@ renderFinance=function(){
   if(row.day<from)article.append(el('p','Pendência de mês anterior','smallnote'));
   if(row.paid)article.append(el('p','Pago '+money(row.paid,row.currency)+' · Falta '+money(row.balance,row.currency)));
   if(row.balance){const pay=el('button','Registrar pagamento','primary');pay.onclick=()=>planPayment(row);article.append(pay);}
-  const edit=el('button',row.kind==='card'?'Editar cartão':'Editar conta','secondary');edit.onclick=()=>row.kind==='card'?editPlanCard(row.source):editPlanAccount(row.source);article.append(edit);
+  const edit=el('button',row.kind==='card'?'Editar cartão':row.kind==='spending'?'Editar gasto':'Editar conta','secondary');edit.onclick=()=>row.kind==='card'?editPlanCard(row.source):row.kind==='spending'?editSimpleSpending(row.source):editPlanAccount(row.source);article.append(edit);
+  if(row.kind==='spending'){
+   article.append(el('p',row.source.category+' · '+({card:'Cartão de crédito',debit:'Débito',pix:'Pix',cash:'Dinheiro',other:'Outro'}[row.source.method]),'smallnote'));
+   const remove=el('button','Excluir gasto','secondary');remove.onclick=()=>{if(confirm('Excluir este gasto e seus pagamentos?'))commitFinance(next=>{next.spending=next.spending.filter(p=>p.id!==row.id);next.billPayments=(next.billPayments||[]).filter(p=>!p.ref.startsWith(row.id+'@'));});};article.append(remove);
+  }
   if(row.kind==='account'){
    const remove=el('button','Excluir conta','secondary');
    remove.onclick=()=>{if(confirm('Excluir esta conta e seus pagamentos?'))commitFinance(next=>{next.accounts=next.accounts.filter(a=>a.id!==row.id);next.billPayments=(next.billPayments||[]).filter(p=>!p.ref.startsWith(row.id+'@'));});};article.append(remove);
@@ -126,6 +121,7 @@ renderFinance=function(){
   const edit=el('button','Editar compra','secondary');edit.onclick=()=>editPlanPurchase(purchase);
   const remove=el('button','Excluir compra','secondary');remove.onclick=()=>{if(!confirm('Excluir esta compra?'))return;try{if((ledger().billPayments||[]).some(p=>p.ref.startsWith(purchase.card+'@')))throw Error('Desfaça os pagamentos da fatura antes de excluir a compra.');commitFinance(next=>{next.purchases=next.purchases.filter(p=>p.id!==purchase.id);});}catch(e){toast(e.message);}};cards.append(line,edit,remove);
  }
- const existing=el('details',undefined,'card');existing.append(el('summary','Acordos, despesas e recebimentos já cadastrados'),budgetCard(),debtsCard(),addDebtForm(),expensesCard(),addExpenseForm());
+ const existing=el('details',undefined,'card');existing.append(el('summary','Acordos, despesas e recebimentos já cadastrados'),debtsCard(),addDebtForm(),expensesCard(),addExpenseForm());
  root.replaceChildren(header,actions,list,cards,existing);
+ checkFinanceThresholds(month,rows);
 };

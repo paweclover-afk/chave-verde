@@ -95,6 +95,7 @@ function financeField(form, labelText, config = {}) {
     }
   }
   if (config.value !== undefined) field.value = config.value;
+  field.setAttribute('aria-label',labelText);
   field.required = true;
   label.append(field);
   form.append(label);
