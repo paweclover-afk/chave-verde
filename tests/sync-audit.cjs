@@ -57,3 +57,20 @@ test('parcelas semanais terminam na quantidade e mês corretos',()=>{
  const rows=finance.occurrences([entry],'2026-11-01','2027-12-31');
  assert.equal(rows.length,10);assert.equal(rows.at(-1).day,'2027-01-22');
 });
+test('quanto guardar inclui parcelas semanais sem duplicar saldo e termina junto das parcelas',()=>{
+ const model={income:{frequency:'week',amount:80000},entries:[
+  {id:'rent',name:'Aluguel',amount:80000,start:'2026-11-30',frequency:'month',interval:1,count:0,overrides:{}},
+  {id:'phone',name:'Celular',amount:13400,start:'2026-12-04',frequency:'week',interval:1,count:4,overrides:{}}
+ ]};
+ assert.equal(finance.weeklyCommitments(model,'2026-12-01','month').total,31862);
+ assert.equal(finance.weeklyCommitments(model,'2026-12-04','week').total,31862);
+ assert.equal(finance.weeklyPlan(model,'2026-12-04').total,31862);
+ assert.equal(finance.weeklyPlan(model,'2026-12-04').balance,48138);
+ model.entries[1].overrides['2026-12-04']={paid:true};
+ assert.equal(finance.weeklyCommitments(model,'2026-12-04','week').total,31862);
+ assert.equal(finance.summary(model,'month','2026-12-01').total,133600);
+ assert.equal(finance.weeklyCommitments(model,'2027-01-01','month').total,18462);
+ assert.equal(finance.weeklyCommitments(model,'2027-01-04','week').weeklyInstallments,0);
+ model.entries[1].overrides['2026-12-11']={deleted:true};
+ assert.equal(finance.weeklyCommitments(model,'2026-12-11','week').weeklyInstallments,0);
+});

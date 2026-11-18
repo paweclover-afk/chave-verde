@@ -55,6 +55,14 @@
   const rows=actual.rows.filter(row=>row.frequency!=='month').concat(occurrences(model.entries,month.from,month.to).filter(row=>row.frequency==='month').map(row=>({...row,amount:Math.ceil(row.amount*12/52)})));
   return {...actual,rows,reserve:reserve.weekly,total:expenses+reserve.weekly,balance:actual.income-expenses-reserve.weekly};
  }
- const api={validate,occurrences,period,income,summary,addDays,addMonths,weeklyReserve,weeklyPlan};
+ function weeklyCommitments(model,anchor,mode='week'){
+  const reserve=weeklyReserve(model,anchor),range=period(mode,anchor);
+  const rows=occurrences(model.entries,range.from,range.to).filter(row=>row.frequency==='week'),groups=new Map();
+  for(const row of rows){if(!groups.has(row.source.id))groups.set(row.source.id,[]);groups.get(row.source.id).push(row);}
+  const installments=[...groups.values()].map(bills=>({name:bills[0].source.name,weekly:mode==='month'?Math.ceil(bills.reduce((sum,row)=>sum+row.amount,0)/bills.length/bills[0].interval):bills.reduce((sum,row)=>sum+row.amount,0)}));
+  const weeklyInstallments=installments.reduce((sum,bill)=>sum+bill.weekly,0);
+  return {...reserve,installments,weeklyInstallments,total:reserve.weekly+weeklyInstallments};
+ }
+ const api={validate,occurrences,period,income,summary,addDays,addMonths,weeklyReserve,weeklyPlan,weeklyCommitments};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.PersonalFinance=api;
 })(typeof window==='object'?window:globalThis);

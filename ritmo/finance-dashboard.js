@@ -158,13 +158,14 @@ renderFinance=function(){
  const followingAnchor=PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1),following=PersonalFinance.summary(model,'month',followingAnchor);
  const future=el('section',undefined,'pf-future');future.append(el('strong','Próximo mês · '+followingAnchor.slice(0,7).split('-').reverse().join('/')),el('p','Renda '+personalMoney(following.income)+' · Comprometido '+personalMoney(following.total)+' · Saldo '+personalMoney(following.balance)));
  const progress=el('progress');progress.max=100;progress.value=summary.income?Math.min(100,planning.total/planning.income*100):0;progress.setAttribute('aria-label','Percentual da renda comprometida');future.append(progress,el('small',summary.income?Math.round(planning.total/planning.income*100)+'% da renda comprometida no período selecionado':'Cadastre sua renda para calcular a proporção.'));
- const reserve=PersonalFinance.weeklyReserve(model,personalAnchor),saving=el('section',undefined,'pf-future pf-reserve');
- saving.append(el('strong','Quanto guardar por semana'),el('h2',personalMoney(reserve.weekly)),el('p','Reserva estimada para as contas mensais do mês consultado. Valor mensal × 12 ÷ 52, arredondado para cima nos centavos.','pf-note'));
+ const reserve=PersonalFinance.weeklyCommitments(model,personalAnchor,personalMode),saving=el('section',undefined,'pf-future pf-reserve');
+ saving.append(el('strong','Quanto guardar por semana'),el('h2',personalMoney(reserve.total)),el('p',personalMode==='week'?'Soma das parcelas que vencem nesta semana com a reserva das contas mensais.':'Reserva das contas mensais + valor semanal médio das parcelas ativas neste mês, enquanto houver cobranças. Consulte Semana para ver os vencimentos exatos.','pf-note'));
  for(const bill of reserve.bills){
   const line=el('div',undefined,'pf-line');line.append(el('span',bill.name+' · '+personalMoney(bill.monthly)+'/mês'),el('strong',personalMoney(bill.weekly)+'/semana'));saving.append(line);
  }
- if(!reserve.bills.length)saving.append(el('p','Cadastre uma conta mensal, como aluguel, para calcular sua reserva.','pf-note'));
- saving.append(el('p','O vencimento continua entrando no total do período. Esta reserva serve para planejar o dinheiro a guardar.','pf-note'));
+ for(const bill of reserve.installments){const line=el('div',undefined,'pf-line');line.append(el('span',bill.name+' · parcelas semanais'),el('strong',personalMoney(bill.weekly)+'/semana'));saving.append(line);}
+ if(!reserve.bills.length&&!reserve.installments.length)saving.append(el('p','Cadastre contas mensais ou parcelas semanais para calcular quanto guardar.','pf-note'));
+ saving.append(el('p','Contas mensais: valor × 12 ÷ 52. Este planejamento não adiciona gastos ao saldo: cada cobrança continua sendo contada uma única vez.','pf-note'));
  const alerts=el('div');for(const warning of pfAlerts(model,planning)){const item=el('p',warning.text,'pf-warning pf-level-'+warning.level);item.setAttribute('role','alert');alerts.append(item);}
  const add=pfButton('+ Adicionar gasto',()=>pfExpense(),'pf-primary pf-add');
  const categories=el('section',undefined,'pf-categories');categories.append(el('h2','Por categoria'));
