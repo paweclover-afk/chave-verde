@@ -80,3 +80,59 @@
 .pf-bill-count{color:var(--pf-accent)!important}
 .pf-bill-group .pf-item{margin:0;padding:12px 0}
 .pf-bill-group>summary:focus-visible{outline:2px solid var(--pf-accent);outline-offset:3px;border-radius:6px}
+.pf-future-summary{display:grid;gap:8px}
+.pf-future-total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:14px}
+.pf-future-total strong{white-space:nowrap}
+.pf-item-actions{display:flex;gap:8px;flex-wrap:wrap}
+.pf-item-actions button{margin:0}
+@media(max-width:640px){
+ .pf-app{padding:12px;border-radius:16px;min-width:0}
+ .pf-app button,.pf-dialog button{min-height:46px;line-height:1.3;font-size:14px}
+ .pf-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+ .pf-heading .pf-title{grid-column:1/-1;font-size:24px;margin-bottom:4px}
+ .pf-heading button{width:100%;min-width:0;padding:10px 8px}
+ .pf-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0}
+ .pf-toolbar button{width:100%;min-width:0;padding:12px 8px}
+ .pf-period{gap:7px;margin:18px 0 12px}
+ .pf-period h2{font-size:23px;flex-basis:100%}
+ .pf-period small{font-size:12px}
+ .pf-dashboard{grid-template-columns:1fr;gap:9px;margin:12px 0}
+ .pf-metric{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:15px 12px;border-radius:13px}
+ .pf-metric small{font-size:13px;line-height:1.4}
+ .pf-metric strong{font-size:clamp(18px,5.2vw,23px);white-space:nowrap;overflow-wrap:normal;text-align:right}
+ .pf-add{font-size:16px!important;margin:16px 0;padding:14px}
+ .pf-future{padding:14px 12px;margin:12px 0;gap:12px;border-radius:14px;min-width:0}
+ .pf-future>strong{line-height:1.5}
+ .pf-future p{font-size:13px;line-height:1.6}
+ .pf-reserve h2{font-size:28px;margin:0}
+ .pf-future-summary{gap:10px;padding-bottom:10px;border-bottom:1px solid var(--pf-border)}
+ .pf-future-total{font-size:13px}
+ .pf-line{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px;font-size:13px;line-height:1.5;padding:10px 0}
+ .pf-line>span{min-width:0;overflow-wrap:anywhere}
+ .pf-line>strong{text-align:right;white-space:normal;overflow-wrap:anywhere;max-width:125px}
+ .pf-categories h2{font-size:20px;margin:22px 0 12px}
+ .pf-category{padding:12px;border-left-width:4px;margin:10px 0}
+ .pf-category>summary{display:grid;grid-template-columns:1fr;gap:5px;line-height:1.4;padding:2px 0}
+ .pf-category>summary span{font-size:12px;color:var(--pf-muted)}
+ .pf-category>button{margin-top:12px}
+ .pf-bill-group>summary{gap:8px;padding:14px 0}
+ .pf-bill-group small{font-size:11px}
+ .pf-bill-figures{max-width:105px}
+ .pf-bill-figures strong{font-size:14px;overflow-wrap:anywhere}
+ .pf-bill-description strong{font-size:14px;line-height:1.4}
+ .pf-item p{font-size:12px;line-height:1.6;margin:6px 0 10px}
+ .pf-item-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .pf-item-actions button{padding:10px 7px;width:100%;min-width:0}
+ .pf-item-actions button:last-child{grid-column:1/-1}
+ .pf-help{padding:14px 12px;font-size:13px;line-height:1.5}
+ .pf-help button{width:100%;margin:10px 0 0;white-space:normal}
+ .pf-dialog{width:calc(100vw - 24px);max-width:520px;max-height:calc(100dvh - 24px);padding:16px;scroll-padding-bottom:16px}
+ .pf-dialog h2{font-size:21px;margin:0 0 6px}
+ .pf-dialog input,.pf-dialog select{font-size:16px!important;min-width:0;max-width:100%}
+ .pf-dialog label{min-width:0;overflow-wrap:anywhere}
+ .pf-warning{font-size:13px;line-height:1.6}
+}
+@media(max-width:359px){
+ .pf-metric{grid-template-columns:1fr;gap:5px}
+ .pf-metric strong{text-align:left;font-size:22px}
+}

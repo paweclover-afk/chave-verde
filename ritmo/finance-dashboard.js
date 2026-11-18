@@ -161,7 +161,9 @@ renderFinance=function(){
  }
  if(personalMode==='week')dashboard.append(el('p','O saldo semanal desconta os gastos da semana e a reserva proporcional das contas mensais (mensal × 12 ÷ 52).','pf-note pf-plan-note'));
  const followingAnchor=PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1),following=PersonalFinance.summary(model,'month',followingAnchor);
- const future=el('section',undefined,'pf-future');future.append(el('strong','Próximo mês · '+followingAnchor.slice(0,7).split('-').reverse().join('/')),el('p','Renda '+personalMoney(following.income)+' · Comprometido '+personalMoney(following.total)+' · Saldo '+personalMoney(following.balance)));
+ const future=el('section',undefined,'pf-future'),futureSummary=el('div',undefined,'pf-future-summary');
+ future.append(el('strong','Próximo mês · '+new Date(followingAnchor+'T12:00:00Z').toLocaleDateString('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'})));
+ for(const [label,value] of [['Renda',following.income],['Comprometido',following.total],['Sobra prevista',following.balance]]){const line=el('div',undefined,'pf-future-total');line.append(el('span',label),el('strong',personalMoney(value)));futureSummary.append(line);}future.append(futureSummary);
  const nextBills=new Map();
  for(const row of following.rows){const key=row.source.id+':'+row.name;if(!nextBills.has(key))nextBills.set(key,[]);nextBills.get(key).push(row);}
  for(const bills of nextBills.values()){
@@ -199,7 +201,7 @@ renderFinance=function(){
  head.append(description,figures);head.setAttribute('aria-label',bills[0].source.name+' · '+paid+' de '+bills.length+' cobranças pagas · '+personalMoney(total)+' · Ver cobranças');group.append(head);
  for(const row of bills){
  const item=el('article',undefined,'pf-item');item.append(el('strong',row.name),el('p',dateLabel(row.day)+' · '+personalMoney(row.amount)+' · '+(row.paid?'Pago':'A pagar')));
- item.append(pfButton('Editar',()=>pfExpense(row)),pfButton('Excluir',()=>pfRemove(row)),pfButton(row.paid?'Desmarcar pagamento':'Marcar como pago',()=>savePersonal(next=>{const e=next.entries.find(e=>e.id===row.source.id);e.overrides[row.day]={...e.overrides[row.day],paid:!row.paid};})));
+ const actions=el('div',undefined,'pf-item-actions');actions.append(pfButton('Editar',()=>pfExpense(row)),pfButton('Excluir',()=>pfRemove(row)),pfButton(row.paid?'Desmarcar pagamento':'Marcar como pago',()=>savePersonal(next=>{const e=next.entries.find(e=>e.id===row.source.id);e.overrides[row.day]={...e.overrides[row.day],paid:!row.paid};})));item.append(actions);
  group.append(item);
  }
  card.append(group);
