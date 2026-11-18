@@ -435,6 +435,15 @@ function daybydayItems(d=key()){
  if(d>='2026-11-03'&&state.foodPlans['2026-10-29']?.format==='four-meals'&&!state.daybyday[d].items.some(x=>x.id==='snack-v2')){state.daybyday[d].items.push({id:'snack-v2',time:'18:00',name:'Lanche da tarde',details:'Plano alimentar de 03/11/2026. Horário sugerido e ajustável.',category:'health',done:false});persist();}
  const extraPlan=Object.values(state.foodPlans||{}).filter(p=>p.routineExtrasFrom&&p.routineExtrasFrom<=d&&Array.isArray(p.routineExtras)).sort((a,b)=>b.routineExtrasFrom.localeCompare(a.routineExtrasFrom))[0];
  if(extraPlan){let changed=false;for(const x of extraPlan.routineExtras){const existing=state.daybyday[d].items.find(y=>y.id===x.id);if(!existing){const merged=Array.isArray(x.replaces)?state.daybyday[d].items.filter(y=>x.replaces.includes(y.id)):[];state.daybyday[d].items.push({...x,done:merged.length>0&&merged.length===x.replaces?.length&&merged.every(y=>y.done)});changed=true;}else if((x.configRevision||0)>(existing.configRevision||0)){const done=existing.done;Object.assign(existing,x,{done});changed=true;}}const retired=extraPlan.routineExtras.flatMap(x=>Array.isArray(x.replaces)?x.replaces:[]);const before=state.daybyday[d].items.length;state.daybyday[d].items=state.daybyday[d].items.filter(x=>!retired.includes(x.id));if(changed||before!==state.daybyday[d].items.length)persist();}
+ const routines=state.daybyday['2000-01-02']?.routines||[];
+ const weekday=String(new Date(d+'T12:00:00').getDay());
+ let added=false;
+ for(const routine of routines){
+  if(d<routine.from||state.daybyday[d].skippedRoutines?.includes(routine.id)||!(routine.repeat==='daily'||routine.repeat===weekday)||state.daybyday[d].items.some(item=>item.id===routine.id))continue;
+  if(state.daybyday[d].items.length>=100)break;
+  const {from,repeat,...item}=routine;state.daybyday[d].items.push({...item,done:false});added=true;
+ }
+ if(added)persist();
  return state.daybyday[d].items;
 }
 const daybydayCategories={rest:'Descanso e rotina',health:'Saúde',study:'Estudos',work:'Trabalho',self:'Autocuidado',english:'Idiomas',pt:'Português',cook:'Cozinha'};
@@ -449,15 +458,54 @@ function renderDaybyday(){
  add.onclick=()=>editDaybyday();reset.disabled=!done;reset.onclick=()=>{if(!confirm('Desmarcar apenas as atividades DayByDay de '+dateLabel(d)+'?'))return;const snapshot=structuredClone(items);items.forEach(x=>x.done=false);persist();render();toast('Marcações do dia removidas.',()=>{state.daybyday[d].items=snapshot;persist();render();});};actions.append(add,reset);title.append(el('h3',selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})),actions);daily.append(title,daybydayProgress('Atividades concluídas no dia',done,items.length));
  const list=el('div',undefined,'db-timeline');
  for(const item of [...items].sort((a,b)=>a.time.localeCompare(b.time))){
-  const row=el('div',undefined,'db-item db-'+item.category+(item.done?' db-done':'')),label=el('label',undefined,'db-checklabel'),check=el('input'),body=el('span',undefined,'db-body'),tools=el('div',undefined,'db-tools'),edit=el('button','Editar','secondary'),remove=el('button','Excluir','secondary');check.type='checkbox';check.checked=item.done;check.onchange=()=>{item.done=check.checked;persist();render();const restored=document.querySelector('[data-db-id="'+CSS.escape(item.id)+'"]');restored?.focus();if(item.done)celebrateCompletion(items);};check.dataset.dbId=item.id;check.setAttribute('aria-label',item.name+' às '+item.time);body.append(el('small',item.time+' · '+daybydayCategories[item.category]+(item.optional?' · Opcional':''),'db-time'),el('strong',item.name));if(item.details)body.append(el('small',item.details));label.append(check,body);edit.setAttribute('aria-label','Editar '+item.name);edit.onclick=()=>editDaybyday(item);remove.setAttribute('aria-label','Excluir '+item.name);remove.onclick=()=>{const snapshot=structuredClone(items);state.daybyday[d].items=items.filter(x=>x.id!==item.id);persist();render();toast('Atividade removida desta data.',()=>{state.daybyday[d].items=snapshot;persist();render();});};tools.append(edit,remove);row.append(label,tools);list.append(row);
+  const row=el('div',undefined,'db-item db-'+item.category+(item.done?' db-done':'')),label=el('label',undefined,'db-checklabel'),check=el('input'),body=el('span',undefined,'db-body'),tools=el('div',undefined,'db-tools'),edit=el('button','Editar','secondary'),remove=el('button','Excluir','secondary');check.type='checkbox';check.checked=item.done;check.onchange=()=>{item.done=check.checked;persist();render();const restored=document.querySelector('[data-db-id="'+CSS.escape(item.id)+'"]');restored?.focus();if(item.done)celebrateCompletion(items);};check.dataset.dbId=item.id;check.setAttribute('aria-label',item.name+' às '+item.time);body.append(el('small',item.time+' · '+daybydayCategories[item.category]+(item.optional?' · Opcional':''),'db-time'),el('strong',item.name));if(item.details)body.append(el('small',item.details));label.append(check,body);edit.setAttribute('aria-label','Editar '+item.name);edit.onclick=()=>editDaybyday(item);remove.setAttribute('aria-label','Excluir '+item.name);remove.onclick=()=>{const snapshot=structuredClone(items);state.daybyday[d].items=items.filter(x=>x.id!==item.id);if(state.daybyday['2000-01-02']?.routines?.some(r=>r.id===item.id)){state.daybyday[d].skippedRoutines??=[];state.daybyday[d].skippedRoutines.push(item.id);}persist();render();toast('Atividade removida desta data.',()=>{state.daybyday[d].items=snapshot;if(state.daybyday[d].skippedRoutines)state.daybyday[d].skippedRoutines=state.daybyday[d].skippedRoutines.filter(id=>id!==item.id);persist();render();});};tools.append(edit,remove);row.append(label,tools);list.append(row);
  }
  if(!items.length)list.append(el('p','Nenhuma atividade nesta data. Toque em + Atividade para começar.','smallnote'));daily.append(list);content.append(daily);
  content.append(monthCalendar());
 }
 function editDaybyday(item){
- const d=key(),dialog=el('dialog',undefined,'db-editor'),form=el('form'),heading=el('h3',item?'Editar atividade DayByDay':'Nova atividade DayByDay');form.append(heading,el('p','Esta alteração vale apenas para '+dateLabel(d)+'.','smallnote'));
- function field(title,type,value,max){const label=el('label',title),input=el('input');input.type=type;input.value=value;input.required=true;if(max)input.maxLength=max;label.append(input);form.append(label);return input;}
- const name=field('Atividade','text',item?.name||'',160),time=field('Horário','time',item?.time||'08:00'),details=field('Detalhes (opcional)','text',item?.details||'',500);details.required=false;const label=el('label','Categoria'),category=el('select');for(const [value,title] of Object.entries(daybydayCategories)){const opt=el('option',title);opt.value=value;category.append(opt);}category.value=item?.category||'rest';label.append(category);form.append(label);const actions=el('div',undefined,'actions'),cancel=el('button','Cancelar','secondary'),save=el('button','Salvar atividade','primary');cancel.type='button';cancel.onclick=()=>dialog.close();save.type='submit';actions.append(cancel,save);form.append(actions);dialog.append(form);document.body.append(dialog);dialog.onclose=()=>dialog.remove();form.onsubmit=e=>{e.preventDefault();if(!name.value.trim()){name.setCustomValidity('Informe o nome da atividade.');name.reportValidity();return;}const items=daybydayItems(d);if(!item&&items.length>=100){toast('Limite de 100 atividades nesta data.');return;}const record={id:item?.id||crypto.randomUUID(),name:name.value.trim(),time:time.value,details:details.value.trim(),category:category.value,done:item?.done||false};state.daybyday[d].items=item?items.map(x=>x.id===item.id?record:x):[...items,record];persist();dialog.close();render();toast('Atividade DayByDay salva.');};name.oninput=()=>name.setCustomValidity('');dialog.showModal();
+ const d=key(),dialog=el('dialog',undefined,'db-editor'),form=el('form');
+ form.append(el('h3',item?'Editar atividade':'Nova atividade'));
+ function field(title,type,value,max){
+  const label=el('label',title),input=el('input');
+  input.type=type;input.value=value;input.required=true;input.setAttribute('aria-label',title);
+  if(max)input.maxLength=max;label.append(input);form.append(label);return input;
+ }
+ const name=field('Atividade','text',item?.name||'',160);
+ const time=field('Horário','time',item?.time||'08:00');
+ const details=field('Detalhes (opcional)','text',item?.details||'',500);details.required=false;
+ const label=el('label','Categoria'),category=el('select');
+ category.setAttribute('aria-label','Categoria');
+ for(const [value,title] of Object.entries(daybydayCategories)){const option=el('option',title);option.value=value;category.append(option);}
+ category.value=item?.category||'rest';label.append(category);form.append(label);
+ const repeatLabel=el('label','Repetir'),repeat=el('select');repeat.setAttribute('aria-label','Repetir');
+ for(const [value,title] of [['once','Somente nesta data'],['daily','Todos os dias'],['1','Toda segunda-feira'],['2','Toda terça-feira'],['3','Toda quarta-feira'],['4','Toda quinta-feira'],['5','Toda sexta-feira'],['6','Todo sábado'],['0','Todo domingo']]){
+  const option=el('option',title);option.value=value;repeat.append(option);
+ }
+ repeatLabel.append(repeat);
+ if(!item)form.append(repeatLabel);
+ form.append(el('p',item?'A edição vale para '+dateLabel(d)+'.':'A rotina começa a partir de '+dateLabel(d)+'. Cada dia terá suas próprias marcações.','smallnote'));
+ const actions=el('div',undefined,'actions'),cancel=el('button','Cancelar','secondary'),save=el('button','Salvar atividade','primary'),error=el('p',undefined,'smallnote');
+ error.setAttribute('role','status');cancel.type='button';cancel.onclick=()=>dialog.close();save.type='submit';
+ actions.append(cancel,save);form.append(error,actions);dialog.append(form);document.body.append(dialog);dialog.onclose=()=>dialog.remove();
+ form.onsubmit=event=>{
+  event.preventDefault();error.textContent='';
+  if(window.RitmoCloud.blocked()){error.textContent='Atualize os registros antes de cadastrar a atividade.';return;}
+  if(!name.value.trim()){name.setCustomValidity('Informe o nome da atividade.');name.reportValidity();return;}
+  const items=daybydayItems(d);
+  if(!item&&items.length>=100){error.textContent='Limite de 100 atividades nesta data.';return;}
+  const record={id:item?.id||crypto.randomUUID(),name:name.value.trim(),time:time.value,details:details.value.trim(),category:category.value,done:item?.done||false};
+  if(!item&&repeat.value!=='once'){
+   const configuration=state.daybyday['2000-01-02']||{items:[],routines:[]};
+   if((configuration.routines||[]).length>=50){error.textContent='Limite de 50 rotinas atingido.';return;}
+   configuration.routines??=[];
+   configuration.routines.push({...record,from:d,repeat:repeat.value});
+   state.daybyday['2000-01-02']=configuration;
+   daybydayItems(d);
+  }else state.daybyday[d].items=item?items.map(x=>x.id===item.id?record:x):[...items,record];
+  persist();dialog.close();switchView('daybyday');toast(repeat.value==='once'?'Atividade salva.':'Rotina salva e sincronizando.');
+ };
+ name.oninput=()=>name.setCustomValidity('');dialog.showModal();
 }
 
 if(location.hash==='#daybyday')switchView('daybyday');
