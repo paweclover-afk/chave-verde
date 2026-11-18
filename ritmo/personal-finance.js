@@ -48,6 +48,11 @@
   const bills=occurrences(model.entries,month.from,month.to).filter(row=>row.frequency==='month');
   return {bills:bills.map(row=>({name:row.name,day:row.day,monthly:row.amount,weekly:Math.ceil(row.amount*12/52)})),weekly:bills.reduce((sum,row)=>sum+Math.ceil(row.amount*12/52),0)};
  }
- const api={validate,occurrences,period,income,summary,addDays,addMonths,weeklyReserve};
+ function weeklyPlan(model,anchor){
+  const actual=summary(model,'week',anchor),reserve=weeklyReserve(model,anchor);
+  const expenses=actual.rows.filter(row=>row.frequency!=='month').reduce((sum,row)=>sum+row.amount,0);
+  return {...actual,reserve:reserve.weekly,total:expenses+reserve.weekly,balance:actual.income-expenses-reserve.weekly};
+ }
+ const api={validate,occurrences,period,income,summary,addDays,addMonths,weeklyReserve,weeklyPlan};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.PersonalFinance=api;
 })(typeof window==='object'?window:globalThis);

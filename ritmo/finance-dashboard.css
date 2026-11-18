@@ -62,3 +62,5 @@
 .pf-eyebrow{color:var(--pf-accent)}
 .pf-future progress{accent-color:var(--pf-accent)}
 .pf-app button:focus-visible,.pf-dialog button:focus-visible{outline-color:var(--pf-accent)}
+
+.pf-plan-note{grid-column:1 / -1;margin:0;line-height:1.6}

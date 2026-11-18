@@ -142,13 +142,15 @@ renderFinance=function(){
  for(const [mode,label] of [['week','Semana'],['month','Mês']])toolbar.append(pfButton(label,()=>{personalMode=mode;renderFinance();},personalMode===mode?'pf-primary':'pf-secondary'));
  const date=financeField(toolbar,'Consultar data',{type:'date',value:personalAnchor});date.onchange=()=>{if(date.value){personalAnchor=date.value;renderFinance();}};
  toolbar.append(pfButton('← Anterior',()=>{personalAnchor=personalMode==='week'?PersonalFinance.addDays(personalAnchor,-7):PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',-1);renderFinance();}),pfButton('Próximo →',()=>{personalAnchor=personalMode==='week'?PersonalFinance.addDays(personalAnchor,7):PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1);renderFinance();}),pfButton('Hoje',()=>{personalAnchor=T.dateKey(new Date());renderFinance();}));
+ const planning=personalMode==='week'?PersonalFinance.weeklyPlan(model,personalAnchor):summary;
  const dashboard=el('section',undefined,'pf-dashboard');
- for(const [label,value,cls] of [['Renda prevista',summary.income,'income'],['Gastos e contas',summary.total,'cost'],['Saldo estimado',summary.balance,summary.balance<0?'negative':'balance']]){
+ for(const [label,value,cls] of [['Renda prevista',summary.income,'income'],[personalMode==='week'?'Gastos + reserva mensal':'Gastos e contas',planning.total,'cost'],['Saldo estimado',planning.balance,planning.balance<0?'negative':'balance']]){
   const tile=el('article',undefined,'pf-metric pf-metric-'+cls);tile.append(el('small',label),el('strong',personalMoney(value)));dashboard.append(tile);
  }
+ if(personalMode==='week')dashboard.append(el('p','O saldo semanal desconta os gastos da semana e a reserva proporcional das contas mensais (mensal × 12 ÷ 52). O cupom abaixo mostra os vencimentos reais.','pf-note pf-plan-note'));
  const followingAnchor=PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1),following=PersonalFinance.summary(model,'month',followingAnchor);
  const future=el('section',undefined,'pf-future');future.append(el('strong','Próximo mês · '+followingAnchor.slice(0,7).split('-').reverse().join('/')),el('p','Renda '+personalMoney(following.income)+' · Comprometido '+personalMoney(following.total)+' · Saldo '+personalMoney(following.balance)));
- const progress=el('progress');progress.max=100;progress.value=summary.income?Math.min(100,summary.total/summary.income*100):0;progress.setAttribute('aria-label','Percentual da renda comprometida');future.append(progress,el('small',summary.income?Math.round(summary.total/summary.income*100)+'% da renda comprometida no período selecionado':'Cadastre sua renda para calcular a proporção.'));
+ const progress=el('progress');progress.max=100;progress.value=summary.income?Math.min(100,planning.total/planning.income*100):0;progress.setAttribute('aria-label','Percentual da renda comprometida');future.append(progress,el('small',summary.income?Math.round(planning.total/planning.income*100)+'% da renda comprometida no período selecionado':'Cadastre sua renda para calcular a proporção.'));
  const reserve=PersonalFinance.weeklyReserve(model,personalAnchor),saving=el('section',undefined,'pf-future pf-reserve');
  saving.append(el('strong','Quanto guardar por semana'),el('h2',personalMoney(reserve.weekly)),el('p','Reserva estimada para as contas mensais do mês consultado. Valor mensal × 12 ÷ 52, arredondado para cima nos centavos.','pf-note'));
  for(const bill of reserve.bills){
