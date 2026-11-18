@@ -39,3 +39,21 @@
 .db-weekday{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.db-monthname{text-transform:capitalize;color:var(--ink);font-weight:600}.db-monthheading{gap:12px;flex-wrap:wrap}.db-monthheading .db-actions{margin:0}.db-calday{min-height:70px}.db-calday strong{font-size:17px}.db-calday small{font-size:12px}
 
 .personal-message{width:500px;max-width:calc(100vw - 28px);max-height:85dvh;overflow:auto}.personal-message h2{font-size:23px;line-height:1.4;margin:0 0 22px}.personal-message .primary{width:100%;margin-top:24px;min-height:48px}
+
+/* Round checkboxes and completed-task styling. */
+body[data-screen=daybyday] #daybyday .db-item{position:relative;display:flex;align-items:flex-start;border:1px solid var(--line);border-radius:20px;background:var(--panel,#fff);padding:18px 16px 18px 20px;gap:8px;margin:0 0 12px;overflow:visible}
+body[data-screen=daybyday] #daybyday .db-item:before{content:'';position:absolute;left:-1px;top:15px;bottom:15px;width:5px;border-radius:10px;background:var(--green)}
+body[data-screen=daybyday] #daybyday .db-checklabel{display:flex;align-items:flex-start;gap:13px;flex:1;min-width:0}
+body[data-screen=daybyday] #daybyday input[type=checkbox]{appearance:none;flex-shrink:0;width:28px;height:28px;min-height:28px;margin:2px 0 0;border:2px solid var(--muted);border-radius:50%;background:transparent;display:grid;place-items:center}
+body[data-screen=daybyday] #daybyday input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}
+body[data-screen=daybyday] #daybyday input[type=checkbox]:checked:after{content:'✓';font-size:20px;font-weight:800;color:var(--bg)}
+body[data-screen=daybyday] #daybyday .db-body{min-width:0}
+body[data-screen=daybyday] #daybyday .db-body strong{display:block;font-size:16px;line-height:1.4;margin:5px 0}
+body[data-screen=daybyday] #daybyday .db-body small{font-size:13px;line-height:1.7;color:var(--muted)}
+body[data-screen=daybyday] #daybyday .db-body .db-time{color:var(--green);font-size:12px}
+body[data-screen=daybyday] #daybyday .db-done{opacity:.65}
+body[data-screen=daybyday] #daybyday .db-done .db-body strong{text-decoration:line-through}
+body[data-screen=daybyday] #daybyday .db-tools{flex-shrink:0;margin:0;display:block}
+
+body[data-screen=daybyday] .home-item-menu[open] button{background:var(--panel,#fff);color:var(--ink)}
+body[data-screen=daybyday] #daybyday input[type=checkbox]:focus-visible{outline:3px solid var(--green);outline-offset:4px}
