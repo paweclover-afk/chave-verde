@@ -64,3 +64,15 @@
 .pf-app button:focus-visible,.pf-dialog button:focus-visible{outline-color:var(--pf-accent)}
 
 .pf-plan-note{grid-column:1 / -1;margin:0;line-height:1.6}
+.pf-bill-group{border-top:1px solid var(--pf-border);margin-top:12px}
+.pf-bill-group>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:14px 0;list-style:none}
+.pf-bill-group>summary::-webkit-details-marker{display:none}
+.pf-bill-group>summary::after{content:'⌄';color:var(--pf-muted);flex-shrink:0}
+.pf-bill-group[open]>summary::after{content:'⌃'}
+.pf-bill-description,.pf-bill-figures{display:grid;gap:5px;min-width:0}
+.pf-bill-description{flex:1;overflow-wrap:anywhere}
+.pf-bill-figures{text-align:right;flex-shrink:0}
+.pf-bill-group small{font-size:12px;color:var(--pf-muted);line-height:1.5}
+.pf-bill-count{color:var(--pf-accent)!important}
+.pf-bill-group .pf-item{margin:0;padding:12px 0}
+.pf-bill-group>summary:focus-visible{outline:2px solid var(--pf-accent);outline-offset:3px;border-radius:6px}

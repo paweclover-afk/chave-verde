@@ -139,7 +139,7 @@ renderFinance=function(){
   for(const [currency,label] of [['BRL','R$ · Real'],['EUR','€ · Euro']])welcome.append(pfButton(label,()=>commitFinance(next=>{next.dashboardCurrency=currency;next.dashboards??={};}),'pf-primary'));
   root.replaceChildren(welcome);return;
  }
- const opened=new Set(Array.from(root.querySelectorAll('details[data-category][open]'),node=>node.dataset.category)),model=personalModel(),summary=PersonalFinance.summary(model,personalMode,personalAnchor);
+ const opened=new Set(Array.from(root.querySelectorAll('details[data-category][open]'),node=>node.dataset.category)),openedBills=new Set(Array.from(root.querySelectorAll('details[data-bill][open]'),node=>node.dataset.bill)),model=personalModel(),summary=PersonalFinance.summary(model,personalMode,personalAnchor);
  root.classList.add('pf-app');
  const heading=el('div',undefined,'pf-heading');heading.append(el('div','Meu financeiro','pf-title'),pfButton(model.income?'Editar renda':'Cadastrar renda',pfIncome));
  heading.append(pfButton(ledger().dashboardCurrency==='EUR'?'€ Euro':'R$ Real',()=>pfCurrency()));
@@ -173,10 +173,21 @@ renderFinance=function(){
  const title=el('summary');title.append(el('strong',category.name),el('span',personalMoney(total)+' · '+(summary.income?Math.round(total/summary.income*100)+'% da renda':'Cadastre sua renda')));
  card.append(title,pfButton('Editar categoria',()=>pfCategory(category)));
  if(category.limit)card.append(el('p','Limite do período: '+personalMoney(category.limit),'pf-note'));
- for(const row of rows){
+ const groups=new Map();
+ for(const row of rows){const id=row.source.id;if(!groups.has(id))groups.set(id,[]);groups.get(id).push(row);}
+ for(const [id,bills] of groups){
+ const group=el('details',undefined,'pf-bill-group'),head=el('summary'),description=el('span',undefined,'pf-bill-description');
+ group.dataset.bill=category.id+':'+id;group.open=openedBills.has(group.dataset.bill);
+ const paid=bills.filter(bill=>bill.paid).length,total=bills.reduce((sum,bill)=>sum+bill.amount,0),sameAmount=bills.every(bill=>bill.amount===bills[0].amount);
+ description.append(el('strong',bills[0].source.name),el('small',bills.length>1?(sameAmount?personalMoney(bills[0].amount)+' por cobrança · ':'')+(bills[0].frequency==='week'?'Semanal':'Mensal'):dateLabel(bills[0].day)));
+ const figures=el('span',undefined,'pf-bill-figures');figures.append(el('strong',personalMoney(total)),el('small',paid+'/'+bills.length+' '+(bills.length===1?'paga':'pagas'),'pf-bill-count'));
+ head.append(description,figures);head.setAttribute('aria-label',bills[0].source.name+' · '+paid+' de '+bills.length+' cobranças pagas · '+personalMoney(total)+' · Ver cobranças');group.append(head);
+ for(const row of bills){
  const item=el('article',undefined,'pf-item');item.append(el('strong',row.name),el('p',dateLabel(row.day)+' · '+personalMoney(row.amount)+' · '+(row.paid?'Pago':'A pagar')));
  item.append(pfButton('Editar',()=>pfExpense(row)),pfButton('Excluir',()=>pfRemove(row)),pfButton(row.paid?'Desmarcar pagamento':'Marcar como pago',()=>savePersonal(next=>{const e=next.entries.find(e=>e.id===row.source.id);e.overrides[row.day]={...e.overrides[row.day],paid:!row.paid};})));
- card.append(item);
+ group.append(item);
+ }
+ card.append(group);
  }
  if(!rows.length)card.append(el('p','Sem gastos neste período.','pf-note'));categories.append(card);
  }
