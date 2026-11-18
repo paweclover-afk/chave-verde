@@ -118,6 +118,7 @@ function celebrateCompletion(items){
  setTimeout(()=>confetti.remove(),2900);
 }
 function render(){
+ document.body.dataset.screen=view;
  const titles={finance:['Financeiro','Despesas, acordos e vencimentos da Leonarda.'],daybyday:['DayByDay','Sua rotina, um checkbox de cada vez.'],diary:['Meu diário','Seus registros de cada dia, guardados para consultar depois.'],overview:['Leonarda, no seu ritmo.','Marque suas atividades do dia e acompanhe seu progresso.'],training:['Meu treino e minhas cargas','Confira a data, preencha as séries e toque em Salvar exercício.'],mobility:['Mobilidade e alongamentos','Veja a sequência e marque o que você fez.'],food:['Minhas refeições','Consulte os horários, as porções e as opções do seu plano.'],history:['Minha evolução','Veja como as cargas mudaram de um treino para o outro.']};
  $('pagetitle').textContent=titles[view][0];$('pageintro').textContent=titles[view][1];$('homehero').hidden=view!=='overview';document.querySelector('.stats').hidden=['daybyday','finance'].includes(view);document.querySelector('.datecard').hidden=view==='finance';$('add').hidden=view==='finance';$('add').textContent='+ Nova atividade';
 
@@ -136,6 +137,7 @@ function render(){
  $('waterstat').replaceChildren(document.createTextNode(fmt(water*.25)+' '),el('small','litros'));$('cups').textContent=water+' copos';
  const w=dayWorkout();$('herotitle').textContent=w?'Hoje tem '+w.title.toLocaleLowerCase('pt-BR')+'.':'Fim de semana no seu ritmo.';
  if(view==='overview'||view==='daybyday'){const content=$('daybydaycontent');$(view==='overview'?'homechecklist':'daybyday').append(content);renderDaybyday();}if(view==='diary')renderDiary();if(view==='overview')renderAgenda();if(view==='training')renderTraining();if(view==='mobility')renderMobility();if(view==='food')renderFood();if(view==='history'){renderEvolution();renderHistory();}
+ if(view==='overview')renderHomeLayout();
 }
 function renderAgenda(){
  const w=dayWorkout();$('workouttitle').textContent=w?w.title:'OFF de musculação';$('workoutdesc').textContent=w?'Divisão original do treinador + 30 min de cardio a 120–140 bpm.':'Sábado e domingo: 40 min de cardio a 120–140 bpm, conforme o plano.';
@@ -492,3 +494,22 @@ function renderFourMeals(){
 
 window.canRefreshRitmo=()=>!dirty&&!drafts.size&&!document.querySelector('dialog[open]')&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName);
 window.renderRitmoFromCloud=()=>render();
+
+function renderHomeLayout(){
+ const items=daybydayItems(),done=items.filter(item=>item.done).length;
+ $('home-month').textContent=selected.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ $('home-day').textContent=selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+ $('home-percent').textContent=done&&items.length?Math.round(done/items.length*100)+'%':'—';
+ const title=document.querySelector('#homechecklist .db-daily>.title h3');
+ if(title)title.textContent='Rotina do dia';
+ for(const tools of document.querySelectorAll('#homechecklist .db-tools')){
+  const menu=el('details',undefined,'home-item-menu'),summary=el('summary','•••');
+  summary.setAttribute('aria-label','Opções da atividade');
+  menu.append(summary,...Array.from(tools.children));tools.replaceChildren(menu);
+ }
+ const cloud=$('cloudstatus');
+ $('home-online').textContent=cloud.dataset.kind==='saved'?'Salvo online':cloud.dataset.kind==='error'?'Verificar sincronização':'Salvando…';
+}
+
+$('home-today').onclick=()=>changeDate(new Date());
+new MutationObserver(()=>{if(view==='overview'){$('home-online').textContent=$('cloudstatus').dataset.kind==='saved'?'Salvo online':$('cloudstatus').dataset.kind==='error'?'Verificar sincronização':'Salvando…';}}).observe($('cloudstatus'),{attributes:true,childList:true,subtree:true});
