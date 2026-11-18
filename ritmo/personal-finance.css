@@ -1,0 +1,39 @@
+.pf-app{background:#f2f6fb;color:#202a3c;padding:20px;border-radius:22px;--ink:#202a3c;--muted:#536174;--card:#fff;--line:#d4deeb;--bg:#f2f6fb}
+.pf-app button,.pf-dialog button{font:inherit;cursor:pointer;min-height:44px;border-radius:12px;padding:11px 15px;font-weight:700;border:1px solid #cbd6e5}
+.pf-primary{background:#236fdb!important;color:#fff!important;border-color:#236fdb!important}
+.pf-secondary{background:#fff!important;color:#263b59!important}
+.pf-add{display:block;width:100%;margin:20px 0;font-size:18px}
+.pf-heading,.pf-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pf-title{font-size:25px;font-weight:800}
+.pf-toolbar{justify-content:flex-start;margin:18px 0}
+.pf-app label,.pf-dialog label{display:grid;gap:6px;font-size:14px;color:#263b59}
+.pf-app input,.pf-app select,.pf-dialog input,.pf-dialog select{box-sizing:border-box;width:100%;padding:11px;border:1px solid #becbdc;border-radius:10px;background:#fff!important;color:#202a3c!important;font:inherit;min-height:44px}
+.pf-receipt{max-width:520px;margin:auto;padding:24px 18px;background:#fffdf4;border-top:5px dashed #bbb4a0;border-bottom:5px dashed #bbb4a0;font-family:'Courier New',monospace;box-shadow:0 7px 20px #1c2c4810}
+.pf-receipt h2,.pf-receipt-date{text-align:center;color:#29313d}
+.pf-receipt h2{font-size:19px;margin-top:0}
+.pf-line{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px dashed #c5c0ae;font-size:14px}
+.pf-line strong{white-space:nowrap;color:inherit}
+.pf-income{color:#176c43}
+.pf-positive{background:#d8f5e5;color:#145a35;padding:14px 6px;font-weight:800;font-size:16px}
+.pf-negative{background:#ffe1df;color:#9c2424;padding:14px 6px;font-weight:800;font-size:16px}
+.pf-committed{font-weight:800}
+.pf-note{font-size:13px;color:#526176;line-height:1.6;opacity:1}
+.pf-preview{padding:12px;background:#eaf4ff;color:#204b83;border-radius:10px;line-height:1.6}
+.pf-categories h2{font-size:19px}
+.pf-category{background:#fff;border:1px solid #d3ddec;border-left:7px solid var(--category);border-radius:14px;margin:12px 0;padding:14px}
+.pf-category summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#263b59}
+.pf-category summary span{font-size:14px}
+.pf-item{margin-top:12px;padding:12px 0;border-top:1px solid #e0e6ef}
+.pf-item p{font-size:14px}
+.pf-item button{margin:3px}
+.pf-help{background:#fff;padding:16px;border-radius:12px;margin-top:16px}
+.pf-help button{margin:6px}
+.pf-dialog{background:#fff;color:#202a3c;width:min(520px,calc(100vw - 30px));box-sizing:border-box;max-height:92dvh;overflow:auto;padding:22px;border:1px solid #d3ddec;border-radius:18px}
+.pf-dialog::backdrop{background:#17243d99}
+.pf-dialog form{display:grid;gap:14px}
+.pf-dialog h2{font-size:22px}
+.pf-error{color:#a22727;font-size:14px}
+.pf-warning{padding:14px;border-radius:12px;color:#674500;background:#fff0b6;font-weight:700}
+.pf-level-90{background:#ffe0c8;color:#8a350b}
+.pf-app button:focus-visible,.pf-dialog button:focus-visible{outline:3px solid #7cacff;outline-offset:3px}
+@media(max-width:480px){.pf-app{padding:12px}.pf-line{font-size:12px}.pf-receipt{padding:20px 12px}.pf-positive,.pf-negative{font-size:14px}.pf-heading .pf-title{font-size:22px}}

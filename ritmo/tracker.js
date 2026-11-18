@@ -127,6 +127,7 @@
     return {...totals,fixed,outstanding,remaining:totals.balance-fixed-outstanding};
   }
   function validateFinance(ledger){
+    if(ledger.personal!==undefined){const personal=typeof module==='object'&&module.exports?require('./personal-finance.js'):window.PersonalFinance;personal.validate(ledger.personal);}
     const plan=typeof module==='object'&&module.exports?require('./finance-plan.js'):window.FinancePlan;
     plan.validate(ledger);
     const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
