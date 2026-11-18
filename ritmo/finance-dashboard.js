@@ -147,7 +147,7 @@ renderFinance=function(){
  toolbar.append(periodLabel);
  const planning=personalMode==='week'?PersonalFinance.weeklyPlan(model,personalAnchor):summary;
  const dashboard=el('section',undefined,'pf-dashboard');
- for(const [label,value,cls] of [['Renda prevista',summary.income,'income'],[personalMode==='week'?'Gastos + reserva mensal':'Gastos e contas',planning.total,'cost'],['Saldo estimado',planning.balance,planning.balance<0?'negative':'balance']]){
+ for(const [label,value,cls] of [['Renda prevista',summary.income,'income'],[personalMode==='week'?'Gastos + reserva mensal':'Gastos e contas',planning.total,'cost'],['Sobra prevista',planning.balance,planning.balance<0?'negative':'balance']]){
   const tile=el('article',undefined,'pf-metric pf-metric-'+cls);tile.append(el('small',label),el('strong',personalMoney(value)));dashboard.append(tile);
  }
  if(personalMode==='week')dashboard.append(el('p','O saldo semanal desconta os gastos da semana e a reserva proporcional das contas mensais (mensal × 12 ÷ 52).','pf-note pf-plan-note'));
