@@ -17,7 +17,7 @@ function toast(msg,undo){clearTimeout(toastTimer);$('toast').replaceChildren(doc
 function persist(){return window.RitmoCloud.queueState(backup());}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 const key=()=>T.dateKey(selected),dayWorkout=()=>P.workouts.find(w=>w.day===selected.getDay()),chosenWorkout=()=>P.workouts.find(w=>w.id===(state.selections[key()]||dayWorkout()?.id));
-function switchView(v){if($('moremenu').open)$('moremenu').close();view=v;history.replaceState(null,'','#'+v);render();document.querySelector('#'+v).scrollIntoView({behavior:'auto',block:'start'});}
+function switchView(v){if(v==='finance'||v==='financeiro')v='overview';if($('moremenu').open)$('moremenu').close();view=v;history.replaceState(null,'','#'+v);render();document.querySelector('#'+v).scrollIntoView({behavior:'auto',block:'start'});}
 function changeDate(d){if(Number.isNaN(d.getTime()))return;selected=d;render();}
 function agenda(){
  const k=key();if(!state.agenda[k]){
@@ -124,7 +124,7 @@ function render(){
  document.querySelectorAll('.view').forEach(n=>n.hidden=n.id!==view);
  document.querySelectorAll('nav button[data-view]').forEach(b=>{b.classList.toggle('active',b.dataset.view===view);b.setAttribute('aria-current',b.dataset.view===view?'page':'false');});
  $('moremenu-toggle').classList.toggle('active',['mobility','history','diary','finance'].includes(view));$('datepick').value=key();$('dateLabel').textContent=selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
- if(view==='finance'){renderFinance();return;}
+
  $('days').replaceChildren();let mon=new Date(selected);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);const b=el('button',undefined,'day'+(T.dateKey(d)===key()?' selected':''));b.append(document.createTextNode(d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')),el('b',d.getDate()));b.setAttribute('aria-label',d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'}));b.setAttribute('aria-pressed',T.dateKey(d)===key());b.onclick=()=>changeDate(d);$('days').append(b);}
  const a=daybydayItems(),done=a.filter(x=>x.done).length,water=state.water[key()]||0;
@@ -459,7 +459,7 @@ function editDaybyday(item){
 
 if(location.hash==='#daybyday')switchView('daybyday');
 else if(location.hash==='#history')switchView('history');
-else if(location.hash==='#financeiro'||location.hash==='#finance')switchView('finance');
+else if(location.hash==='#financeiro'||location.hash==='#finance')switchView('overview');
 else render();
 if(storageWarning)toast('O armazenamento não está disponível ou um registro não pôde ser lido. Exporte um backup antes de sair.');
 
