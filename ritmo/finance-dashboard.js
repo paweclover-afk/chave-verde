@@ -147,7 +147,7 @@ renderFinance=function(){
  for(const [label,value,cls] of [['Renda prevista',summary.income,'income'],[personalMode==='week'?'Gastos + reserva mensal':'Gastos e contas',planning.total,'cost'],['Saldo estimado',planning.balance,planning.balance<0?'negative':'balance']]){
   const tile=el('article',undefined,'pf-metric pf-metric-'+cls);tile.append(el('small',label),el('strong',personalMoney(value)));dashboard.append(tile);
  }
- if(personalMode==='week')dashboard.append(el('p','O saldo semanal desconta os gastos da semana e a reserva proporcional das contas mensais (mensal × 12 ÷ 52). O cupom abaixo mostra os vencimentos reais.','pf-note pf-plan-note'));
+ if(personalMode==='week')dashboard.append(el('p','O saldo semanal desconta os gastos da semana e a reserva proporcional das contas mensais (mensal × 12 ÷ 52).','pf-note pf-plan-note'));
  const followingAnchor=PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1),following=PersonalFinance.summary(model,'month',followingAnchor);
  const future=el('section',undefined,'pf-future');future.append(el('strong','Próximo mês · '+followingAnchor.slice(0,7).split('-').reverse().join('/')),el('p','Renda '+personalMoney(following.income)+' · Comprometido '+personalMoney(following.total)+' · Saldo '+personalMoney(following.balance)));
  const progress=el('progress');progress.max=100;progress.value=summary.income?Math.min(100,planning.total/planning.income*100):0;progress.setAttribute('aria-label','Percentual da renda comprometida');future.append(progress,el('small',summary.income?Math.round(planning.total/planning.income*100)+'% da renda comprometida no período selecionado':'Cadastre sua renda para calcular a proporção.'));
@@ -158,11 +158,6 @@ renderFinance=function(){
  }
  if(!reserve.bills.length)saving.append(el('p','Cadastre uma conta mensal, como aluguel, para calcular sua reserva.','pf-note'));
  saving.append(el('p','O vencimento continua entrando no total do período. Esta reserva serve para planejar o dinheiro a guardar.','pf-note'));
- const receipt=el('section',undefined,'pf-receipt');receipt.append(el('h2','SEU CUPOM '+(personalMode==='week'?'DA SEMANA':'DO MÊS')),el('p',dateLabel(summary.from)+' a '+dateLabel(summary.to),'pf-receipt-date'));
- for(const [label,value,style] of [['Renda '+(model.income?.frequency!==personalMode?'estimada':'informada'),summary.income,'pf-income'],['Gastos avulsos',summary.spent,''],['Contas fixas previstas',summary.fixed,''],['TOTAL COMPROMETIDO',summary.total,'pf-committed'],['Já pago',summary.paid,''],['Ainda a pagar',summary.total-summary.paid,''],['SALDO DISPONÍVEL',summary.balance,summary.balance<0?'pf-negative':'pf-positive']]){
- const line=el('div',undefined,'pf-line '+style);line.append(el('span',label),el('strong',personalMoney(value)));receipt.append(line);
- }
- receipt.append(el('p','Projeção: semana × 52 ÷ 12 ou mês × 12 ÷ 52. Contas pagas entram uma vez no total.','pf-note'));
  const alerts=el('div');for(const warning of pfAlerts(model,summary)){const item=el('p',warning.text,'pf-warning pf-level-'+warning.level);item.setAttribute('role','alert');alerts.append(item);}
  const add=pfButton('+ Adicionar gasto',()=>pfExpense(),'pf-primary pf-add');
  const categories=el('section',undefined,'pf-categories');categories.append(el('h2','Por categoria'));
@@ -183,7 +178,7 @@ renderFinance=function(){
  advanced.append(el('p','Este dashboard mantém um cadastro por moeda. Consulte os registros anteriores no histórico.','pf-note'));
  advanced.append(pfButton('Consultar histórico anterior',()=>{root.classList.remove('pf-app');originalFinanceView();const back=pfButton('Voltar ao novo resumo',()=>renderFinance(),'pf-primary');root.prepend(back);}));
  if(typeof Notification!=='undefined')advanced.append(pfButton('Ativar notificações neste dispositivo',async()=>{try{const permission=await Notification.requestPermission();toast(permission==='granted'?'Notificações autorizadas.':'Os avisos continuam disponíveis dentro do app.');}catch{toast('Este navegador usa os avisos dentro do app.');}}));
- root.replaceChildren(heading,toolbar,alerts,dashboard,add,saving,future,receipt,categories,advanced);
+ root.replaceChildren(heading,toolbar,alerts,dashboard,add,saving,future,categories,advanced);
 };function pfCurrency(){
  pfDialog('Moeda do dashboard',form=>{
   const currency=financeField(form,'Trabalhar com',{options:[['BRL','Real (R$)'],['EUR','Euro (€)']],value:ledger().dashboardCurrency});
