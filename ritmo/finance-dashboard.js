@@ -157,7 +157,14 @@ renderFinance=function(){
  if(personalMode==='week')dashboard.append(el('p','O saldo semanal desconta os gastos da semana e a reserva proporcional das contas mensais (mensal × 12 ÷ 52).','pf-note pf-plan-note'));
  const followingAnchor=PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1),following=PersonalFinance.summary(model,'month',followingAnchor);
  const future=el('section',undefined,'pf-future');future.append(el('strong','Próximo mês · '+followingAnchor.slice(0,7).split('-').reverse().join('/')),el('p','Renda '+personalMoney(following.income)+' · Comprometido '+personalMoney(following.total)+' · Saldo '+personalMoney(following.balance)));
- const progress=el('progress');progress.max=100;progress.value=summary.income?Math.min(100,planning.total/planning.income*100):0;progress.setAttribute('aria-label','Percentual da renda comprometida');future.append(progress,el('small',summary.income?Math.round(planning.total/planning.income*100)+'% da renda comprometida no período selecionado':'Cadastre sua renda para calcular a proporção.'));
+ const nextWeekly=new Map();
+ for(const row of following.rows.filter(row=>row.frequency==='week')){if(!nextWeekly.has(row.source.id))nextWeekly.set(row.source.id,[]);nextWeekly.get(row.source.id).push(row);}
+ for(const bills of nextWeekly.values()){
+  const total=bills.reduce((sum,row)=>sum+row.amount,0),sameAmount=bills.every(row=>row.amount===bills[0].amount),line=el('div',undefined,'pf-line');
+  line.append(el('span',bills[0].source.name+' · '+bills.length+' '+(bills.length===1?'parcela':'parcelas')+(sameAmount?' × '+personalMoney(bills[0].amount):'')),el('strong',personalMoney(total)));future.append(line);
+ }
+ const progress=el('progress');progress.max=100;progress.value=following.income?Math.min(100,following.total/following.income*100):0;progress.setAttribute('aria-label','Percentual da renda comprometida no próximo mês');future.append(progress,el('small',following.income?Math.round(following.total/following.income*100)+'% da renda comprometida no próximo mês':'Cadastre sua renda para calcular a proporção.'));
+ future.append(el('small','Inclui somente as cobranças com vencimento entre '+dateLabel(following.from)+' e '+dateLabel(following.to)+', respeitando a quantidade de parcelas e a data final.','pf-note'));
  const reserve=PersonalFinance.weeklyCommitments(model,personalAnchor,personalMode),saving=el('section',undefined,'pf-future pf-reserve');
  saving.append(el('strong','Quanto guardar por semana'),el('h2',personalMoney(reserve.total)),el('p',personalMode==='week'?'Soma das parcelas que vencem nesta semana com a reserva das contas mensais.':'Reserva das contas mensais + valor semanal médio das parcelas ativas neste mês, enquanto houver cobranças. Consulte Semana para ver os vencimentos exatos.','pf-note'));
  for(const bill of reserve.bills){
