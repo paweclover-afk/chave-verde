@@ -127,6 +127,12 @@
     return {...totals,fixed,outstanding,remaining:totals.balance-fixed-outstanding};
   }
   function validateFinance(ledger){
+    if(ledger.dashboardCurrency!==undefined&&!['BRL','EUR'].includes(ledger.dashboardCurrency))throw Error('Moeda inválida.');
+    if(ledger.dashboards!==undefined){
+      if(!ledger.dashboards||typeof ledger.dashboards!=='object'||Array.isArray(ledger.dashboards)||Object.keys(ledger.dashboards).some(c=>!['BRL','EUR'].includes(c)))throw Error('Dashboard inválido.');
+      const engine=typeof module==='object'&&module.exports?require('./personal-finance.js'):window.PersonalFinance;
+      for(const model of Object.values(ledger.dashboards))engine.validate(model);
+    }
     if(ledger.personal!==undefined){const personal=typeof module==='object'&&module.exports?require('./personal-finance.js'):window.PersonalFinance;personal.validate(ledger.personal);}
     const plan=typeof module==='object'&&module.exports?require('./finance-plan.js'):window.FinancePlan;
     plan.validate(ledger);

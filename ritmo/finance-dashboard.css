@@ -1,0 +1,18 @@
+.pf-dashboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.pf-metric{display:grid;gap:12px;padding:20px 16px;border-radius:17px;border:1px solid #c7d8ec;background:#fff}
+.pf-metric small{font-size:13px;font-weight:700}
+.pf-metric strong{font-size:clamp(17px,2.4vw,29px);overflow-wrap:anywhere}
+.pf-metric-income{background:#e4f7ec;color:#175d3b}
+.pf-metric-cost{background:#fff0db;color:#805011}
+.pf-metric-balance{background:#e3efff;color:#1c508e}
+.pf-metric-negative{background:#ffe3e3;color:#932e34}
+.pf-future{display:grid;gap:10px;background:#fff;border:1px solid #d0dced;padding:18px;border-radius:16px;margin:16px 0}
+.pf-future p{line-height:1.7;margin:0}
+.pf-future progress{width:100%;accent-color:#347cdd;height:12px}
+.pf-future small{color:#536174}
+.pf-welcome{max-width:500px;margin:20px auto;padding:28px;background:#fff;border-radius:20px}
+.pf-welcome h2{font-size:30px;line-height:1.2}
+.pf-welcome p{color:#526176;line-height:1.7}
+.pf-welcome button{margin:8px 10px 0 0;min-width:135px}
+.pf-eyebrow{color:#276cc1;font-size:12px;font-weight:800;letter-spacing:1px}
+@media(max-width:560px){.pf-dashboard{grid-template-columns:1fr}.pf-metric{display:flex;justify-content:space-between;align-items:center;padding:17px}.pf-metric strong{font-size:23px}.pf-toolbar label{width:100%}}
