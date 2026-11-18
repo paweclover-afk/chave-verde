@@ -16,3 +16,49 @@
 .pf-welcome button{margin:8px 10px 0 0;min-width:135px}
 .pf-eyebrow{color:#276cc1;font-size:12px;font-weight:800;letter-spacing:1px}
 @media(max-width:560px){.pf-dashboard{grid-template-columns:1fr}.pf-metric{display:flex;justify-content:space-between;align-items:center;padding:17px}.pf-metric strong{font-size:23px}.pf-toolbar label{width:100%}}
+/* Finance follows the app theme, including dialogs mounted outside the page. */
+:root{
+ --pf-bg:#f7f6f4;--pf-surface:#fff;--pf-text:#28242a;--pf-muted:#655d65;
+ --pf-border:#ded8dd;--pf-control:#fff;--pf-accent:#963d70;--pf-accent-text:#fff;
+ --pf-income-bg:#e5f5ec;--pf-income-text:#1c6542;--pf-cost-bg:#fff0de;--pf-cost-text:#795017;
+ --pf-balance-bg:#f7e8f1;--pf-balance-text:#81365f;--pf-negative-bg:#ffe5e5;--pf-negative-text:#932f3c;
+ --pf-receipt:#fffdf7;--pf-preview-bg:#f7e8f1;--pf-preview-text:#77365c;
+ --pf-warning-bg:#fff0b8;--pf-warning-text:#674700;--pf-danger-bg:#ffe0cb;--pf-danger-text:#823812
+}
+:root[data-theme=dark]{
+ --pf-bg:#090909;--pf-surface:#151215;--pf-text:#f7edf3;--pf-muted:#d0bdc8;
+ --pf-border:#41313b;--pf-control:#0c0b0c;--pf-accent:#f9a8d4;--pf-accent-text:#2d1021;
+ --pf-income-bg:#11271e;--pf-income-text:#9be4bc;--pf-cost-bg:#2b2114;--pf-cost-text:#f4cc91;
+ --pf-balance-bg:#321c2b;--pf-balance-text:#f9b9dc;--pf-negative-bg:#351b22;--pf-negative-text:#ffa8b6;
+ --pf-receipt:#181418;--pf-preview-bg:#2d1b27;--pf-preview-text:#f4bad9;
+ --pf-warning-bg:#342b15;--pf-warning-text:#ffdf91;--pf-danger-bg:#3a211a;--pf-danger-text:#ffc19d
+}
+.pf-app{background:var(--pf-bg);color:var(--pf-text);--ink:var(--pf-text);--muted:var(--pf-muted);--card:var(--pf-surface);--line:var(--pf-border);--bg:var(--pf-bg)}
+.pf-primary{background:var(--pf-accent)!important;color:var(--pf-accent-text)!important;border-color:var(--pf-accent)!important}
+.pf-secondary{background:var(--pf-surface)!important;color:var(--pf-text)!important;border-color:var(--pf-border)!important}
+.pf-app button,.pf-dialog button{border-color:var(--pf-border)}
+.pf-app label,.pf-dialog label{color:var(--pf-text)}
+.pf-app input,.pf-app select,.pf-dialog input,.pf-dialog select{background:var(--pf-control)!important;color:var(--pf-text)!important;border-color:var(--pf-border)}
+.pf-app input::placeholder,.pf-dialog input::placeholder{color:var(--pf-muted);opacity:1}
+.pf-dialog{background:var(--pf-surface)!important;color:var(--pf-text)!important;border-color:var(--pf-border)}
+.pf-category,.pf-help,.pf-future,.pf-welcome,.pf-metric{background:var(--pf-surface);color:var(--pf-text);border-color:var(--pf-border)}
+.pf-category{border-left-color:var(--category)}
+.pf-category summary,.pf-receipt h2,.pf-receipt-date{color:var(--pf-text)}
+.pf-note,.pf-future small,.pf-welcome p{color:var(--pf-muted)}
+.pf-preview{background:var(--pf-preview-bg);color:var(--pf-preview-text)}
+.pf-receipt{background:var(--pf-receipt);color:var(--pf-text);border-color:var(--pf-border)}
+.pf-line{border-color:var(--pf-border)}
+.pf-income{color:var(--pf-income-text)}
+.pf-positive{background:var(--pf-income-bg);color:var(--pf-income-text)}
+.pf-negative{background:var(--pf-negative-bg);color:var(--pf-negative-text)}
+.pf-item{border-color:var(--pf-border)}
+.pf-metric-income{background:var(--pf-income-bg);color:var(--pf-income-text)}
+.pf-metric-cost{background:var(--pf-cost-bg);color:var(--pf-cost-text)}
+.pf-metric-balance{background:var(--pf-balance-bg);color:var(--pf-balance-text)}
+.pf-metric-negative{background:var(--pf-negative-bg);color:var(--pf-negative-text)}
+.pf-warning{background:var(--pf-warning-bg);color:var(--pf-warning-text)}
+.pf-level-90{background:var(--pf-danger-bg);color:var(--pf-danger-text)}
+.pf-error{color:var(--pf-negative-text)}
+.pf-eyebrow{color:var(--pf-accent)}
+.pf-future progress{accent-color:var(--pf-accent)}
+.pf-app button:focus-visible,.pf-dialog button:focus-visible{outline-color:var(--pf-accent)}
