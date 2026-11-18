@@ -58,11 +58,10 @@ body[data-screen=daybyday] #daybyday .db-tools{flex-shrink:0;margin:0;display:bl
 body[data-screen=daybyday] .home-item-menu[open] button{background:var(--panel,#fff);color:var(--ink)}
 body[data-screen=daybyday] #daybyday input[type=checkbox]:focus-visible{outline:3px solid var(--green);outline-offset:4px}
 
-/* Completion water level in each calendar day. */
-.db-calday{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
-.calendar-bucket{position:relative;display:block;width:28px;height:30px;border:2px solid var(--muted);border-top-width:3px;border-radius:3px 3px 9px 9px;overflow:hidden;isolation:isolate;background:var(--control,transparent)}
-.calendar-bucket-water{position:absolute;bottom:0;left:0;right:0;background:#279bd6;transition:height .45s ease}
-.calendar-bucket-water::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#a4e6ff}
-.db-calday.active .calendar-bucket{border-color:var(--green)}
-@media(max-width:400px){.calendar-bucket{width:22px;height:25px}.db-calday{gap:5px}}
-@media(prefers-reduced-motion:reduce){.calendar-bucket-water{transition:none}}
+/* The calendar tile itself fills with completion progress. */
+.db-calday{position:relative;overflow:hidden;isolation:isolate}
+.db-calday::before{content:'';position:absolute;inset:auto 0 0;height:var(--day-fill,0%);background:#d95b9e;opacity:.3;z-index:-1;transition:height .5s ease}
+.db-calday::after{content:'';position:absolute;left:0;right:0;bottom:var(--day-fill,0%);height:2px;background:#f9a8d4;opacity:.65;z-index:-1;transition:bottom .5s ease}
+.db-calday[style*="--day-fill: 0%"]::after{display:none}
+.db-calday strong,.db-calday small{position:relative;z-index:1}
+@media(prefers-reduced-motion:reduce){.db-calday::before,.db-calday::after{transition:none}}
