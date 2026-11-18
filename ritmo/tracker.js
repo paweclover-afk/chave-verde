@@ -63,7 +63,7 @@
       for(const routine of v.routines)if(!routine||typeof routine.from!=='string'||!/^20[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(routine.from)||!['daily','0','1','2','3','4','5','6'].includes(routine.repeat))throw Error('Repetição de rotina inválida.');
       validateDaybyday({items:v.routines});
     }
-    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly'].includes(k)))throw Error('DayByDay inválido.');
+    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines'].includes(k)))throw Error('DayByDay inválido.');
     if(v.items!==undefined){
       if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
     const ids=new Set();
