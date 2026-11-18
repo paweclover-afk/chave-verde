@@ -5,23 +5,26 @@ function planEditor(title,fields,save){
  dialog.append(el('h2',title),form);
  const inputs={};
  for(const [id,label,config] of fields)inputs[id]=financeField(form,label,config);
+ for(const [id,label] of fields){if(label.includes('(opcional)'))inputs[id].required=false;}
  const submit=el('button','Salvar','primary'),cancel=el('button','Cancelar','secondary');
  submit.type='submit';cancel.type='button';cancel.onclick=()=>dialog.close();form.append(submit,cancel);
  form.onsubmit=e=>{e.preventDefault();try{save(inputs);dialog.close();}catch(error){toast(error.message);}};
  dialog.onclose=()=>dialog.remove();document.body.append(dialog);dialog.showModal();
 }
 function editPlanAccount(account){
- planEditor(account?'Editar conta':'Adicionar conta',[
+ planEditor(account?'Editar gasto fixo':'Adicionar gasto fixo',[
  ['name','Nome',{type:'text',maxLength:160,value:account?.name||''}],
- ['amount','Valor', {...amountField,value:account?account.amount/100:''}],
+ ['amount','Valor de cada pagamento', {...amountField,value:account?account.amount/100:''}],
  ['currency','Moeda',{options:currencyOptions,value:account?.currency||'GBP'}],
  ['category','Categoria',{options:simpleCategories.map(x=>[x,x]),value:account?.category||'Moradia'}],
  ['method','Forma de pagamento',{options:[['card','Cartão'],['pix','Pix'],['cash','Dinheiro'],['debit','Débito'],['other','Outro']],value:account?.method||'other'}],
  ['frequency','Frequência',{options:[['week','Semanal'],['month','Mensal'],['once','Uma vez']],value:account?.frequency||'month'}],
  ['installments','Quantidade de pagamentos (0 para continuar sem prazo)',{type:'number',min:0,max:1200,step:1,value:account?.installments||0}],
- ['start','Primeiro vencimento',{type:'date',value:account?.start||T.dateKey(new Date())}]
+ ['start','Quando começa / primeiro vencimento',{type:'date',value:account?.start||T.dateKey(new Date())}],
+ ['end','Quando termina (opcional)',{type:'date',value:account?.end||''}]
  ],f=>commitFinance(next=>{
  const record={id:account?.id||crypto.randomUUID(),name:f.name.value.trim(),amount:cents(f.amount),currency:f.currency.value,frequency:f.frequency.value,start:f.start.value,category:f.category.value,method:f.method.value};
+ if(f.end.value)record.end=f.end.value;
  const count=f.installments.valueAsNumber;
  if(!Number.isInteger(count)||count<0||count>1200)throw Error('Informe de 0 a 1200 pagamentos.');
  if(record.frequency==='once')record.installments=1;else if(count)record.installments=count;
@@ -75,12 +78,13 @@ renderFinance=function(){
  const root=$('finance-section'),month=financeMonth||T.dateKey(new Date()).slice(0,7);
  financeMonth=month;
  const from=month+'-01',to=FinancePlan.monthDate(month,31),rows=FinancePlan.occurrences(ledger(),month),today=T.dateKey(new Date());
- const header=financeCard('Seu mês financeiro');
+ const header=financeCard('Seu resumo financeiro');
  const picker=financeField(header,'Mês',{type:'month',value:month});
  picker.onchange=()=>{if(picker.value){financeMonth=picker.value;renderFinance();}};
- header.append(financeReceipt(month,rows));
+ const period=financePeriodControls(header,month);
+ header.append(financeReceipt(month,FinancePlan.occurrences(ledger(),period.to.slice(0,7)),period));
  const actions=el('div',undefined,'finance-actions');
- for(const [label,action] of [['+ Adicionar gasto',()=>editSimpleSpending()],['Renda',()=>editSimpleIncome()],['Contas fixas',()=>editPlanAccount()],['Compra no cartão',()=>editPlanPurchase()],['Adicionar cartão',()=>editPlanCard()]]){const b=el('button',label,label==='+ Adicionar gasto'?'primary':'secondary');b.onclick=action;actions.append(b);}
+ for(const [label,action] of [['+ Adicionar gasto',()=>editPlanAccount()],['Renda',()=>editSimpleIncome()],['Custo de hoje',()=>editDailyCost()],['Compra no cartão',()=>editPlanPurchase()],['Adicionar cartão',()=>editPlanCard()]]){const b=el('button',label,label==='+ Adicionar gasto'?'primary':'secondary');b.onclick=action;actions.append(b);}
  const list=financeCard('Contas e compromissos');
  const filter=financeField(list,'Mostrar',{options:[['all','Todas'],['pending','Pendentes'],['paid','Pagas'],['overdue','Atrasadas']],value:financeFilter});
  filter.onchange=()=>{financeFilter=filter.value;renderFinance();};

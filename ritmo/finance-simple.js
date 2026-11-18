@@ -43,22 +43,25 @@ function editSimpleSpending(existing){
  }catch(error){toast(error.message);}};
  dialog.onclose=()=>dialog.remove();document.body.append(dialog);dialog.showModal();
 }
-function financeReceipt(month,rows){
- const receipt=el('section',undefined,'finance-receipt'),from=month+'-01',to=FinancePlan.monthDate(month,31);
- const heading=el('h3','SEU CUPOM DO MÊS');receipt.append(heading,el('p',month.split('-').reverse().join('/'),'receipt-date'));
- const incomes=FinancePlan.incomeTotal(ledger(),month,c=>T.cashSummary(ledger(),from,to,c).income);
+function financeReceipt(month,rows,period){
+ const receipt=el('section',undefined,'finance-receipt'),from=period?.from||month+'-01',to=period?.to||FinancePlan.monthDate(month,31);
+ const heading=el('h3',receiptMode==='week'?'SEU CUPOM DA SEMANA':'SEU CUPOM DO MÊS');receipt.append(heading,el('p',dateLabel(from)+' a '+dateLabel(to),'receipt-date'));
+ const incomes=FinancePlan.periodIncome(ledger(),from,to,(day,c)=>T.cashSummary(ledger(),day,day,c).income);
  const today=T.dateKey(new Date());
  for(const currency of T.financeCurrencies){
-  const old=T.monthlyForecast(ledger(),from,to,currency),current=rows.filter(r=>r.currency===currency&&r.day>=from),late=rows.filter(r=>r.currency===currency&&r.day<from);
+  const forecast=T.monthlyForecast(ledger(),from,to,currency);
+  const fixed=(ledger().fixedBills||[]).filter(b=>b.currency===currency).reduce((sum,b)=>{const due=FinancePlan.monthDate(from.slice(0,7),Number(b.from.slice(8)));return sum+(b.from<=due&&(!b.to||b.to>=due)&&due>=from&&due<=to?b.amount:0);},0);
+  const old={...forecast,fixed};
+  const current=rows.filter(r=>r.currency===currency&&r.day>=from&&r.day<=to),late=rows.filter(r=>r.currency===currency&&r.day<from);
   const newCost=current.reduce((s,r)=>s+r.amount,0),overdue=late.reduce((s,r)=>s+r.balance,0);
   const total=old.fixed+old.expenses+old.payments+old.outstanding+newCost+overdue,income=incomes[currency],balance=income-total;
   if(!total&&!income)continue;
   const paid=old.expenses+old.payments+current.reduce((s,r)=>s+Math.min(r.paid,r.amount),0);
   const registered=old.expenses+old.payments+current.filter(r=>r.kind==='spending').reduce((s,r)=>s+r.amount,0);
-  const day=(ledger().expenses||[]).filter(e=>e.currency===currency&&e.date===today&&today.startsWith(month)).reduce((s,e)=>s+e.amount,0)+current.filter(r=>r.kind==='spending'&&r.day===today).reduce((s,r)=>s+r.amount,0);
-  const lines=[['RENDA PREVISTA',income],['Gastos de hoje (incluídos abaixo)',day],['Contas fixas',old.fixed+current.filter(r=>r.kind==='account').reduce((s,r)=>s+r.amount,0)],['Compras e parcelas',old.expenses+old.payments+old.outstanding+current.filter(r=>r.kind!=='account').reduce((s,r)=>s+r.amount,0)],['Atrasos anteriores',overdue],['TOTAL DE DESPESAS',total],['Já pago neste mês',paid],['Ainda previsto',Math.max(0,total-paid)],['SALDO ESTIMADO',balance]];
+  const day=(ledger().expenses||[]).filter(e=>e.currency===currency&&e.date===today&&today>=from&&today<=to).reduce((s,e)=>s+e.amount,0)+current.filter(r=>r.kind==='spending'&&r.day===today).reduce((s,r)=>s+r.amount,0);
+  const lines=[['RENDA PREVISTA',income],['Gastos de hoje (incluídos abaixo)',day],['Contas fixas',old.fixed+current.filter(r=>r.kind==='account').reduce((s,r)=>s+r.amount,0)],['Compras e parcelas',old.expenses+old.payments+old.outstanding+current.filter(r=>r.kind!=='account').reduce((s,r)=>s+r.amount,0)],['Atrasos anteriores',overdue],['TOTAL DE DESPESAS',total],['Já pago no período',paid],['Ainda previsto',Math.max(0,total-paid)],['SALDO ESTIMADO',balance]];
   for(const [label,value] of lines){const line=el('div',undefined,'receipt-line'+(label==='SALDO ESTIMADO'?' receipt-total '+(balance<0?'receipt-negative':''):''));line.append(el('span',label),el('strong',money(value,currency)));receipt.append(line);}
-  if(income&&registered/income>=.7){
+  if(receiptMode==='month'&&income&&registered/income>=.7){
    const level=registered/income>=.9?90:70;
    receipt.append(el('p','Atenção: gastos registrados atingiram '+level+'% da renda '+currency+'.','receipt-warning'));
   }
@@ -92,4 +95,48 @@ async function checkFinanceThresholds(month,rows){
    }catch{checkingFinanceAlerts.delete(key);}
   }
  }
+}
+let receiptMode='month';
+let receiptStart='';
+let receiptEnd='';
+function financePeriodControls(parent,month){
+ const mode=financeField(parent,'Ver cupom',{options:[['month','Mês'],['week','Semana']],value:receiptMode});
+ mode.onchange=()=>{receiptMode=mode.value;receiptStart='';receiptEnd='';renderFinance();};
+ let from=month+'-01',to=FinancePlan.monthDate(month,31);
+ if(receiptMode==='week'){
+  const today=T.dateKey(new Date());
+  const anchor=today.startsWith(month)?today:from;
+  const day=new Date(anchor+'T12:00:00Z');
+  day.setUTCDate(day.getUTCDate()-(day.getUTCDay()-5+7)%7);
+  from=receiptStart||day.toISOString().slice(0,10);
+  const end=new Date(from+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+6);
+  to=receiptEnd||end.toISOString().slice(0,10);
+  const startField=financeField(parent,'Início da semana',{type:'date',value:from});
+  const endField=financeField(parent,'Fechamento da semana',{type:'date',value:to});
+  startField.onchange=()=>{
+   if(!startField.value)return;
+   receiptStart=startField.value;
+   const d=new Date(receiptStart+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+6);receiptEnd=d.toISOString().slice(0,10);
+   renderFinance();
+  };
+  endField.onchange=()=>{
+   if(!endField.value||endField.value<from||endField.value>FinancePlan.monthDate(FinancePlan.nextMonth(from.slice(0,7),1),31)){toast('Escolha um fechamento após o início, até o próximo mês.');return;}
+   receiptStart=from;receiptEnd=endField.value;renderFinance();
+  };
+  parent.append(el('p','Por padrão, a semana vai de sexta a quinta. Ajuste o início e o fechamento conforme seu recebimento.','smallnote'));
+ }
+ return {from,to};
+}
+function editDailyCost(existing){
+ planEditor(existing?'Editar custo do dia':'Custo de hoje',[
+ ['name','Nome',{type:'text',maxLength:160,value:existing?.name||''}],
+ ['amount','Valor',{...amountField,value:existing?existing.amount/100:''}],
+ ['date','Data',{type:'date',value:existing?.date||T.dateKey(new Date())}],
+ ['category','Categoria',{options:simpleCategories.map(x=>[x,x]),value:existing?.category||'Café'}],
+ ['method','Pagamento',{options:[['cash','Dinheiro'],['pix','Pix'],['debit','Débito'],['card','Cartão'],['other','Outro']],value:existing?.method||'cash'}],
+ ['currency','Moeda',{options:currencyOptions,value:existing?.currency||'EUR'}]
+ ],f=>commitFinance(next=>{
+ next.spending=(next.spending||[]).filter(x=>x.id!==existing?.id);
+ next.spending.push({id:existing?.id||crypto.randomUUID(),name:f.name.value.trim(),amount:cents(f.amount),date:f.date.value,category:f.category.value,method:f.method.value,currency:f.currency.value,frequency:'once',installments:1});
+ }));
 }

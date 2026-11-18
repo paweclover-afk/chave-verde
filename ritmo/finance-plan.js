@@ -16,7 +16,7 @@
     id(purchase);
     if(!name(purchase.name)||!amount(purchase.amount)||!currency(purchase.currency)||!date(purchase.date)||!['week','month','once'].includes(purchase.frequency)||!Number.isInteger(purchase.installments)||purchase.installments<1||purchase.installments>1200||purchase.amount<purchase.installments||typeof purchase.category!=='string'||purchase.category.length>100||!['card','pix','cash','debit','other'].includes(purchase.method))throw Error('Gasto inválido.');
   }
-  for(const a of finance.accounts||[]){id(a);if(!name(a.name)||!amount(a.amount)||!currency(a.currency)||!date(a.start)||!['week','month','once'].includes(a.frequency)||a.installments!==undefined&&(!Number.isInteger(a.installments)||a.installments<1||a.installments>1200))throw Error('Conta inválida.');}
+  for(const a of finance.accounts||[]){id(a);if(!name(a.name)||!amount(a.amount)||!currency(a.currency)||!date(a.start)||!['week','month','once'].includes(a.frequency)||a.end!==undefined&&(!date(a.end)||a.end<a.start)||a.installments!==undefined&&(!Number.isInteger(a.installments)||a.installments<1||a.installments>1200))throw Error('Conta inválida.');}
   for(const c of finance.cards||[]){id(c);if(!name(c.name)||!currency(c.currency)||![c.closing,c.due].every(n=>Number.isInteger(n)&&n>=1&&n<=31))throw Error('Cartão inválido.');}
   for(const p of finance.purchases||[]){id(p);if(!(finance.cards||[]).some(c=>c.id===p.card)||!name(p.name)||!amount(p.amount)||!date(p.date)||!Number.isInteger(p.installments)||p.installments<1||p.installments>120)throw Error('Compra inválida.');}
   for(const p of finance.billPayments||[]){id(p);if(typeof p.ref!=='string'||p.ref.length>200||!date(p.date)||!amount(p.amount))throw Error('Pagamento inválido.');}
@@ -25,7 +25,7 @@
   const end=monthDate(month,31),rows=[];
   for(const a of finance.accounts||[]){
    let day=a.start,index=0;
-   while(day<=end&&(a.installments===undefined||index<a.installments)){
+   while(day<=end&&(!a.end||day<=a.end)&&(a.installments===undefined||index<a.installments)){
     rows.push({ref:a.id+'@'+day,source:a,id:a.id,name:a.name,day,amount:a.amount,currency:a.currency,frequency:a.frequency,installment:index+1,totalInstallments:a.installments,kind:'account'});
     if(a.frequency==='once')break;
     index++;
@@ -83,7 +83,26 @@
   }
   return result;
  }
- const api={validate,occurrences,monthDate,nextMonth,incomeTotal};
+ function periodIncome(finance,from,to,legacy){
+  const result={};
+  for(const currency of ['GBP','EUR','BRL']){
+    const rates=(finance.salary||[]).filter(r=>r.currency===currency).sort((a,b)=>a.from.localeCompare(b.from));
+    let total=0;
+    for(let day=from;day<=to;){
+      const rate=rates.filter(r=>r.from<=day).at(-1);
+      if(rate){
+        if(rate.frequency==='week'&&new Date(day+'T12:00:00Z').getUTCDay()===5)total+=rate.amount;
+        if(rate.frequency==='month'&&day.endsWith('-01'))total+=rate.amount;
+      }else{
+        total+=legacy(day,currency);
+      }
+      const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+1);day=key(d);
+    }
+    result[currency]=total;
+  }
+  return result;
+ }
+ const api={validate,occurrences,monthDate,nextMonth,incomeTotal,periodIncome};
  if(typeof module==='object'&&module.exports)module.exports=api;
  else root.FinancePlan=api;
 })(typeof window==='object'?window:globalThis);

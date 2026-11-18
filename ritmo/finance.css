@@ -41,3 +41,6 @@
 .receipt-negative{background:#ffe0dd;color:#7b211c}
 .finance-receipt .smallnote{color:#514b41;opacity:1;margin-top:12px}
 .receipt-warning{padding:12px;background:#ffda82;color:#472900;font-weight:bold;border-radius:6px}
+
+.finance-receipt .receipt-warning{color:#472900!important;background:#ffda82;opacity:1}
+.finance-receipt .receipt-date{color:#514b41;opacity:1}
