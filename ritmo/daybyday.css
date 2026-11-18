@@ -57,3 +57,12 @@ body[data-screen=daybyday] #daybyday .db-tools{flex-shrink:0;margin:0;display:bl
 
 body[data-screen=daybyday] .home-item-menu[open] button{background:var(--panel,#fff);color:var(--ink)}
 body[data-screen=daybyday] #daybyday input[type=checkbox]:focus-visible{outline:3px solid var(--green);outline-offset:4px}
+
+/* Completion water level in each calendar day. */
+.db-calday{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.calendar-bucket{position:relative;display:block;width:28px;height:30px;border:2px solid var(--muted);border-top-width:3px;border-radius:3px 3px 9px 9px;overflow:hidden;isolation:isolate;background:var(--control,transparent)}
+.calendar-bucket-water{position:absolute;bottom:0;left:0;right:0;background:#279bd6;transition:height .45s ease}
+.calendar-bucket-water::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#a4e6ff}
+.db-calday.active .calendar-bucket{border-color:var(--green)}
+@media(max-width:400px){.calendar-bucket{width:22px;height:25px}.db-calday{gap:5px}}
+@media(prefers-reduced-motion:reduce){.calendar-bucket-water{transition:none}}
