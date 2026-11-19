@@ -513,10 +513,10 @@ function editDaybyday(item){
  name.oninput=()=>name.setCustomValidity('');dialog.showModal();
 }
 
-if(location.hash==='#daybyday')switchView('daybyday');
-else if(location.hash==='#history')switchView('history');
-else if(location.hash==='#financeiro'||location.hash==='#finance')switchView('finance');
-else render();
+// Every new app load starts at Home; navigation remains available afterward.
+history.replaceState(null,'','#overview');
+if('scrollRestoration' in history)history.scrollRestoration='manual';
+render();
 if(storageWarning)toast('O armazenamento não está disponível ou um registro não pôde ser lido. Exporte um backup antes de sair.');
 
 function renderUpdatedFood(){
