@@ -15,3 +15,32 @@
 .finance-reminder-list{max-height:55dvh;overflow:auto;padding-left:22px}
 .finance-reminder-list li{margin:14px 0}
 @media(max-width:760px){.finance-grid{grid-template-columns:minmax(0,1fr)}.finance-tabs button{flex:1}}
+
+.fixed-budget{margin:18px 0;padding:16px;border:1px solid var(--line,#444);border-radius:12px}
+.fixed-budget .fixed-income{border-left:5px solid #54b8ff}
+.fixed-budget .fixed-cost{border-left:5px solid #ffbc59}
+.fixed-budget .fixed-balance{border-left:5px solid #57db9c}
+.fixed-budget .fixed-deficit{border-left:5px solid #ff6479}
+.fixed-budget .fixed-income h3{color:#90ceff}
+.fixed-budget .fixed-cost h3{color:#ffd08b}
+.fixed-budget .fixed-balance h3{color:#83edb8}
+.fixed-budget .fixed-deficit h3{color:#ff9eab}
+
+.fixed-budget .finance-row.fixed-income{background:#102d46;color:#f3f9ff;border-color:#54b8ff}
+.fixed-budget .finance-row.fixed-cost{background:#352712;color:#fff7e8;border-color:#ffbc59}
+.fixed-budget .finance-row.fixed-balance{background:#103326;color:#effff6;border-color:#57db9c}
+.fixed-budget .finance-row.fixed-deficit{background:#3a1821;color:#fff2f5;border-color:#ff6479}
+.fixed-budget .finance-row h3{font-size:1.65rem;margin:8px 0;overflow-wrap:anywhere}
+.fixed-budget .finance-row small{color:inherit;opacity:1}
+
+.finance-receipt{max-width:480px;margin:14px auto;padding:22px 18px;background:#fff9ee;color:#24211c;border-radius:2px;border-top:4px dashed #b6afa2;border-bottom:4px dashed #b6afa2;font-family:monospace}
+.finance-receipt h3,.receipt-date{text-align:center;color:#24211c}
+.receipt-line{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed #c7bfaf;font-size:14px}
+.receipt-line strong{white-space:nowrap;color:#24211c}
+.receipt-total{font-size:17px;font-weight:800;margin-top:10px;background:#d7f6df;padding:12px 6px;color:#153f24}
+.receipt-negative{background:#ffe0dd;color:#7b211c}
+.finance-receipt .smallnote{color:#514b41;opacity:1;margin-top:12px}
+.receipt-warning{padding:12px;background:#ffda82;color:#472900;font-weight:bold;border-radius:6px}
+
+.finance-receipt .receipt-warning{color:#472900!important;background:#ffda82;opacity:1}
+.finance-receipt .receipt-date{color:#514b41;opacity:1}

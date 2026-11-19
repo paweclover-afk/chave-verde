@@ -27,7 +27,7 @@
   const context=s=>`${s.variant}|||${s.basis}`;
   function previous(sessions,exercise,date,variant,basis){return sessions.filter(s=>s.exercise===exercise&&s.date<date&&s.variant===variant&&s.basis===basis).sort((a,b)=>b.date.localeCompare(a.date))[0]||null;}
   function validateBackup(data,plan){
-    if(!data||data.app!=='ritmo-leonarda'||data.version!==2||!Array.isArray(data.sessions)||!data.state||typeof data.state!=='object'||Array.isArray(data.state)||!data.legacy||typeof data.legacy!=='object')throw Error('Este arquivo não é um backup válido do Ritmo.');
+    if(!data||data.app!=='daybyday-system'||data.version!==2||!Array.isArray(data.sessions)||!data.state||typeof data.state!=='object'||Array.isArray(data.state)||!data.legacy||typeof data.legacy!=='object')throw Error('Este arquivo não é um backup válido do Ritmo.');
     const exercises=new Map(plan.workouts.flatMap(w=>w.exercises.map(e=>[e.id,e]))),seen=new Set();
     const validDate=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&!isNaN(Date.parse(d+'T12:00:00'))&&dateKey(new Date(d+'T12:00:00'))===d;
     const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
@@ -39,6 +39,7 @@
       normalize(s.rows,e.timed);seen.add(id);
     }
     const st=data.state;
+    if(st.finance!==undefined)validateFinance(st.finance);
     if(st.daybyday!==undefined){
       if(!object(st.daybyday))throw Error('Histórico DayByDay inválido.');
       for(const [d,v] of Object.entries(st.daybyday)){if(!validDate(d)||v?.monthly!==undefined&&!d.endsWith('-01'))throw Error('Data DayByDay inválida.');validateDaybyday(v);}
@@ -56,32 +57,27 @@
     return data;
   }
   function validateDaybyday(v){
-    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','finance','wellness'].includes(k)))throw Error('DayByDay inválido.');
+    const model=typeof module==='object'&&module.exports?require('./platform-model.js'):root.DaybydayModel;
+    if(v?.platform!==undefined)model.validateDaily(v.platform);
+    if(v?.userPlan!==undefined)model.validatePlan(v.userPlan);
+    if(v?.finance!==undefined)validateFinance(v.finance);
+    if(v?.wellness!==undefined){const old=typeof module==='object'&&module.exports?require('./legacy-tracker.js'):root.LegacyDaybydayTracker;old.validateDaybyday({wellness:v.wellness});}
+
+    if(v?.skippedRoutines!==undefined&&(!Array.isArray(v.skippedRoutines)||v.skippedRoutines.length>100||v.skippedRoutines.some(id=>typeof id!=='string'||id.length>100)))throw Error('Exceções de rotina inválidas.');
+    if(v?.routines!==undefined){
+      if(!Array.isArray(v.routines)||v.routines.length>50)throw Error('Limite de 50 rotinas atingido.');
+      for(const routine of v.routines)if(!routine||typeof routine.from!=='string'||!/^20[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(routine.from)||!['daily','0','1','2','3','4','5','6'].includes(routine.repeat))throw Error('Repetição de rotina inválida.');
+      validateDaybyday({items:v.routines});
+    }
+    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines','finance','wellness','platform','userPlan'].includes(k)))throw Error('DayByDay inválido.');
     if(v.items!==undefined){
       if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
-      const ids=new Set();
+    const ids=new Set();
       for(const x of v.items){
         if(!x||typeof x!=='object'||typeof x.id!=='string'||!x.id||x.id.length>100||ids.has(x.id)||typeof x.name!=='string'||!x.name.trim()||x.name.length>160||typeof x.details!=='string'||x.details.length>500||!/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time)||typeof x.done!=='boolean'||!['rest','health','study','work','self','english','pt','cook'].includes(x.category))throw Error('Atividade DayByDay inválida.');
         ids.add(x.id);
       }
     }
-    if(v.wellness!==undefined){
-      const w=v.wellness, text=(x,n)=>typeof x==='string'&&x.length<=n;
-      if(!w||typeof w!=='object'||Array.isArray(w)||Object.keys(w).some(k=>!['training','meals','mobility','notes','water'].includes(k))||!text(w.notes,2000)||!Number.isInteger(w.water)||w.water<0||w.water>1000)throw Error('Registro de saúde inválido.');
-      for(const kind of ['training','meals','mobility']){
-        if(!Array.isArray(w[kind])||w[kind].length>100)throw Error('Lista de saúde inválida.');
-        const ids=new Set();
-        for(const x of w[kind]){
-          if(!x||typeof x!=='object'||!text(x.id,100)||!x.id||ids.has(x.id)||!text(x.name,160)||!x.name.trim()||!text(x.details,1000)||typeof x.done!=='boolean'||Object.keys(x).some(k=>!['id','name','details','done','sets'].includes(k)))throw Error('Atividade de saúde inválida.');
-          ids.add(x.id);
-          if(kind==='training'){
-            if(!Array.isArray(x.sets)||x.sets.length>20)throw Error('Séries inválidas.');
-            for(const row of x.sets)if(!row||!Number.isFinite(row.kg)||row.kg<0||row.kg>2000||!Number.isInteger(row.reps)||row.reps<1||row.reps>1000)throw Error('Carga ou repetições inválidas.');
-          }else if(x.sets!==undefined)throw Error('Séries fora do treino.');
-        }
-      }
-    }
-    if(v.finance!==undefined)validateFinance(v.finance);
     if(v.monthly!==undefined&&(!Array.isArray(v.monthly)||v.monthly.length!==12||v.monthly.some(x=>typeof x!=='boolean')))throw Error('Checklist mensal inválido.');
     return v;
   }
@@ -112,10 +108,67 @@
     const nominalDay=dateKey(date);
     return {day:fridayOnOrAfter(nominalDay),nominalDay,balance,due:debt.frequency==='once'?balance:Math.min(balance,debt.installment-schedulePaid%debt.installment)};
   }
+  function cashSummary(ledger,from,to,currency){
+    const rates=(ledger.income||[]).filter(entry=>entry.currency===currency).sort((a,b)=>b.from.localeCompare(a.from));
+    const dates=[];
+    const friday=new Date(fridayOnOrAfter(from)+'T12:00:00');
+    let income=0;
+    while(dateKey(friday)<=to){
+      const day=dateKey(friday);
+      const rate=rates.find(entry=>entry.from<=day);
+      if(rate?.amount){income+=rate.amount;dates.push(day);}
+      friday.setDate(friday.getDate()+7);
+    }
+    const within=date=>date>=from&&date<=to;
+    const expenses=ledger.expenses.filter(entry=>entry.currency===currency&&within(entry.date)).reduce((sum,entry)=>sum+entry.amount,0);
+    const payments=ledger.debts.filter(debt=>debt.currency===currency).flatMap(debt=>debt.payments).filter(payment=>within(payment.date)).reduce((sum,payment)=>sum+payment.amount,0);
+    return {income,expenses,payments,balance:income-expenses-payments,dates};
+  }
+  function monthlyForecast(ledger,from,to,currency){
+    const totals=cashSummary(ledger,from,to,currency);
+    const fixed=(ledger.fixedBills||[]).filter(bill=>bill.currency===currency&&bill.from<=to&&(!bill.to||bill.to>=from)).reduce((sum,bill)=>sum+bill.amount,0);
+    let outstanding=0;
+    for(const debt of ledger.debts.filter(debt=>debt.currency===currency)){
+      let projected=0,due=debtDue(debt);
+      while(due&&due.day<=to){
+        outstanding+=due.due;
+        projected+=due.due;
+        due=debtDue(debt,projected);
+      }
+    }
+    return {...totals,fixed,outstanding,remaining:totals.balance-fixed-outstanding};
+  }
   function validateFinance(ledger){
+    if(ledger.dashboardCurrency!==undefined&&!['BRL','EUR'].includes(ledger.dashboardCurrency))throw Error('Moeda inválida.');
+    if(ledger.dashboards!==undefined){
+      if(!ledger.dashboards||typeof ledger.dashboards!=='object'||Array.isArray(ledger.dashboards)||Object.keys(ledger.dashboards).some(c=>!['BRL','EUR'].includes(c)))throw Error('Dashboard inválido.');
+      const engine=typeof module==='object'&&module.exports?require('./personal-finance.js'):window.PersonalFinance;
+      for(const model of Object.values(ledger.dashboards))engine.validate(model);
+    }
+    if(ledger.personal!==undefined){const personal=typeof module==='object'&&module.exports?require('./personal-finance.js'):window.PersonalFinance;personal.validate(ledger.personal);}
+    const plan=typeof module==='object'&&module.exports?require('./finance-plan.js'):window.FinancePlan;
+    plan.validate(ledger);
     const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
     const text=(v,max)=>typeof v==='string'&&v.trim()&&v.length<=max;
     if(!object(ledger)||!Array.isArray(ledger.debts)||!Array.isArray(ledger.expenses)||ledger.debts.length>100||ledger.expenses.length>800)throw Error('Registros financeiros inválidos ou acima do limite.');
+    if(ledger.income!==undefined){
+      if(!Array.isArray(ledger.income)||ledger.income.length>100)throw Error('Histórico de recebimentos inválido.');
+      const rates=new Set();
+      for(const entry of ledger.income){
+        if(!object(entry)||!financeCurrencies.includes(entry.currency)||!validFinanceDate(entry.from)||fridayOnOrAfter(entry.from)!==entry.from||!(entry.amount===0||validAmount(entry.amount)))throw Error('Recebimento semanal inválido.');
+        const key=entry.currency+'|'+entry.from;
+        if(rates.has(key))throw Error('Recebimento semanal duplicado.');
+        rates.add(key);
+      }
+    }
+      if(ledger.fixedBills!==undefined){
+      if(!Array.isArray(ledger.fixedBills)||ledger.fixedBills.length>100)throw Error('Limite de contas fixas excedido.');
+      const billIds=new Set();
+      for(const bill of ledger.fixedBills){
+        if(!object(bill)||!text(bill.id,100)||billIds.has(bill.id)||!text(bill.name,160)||!financeCurrencies.includes(bill.currency)||!validAmount(bill.amount)||!validFinanceDate(bill.from)||bill.to!==undefined&&(!validFinanceDate(bill.to)||bill.to<bill.from))throw Error('Conta fixa inválida.');
+        billIds.add(bill.id);
+      }
+    }
     const ids=new Set();
     function unique(v){if(!object(v)||!text(v.id,100)||ids.has(v.id))return false;ids.add(v.id);return true;}
     for(const d of ledger.debts){
@@ -127,6 +180,6 @@
     for(const x of ledger.expenses)if(!unique(x)||!text(x.name,160)||!financeCurrencies.includes(x.currency)||!expenseCategories.includes(x.category)||!validAmount(x.amount)||!validFinanceDate(x.date))throw Error('Despesa inválida.');
     return ledger;
   }
-  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday,financeDay,expenseCategories,financeCurrencies,validateFinance,paidAmount,debtDue,fridayOnOrAfter};
+  const api={dateKey,number,normalize,summary,context,previous,validateBackup,validateDaybyday,financeDay,expenseCategories,financeCurrencies,validateFinance,paidAmount,debtDue,fridayOnOrAfter,cashSummary,monthlyForecast};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.Tracker=api;
 })(typeof window!=='undefined'?window:globalThis);

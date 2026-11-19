@@ -1,19 +1,20 @@
 'use strict';
 
 let financeMonth = '';
+let budgetDate = '';
 function ledger() {
-  return state[T.financeDay]?.finance || {debts: [], expenses: []};
+  return state.finance || {debts: [], expenses: []};
 }
 function commitFinance(change) {
-  if (blocked) throw Error('Há um conflito de sincronização. Baixe o backup e recarregue antes de alterar os registros.');
+  if (window.RitmoCloud.blocked()) throw Error('Os registros foram atualizados em outro acesso. Toque em Atualizar registros para carregar a versão atual.');
   const next = structuredClone(ledger());
   change(next);
   T.validateFinance(next);
-  const record = {...state[T.financeDay], finance: next};
+  const record = {finance:next};
   if (new TextEncoder().encode(JSON.stringify(record)).length > 145000) {
     throw Error('O limite de registros financeiros foi atingido. Baixe um backup.');
   }
-  state[T.financeDay] = record;
+  state.finance = record.finance;
   persist();
   renderFinance();
 }
@@ -25,25 +26,6 @@ function cents(field) {
   if (!Number.isFinite(value) || value <= 0) throw Error('Informe um valor maior que zero.');
   return Math.round(value * 100);
 }
-function openFinanceSection(finance) {
-  $('finance-section').hidden = !finance;
-  $('routine-section').hidden = finance;
-  document.querySelectorAll('[data-section]').forEach(button => {
-    const active = (button.dataset.section === 'finance') === finance;
-    button.classList.toggle('active', active);
-    if (active) button.setAttribute('aria-current', 'page');
-    else button.removeAttribute('aria-current');
-  });
-  if (finance) renderFinance();
-}
-document.querySelectorAll('[data-section]').forEach(button => {
-  button.onclick = () => {
-    const finance = button.dataset.section === 'finance';
-    history.replaceState(null, '', finance ? '#financeiro' : location.pathname);
-    openFinanceSection(finance);
-  };
-});
-
 function dueList() {
   return ledger().debts.map(debt => ({debt, due:T.debtDue(debt)}))
     .filter(item => item.due)
@@ -55,7 +37,15 @@ function dueLine(item) {
     : item.due.day === today ? 'Vence hoje' : 'Vence em ' + dateLabel(item.due.day);
   return when + ' · ' + money(item.due.due, item.debt.currency);
 }
-function showFinanceReminders() {
+let lastFinanceReminder = '';
+function showFinanceReminders(owner) {
+  if (!owner) return;
+  const storageKey = 'ritmo-finance-reminder:' + owner;
+  const today = T.dateKey(new Date());
+  if (lastFinanceReminder === storageKey + ':' + today) return;
+  try {
+    if (localStorage.getItem(storageKey) === today) return;
+  } catch { /* The in-page check still applies if storage is unavailable. */ }
   const nextWeek = new Date();
   nextWeek.setDate(nextWeek.getDate() + 7);
   const upcoming = dueList().filter(item => item.due.day <= T.dateKey(nextWeek));
@@ -70,7 +60,7 @@ function showFinanceReminders() {
   const view = el('button', 'Abrir Financeiro', 'primary');
   view.onclick = () => {
     dialog.close();
-    document.querySelector('[data-section="finance"]').click();
+    switchView('finance');
   };
   const close = el('button', 'Fechar', 'secondary');
   close.onclick = () => dialog.close();
@@ -80,6 +70,10 @@ function showFinanceReminders() {
   actions.append(view, close);
   dialog.replaceChildren(title, el('p', 'Vencidos e próximos 7 dias.', 'smallnote'), list, actions);
   dialog.showModal();
+  lastFinanceReminder = storageKey + ':' + today;
+  try {
+    localStorage.setItem(storageKey, today);
+  } catch { /* The reminder is already visible. */ }
 }
 function financeCard(title) {
   const card = el('section', undefined, 'card finance-card');
@@ -101,6 +95,7 @@ function financeField(form, labelText, config = {}) {
     }
   }
   if (config.value !== undefined) field.value = config.value;
+  field.setAttribute('aria-label',labelText);
   field.required = true;
   label.append(field);
   form.append(label);
@@ -312,22 +307,27 @@ function expensesCard() {
       try { commitFinance(next => { next.expenses=next.expenses.filter(x=>x.id!==expense.id); }); }
       catch (error) { toast(error.message); }
     };
-    row.append(remove);
+    const edit = el('button','Editar despesa','secondary');
+    edit.onclick=()=>planEditor('Editar despesa',[
+      ['name','Nome',{type:'text',maxLength:160,value:expense.name}],
+      ['amount','Valor',{...amountField,value:expense.amount/100}],
+      ['date','Data',{type:'date',value:expense.date}],
+      ['category','Categoria',{options:T.expenseCategories.map(x=>[x,x]),value:expense.category}]
+    ],fields=>commitFinance(next=>{const entry=next.expenses.find(x=>x.id===expense.id);Object.assign(entry,{name:fields.name.value.trim(),amount:cents(fields.amount),date:fields.date.value,category:fields.category.value});}));
+    row.append(edit,remove);
     card.append(row);
   }
   return card;
 }
 function renderFinance() {
   const root = $('finance-section');
-  const title = el('div',undefined,'heading');
-  title.append(el('h1','Financeiro'));
   const hint = el('p','Registre despesas, acompanhe o saldo de cada dívida e veja os próximos vencimentos. O vencimento cai na sexta-feira da data escolhida ou na seguinte. A próxima parcela aparece após quitar o valor previsto.','smallnote');
   const grid = el('div',undefined,'finance-grid');
   const debts = el('div'), expenses = el('div');
   debts.append(debtsCard(),addDebtForm());
   expenses.append(expensesCard(),addExpenseForm());
   grid.append(debts,expenses);
-  root.replaceChildren(title,hint,forecastCard(),grid);
+  root.replaceChildren(hint,budgetCard(),forecastCard(),grid);
 }
 
 function forecastCard() {
@@ -370,4 +370,93 @@ function forecastCard() {
     card.append(details);
   }
   return card;
+}
+
+function budgetCard() {
+  const card = financeCard('Recebimentos e saldo');
+  card.append(el('p','Informe quanto recebe toda sexta. O saldo previsto considera as entradas do período e desconta as despesas e parcelas já registradas.','smallnote'));
+  const reference=financeField(card,'Data de referência',{type:'date',value:budgetDate||T.dateKey(new Date())});
+  reference.onchange=()=>{budgetDate=reference.value;renderFinance();};
+  const date=new Date(reference.value+'T12:00:00');
+  const monday=new Date(date);
+  monday.setDate(monday.getDate()-(monday.getDay()+6)%7);
+  const sunday=new Date(monday);
+  sunday.setDate(sunday.getDate()+6);
+  const monthStart=new Date(date.getFullYear(),date.getMonth(),1,12);
+  const monthEnd=new Date(date.getFullYear(),date.getMonth()+1,0,12);
+  const columns=el('div',undefined,'finance-grid');
+  for(const [title,from,to] of [['Semana',monday,sunday],['Mês',monthStart,monthEnd]]){
+    const period=el('section',undefined,'finance-row');
+    period.append(el('h4',title),el('p',dateLabel(T.dateKey(from))+' a '+dateLabel(T.dateKey(to)),'smallnote'));
+    let populated=false;
+    for(const currency of T.financeCurrencies){
+      const totals=T.cashSummary(ledger(),T.dateKey(from),T.dateKey(to),currency);
+      if(!totals.income&&!totals.expenses&&!totals.payments)continue;
+      populated=true;
+      period.append(el('p','Recebimento previsto · '+money(totals.income,currency)+' · '+totals.dates.length+(totals.dates.length===1?' sexta':' sextas'),'smallnote'),
+        el('p','Despesas · '+money(totals.expenses,currency),'smallnote'),
+        el('p','Parcelas pagas · '+money(totals.payments,currency),'smallnote'),
+        el('p',(totals.balance<0?'Falta prevista · ':'Sobra prevista · ')+money(Math.abs(totals.balance),currency),'finance-due'));
+    }
+    if(!populated)period.append(el('p','Sem recebimentos ou gastos no período.','smallnote'));
+    columns.append(period);
+  }
+  card.append(monthlyFixedBudget(T.dateKey(monthStart),T.dateKey(monthEnd)),columns);
+  const details=el('details');
+  details.open=!(ledger().income||[]).length;
+  details.append(el('summary','Configurar recebimento semanal'));
+  const {form,button}=financeForm(details,'Salvar recebimento');
+  const currency=financeField(form,'Moeda do recebimento',{options:currencyOptions});
+  const amount=financeField(form,'Valor líquido por sexta',{...amountField,min:'0',placeholder:'Ex.: 500,00'});
+  const start=financeField(form,'A partir de qual sexta-feira?',{type:'date',value:T.fridayOnOrAfter(T.dateKey(new Date()))});
+  form.append(el('p','Para mudar o valor, escolha a primeira sexta do novo pagamento. Use zero para pausar a previsão a partir dessa data.','smallnote'),button);
+  form.onsubmit=event=>{
+    event.preventDefault();
+    try{
+      const from=start.value;
+      if(T.fridayOnOrAfter(from)!==from)throw Error('Escolha uma sexta-feira.');
+      const value=amount.valueAsNumber===0?0:cents(amount);
+      commitFinance(next=>{
+        next.income=(next.income||[]).filter(entry=>entry.currency!==currency.value||entry.from!==from);
+        next.income.push({currency:currency.value,from,amount:value});
+      });
+      toast('Recebimento semanal salvo.');
+    }catch(error){toast(error.message);}
+  };
+  card.append(details);
+  return card;
+}
+
+function monthlyFixedBudget(from,to) {
+  const box=el('section',undefined,'fixed-budget');
+  box.append(el('h3','Quanto sobra do salário no mês'),el('p','Cálculo automático com os recebimentos, gastos e acordos já registrados. Inclui parcelas pendentes até o fim do mês e parcelas atrasadas.','smallnote'));
+  const bills=ledger().fixedBills||[];
+  const active=bills.filter(bill=>bill.from<=to&&(!bill.to||bill.to>=from));
+  for(const currency of T.financeCurrencies){
+    const forecast=T.monthlyForecast(ledger(),from,to,currency);
+    const {income,fixed,expenses,payments,outstanding,remaining}=forecast;
+    if(!income&&!fixed&&!expenses&&!payments&&!outstanding)continue;
+    const summary=el('div',undefined,'finance-grid');
+    for(const [title,value,style] of [['Ganho mensal estimado',income,'fixed-income'],['Contas fixas mensais',fixed,'fixed-cost'],['Gastos já registrados',expenses,'fixed-cost'],['Parcelas já pagas no mês',payments,'fixed-cost'],['Parcelas a pagar até o fim do mês',outstanding,'fixed-cost'],[remaining<0?'Falta prevista no mês':'Sobra prevista do salário',remaining,remaining<0?'fixed-deficit':'fixed-balance']]){
+      const tile=el('div',undefined,'finance-row '+style);
+      tile.append(el('small',title),el('h3',money(value,currency)));summary.append(tile);
+    }
+    box.append(summary);
+  }
+  box.append(el('p','As parcelas já quitadas são descontadas pelos pagamentos registrados. A previsão soma as parcelas restantes até o fim do mês. As contas fixas adicionais são consideradas pelo valor mensal cadastrado.','smallnote'));
+  for(const bill of active){
+    const row=el('div',undefined,'finance-row'),remove=el('button','Encerrar a partir deste mês','secondary');
+    row.append(el('strong',bill.name+' · '+money(bill.amount,bill.currency)));
+    remove.type='button';
+    remove.onclick=()=>{if(!confirm('Encerrar '+bill.name+' a partir do mês selecionado?'))return;commitFinance(next=>{const existing=next.fixedBills.find(x=>x.id===bill.id);if(existing.from>=from)next.fixedBills=next.fixedBills.filter(x=>x.id!==bill.id);else{const end=new Date(from+'T12:00:00');end.setDate(0);existing.to=T.dateKey(end);}});};
+    row.append(remove);box.append(row);
+  }
+  const details=el('details');details.append(el('summary','Adicionar conta fixa mensal'));
+  const {form,button}=financeForm(details,'Salvar conta fixa');
+  const name=financeField(form,'Nome da conta',{type:'text',maxLength:160});
+  const currency=financeField(form,'Moeda',{options:currencyOptions});
+  const amount=financeField(form,'Valor mensal',amountField);
+  form.append(el('p','Esta conta entra na previsão todos os meses a partir do mês selecionado.','smallnote'),button);
+  form.onsubmit=event=>{event.preventDefault();try{const value=cents(amount),title=name.value.trim();if(!title)throw Error('Informe o nome da conta.');commitFinance(next=>{next.fixedBills??=[];next.fixedBills.push({id:crypto.randomUUID(),name:title,currency:currency.value,amount:value,from});});toast('Conta fixa mensal salva.');}catch(error){toast(error.message);}};
+  box.append(details);return box;
 }

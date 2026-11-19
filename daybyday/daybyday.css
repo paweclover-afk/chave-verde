@@ -1,6 +1,6 @@
 /* DayByDay: daily records and monthly checklists share the private account. */
 #daybyday{max-width:1100px;margin:auto}
-#daybyday .card{margin-bottom:20px}
+#daybydaycontent .card{margin-bottom:20px}
 .db-intro{background:linear-gradient(120deg,#edf4e7,#fff9eb)}
 .db-intro h2{font-size:30px;margin:15px 0 8px;letter-spacing:-1px}
 .db-actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -34,10 +34,38 @@
 .db-calday small{font-size:11px}
 .db-editor{width:470px;max-width:calc(100vw - 24px);max-height:85dvh;overflow:auto}
 .db-editor input,.db-editor select{font-size:16px;min-height:48px}
-@media(max-width:600px){#daybyday .card{padding:17px}.db-intro h2{font-size:27px}.db-daily>.title{display:block}.db-actions{margin-top:13px}.db-item{display:block;padding:12px}.db-tools{margin:10px 0 0 39px}.db-monthgroups{grid-template-columns:1fr}.db-progress{padding:16px}.db-calendar{gap:5px}.db-calday{padding:10px 2px}.db-editor .actions{display:flex;flex-wrap:wrap}.db-editor .actions button{flex:1}}
+@media(max-width:600px){#daybydaycontent .card{padding:17px}.db-intro h2{font-size:27px}.db-daily>.title{display:block}.db-actions{margin-top:13px}.db-item{display:block;padding:12px}.db-tools{margin:10px 0 0 39px}.db-monthgroups{grid-template-columns:1fr}.db-progress{padding:16px}.db-calendar{gap:5px}.db-calday{padding:10px 2px}.db-editor .actions{display:flex;flex-wrap:wrap}.db-editor .actions button{flex:1}}
 
-.personal-app #register{width:100%;margin-top:12px;min-height:48px}
-@media(max-width:900px){.personal-app main{padding-bottom:28px}.personal-app #app-shell>aside{padding:14px 18px}}
+.db-weekday{text-align:center;font-size:11px;color:var(--muted);padding:5px 0}.db-monthname{text-transform:capitalize;color:var(--ink);font-weight:600}.db-monthheading{gap:12px;flex-wrap:wrap}.db-monthheading .db-actions{margin:0}.db-calday{min-height:70px}.db-calday strong{font-size:17px}.db-calday small{font-size:12px}
 
-.personal-app #recover,.personal-app #resend{width:100%;min-height:48px;margin-top:12px}
-.wellness-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.wellness-tabs button[aria-pressed=true]{outline:2px solid currentColor}.wellness-item{border-top:1px solid currentColor;padding:18px 0;margin-top:14px}.wellness-item>label{display:flex;align-items:center;gap:12px}.wellness-item input[type=checkbox]{width:22px;height:22px;flex-shrink:0}#wellness-section form{display:grid;gap:12px;margin:14px 0;max-width:560px}#wellness-section input,#wellness-section textarea{max-width:100%;box-sizing:border-box}#wellness-section textarea{min-height:100px}#wellness-section details{margin:16px 0}#wellness-section p{overflow-wrap:anywhere}#wellness-section button{min-height:44px}
+.personal-message{width:500px;max-width:calc(100vw - 28px);max-height:85dvh;overflow:auto}.personal-message h2{font-size:23px;line-height:1.4;margin:0 0 22px}.personal-message .primary{width:100%;margin-top:24px;min-height:48px}
+
+/* Round checkboxes and completed-task styling. */
+body[data-screen=daybyday] #daybyday .db-item{position:relative;display:flex;align-items:flex-start;border:1px solid var(--line);border-radius:20px;background:var(--panel,#fff);padding:18px 16px 18px 20px;gap:8px;margin:0 0 12px;overflow:visible}
+body[data-screen=daybyday] #daybyday .db-item:before{content:'';position:absolute;left:-1px;top:15px;bottom:15px;width:5px;border-radius:10px;background:var(--green)}
+body[data-screen=daybyday] #daybyday .db-checklabel{display:flex;align-items:flex-start;gap:13px;flex:1;min-width:0}
+body[data-screen=daybyday] #daybyday input[type=checkbox]{appearance:none;flex-shrink:0;width:28px;height:28px;min-height:28px;margin:2px 0 0;border:2px solid var(--muted);border-radius:50%;background:transparent;display:grid;place-items:center}
+body[data-screen=daybyday] #daybyday input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}
+body[data-screen=daybyday] #daybyday input[type=checkbox]:checked:after{content:'✓';font-size:20px;font-weight:800;color:var(--bg)}
+body[data-screen=daybyday] #daybyday .db-body{min-width:0}
+body[data-screen=daybyday] #daybyday .db-body strong{display:block;font-size:16px;line-height:1.4;margin:5px 0}
+body[data-screen=daybyday] #daybyday .db-body small{font-size:13px;line-height:1.7;color:var(--muted)}
+body[data-screen=daybyday] #daybyday .db-body .db-time{color:var(--green);font-size:12px}
+body[data-screen=daybyday] #daybyday .db-done{opacity:.65}
+body[data-screen=daybyday] #daybyday .db-done .db-body strong{text-decoration:line-through}
+body[data-screen=daybyday] #daybyday .db-tools{flex-shrink:0;margin:0;display:block}
+
+body[data-screen=daybyday] .home-item-menu[open] button{background:var(--panel,#fff);color:var(--ink)}
+body[data-screen=daybyday] #daybyday input[type=checkbox]:focus-visible{outline:3px solid var(--green);outline-offset:4px}
+
+/* The calendar tile itself fills with completion progress. */
+.db-calday{position:relative;overflow:hidden;isolation:isolate}
+.db-calday::before{content:'';position:absolute;inset:auto 0 0;height:var(--day-fill,0%);background:#f9a8d4;opacity:1;z-index:-1;transition:height .5s ease}
+.db-calday::after{content:'';position:absolute;left:0;right:0;bottom:var(--day-fill,0%);height:2px;background:#f9a8d4;opacity:.65;z-index:-1;transition:bottom .5s ease}
+.db-calday[style*="--day-fill: 0%"]::after{display:none}
+.db-calday strong,.db-calday small{position:relative;z-index:1}
+@media(prefers-reduced-motion:reduce){.db-calday::before,.db-calday::after{transition:none}}
+
+.db-calday strong,.db-calday small{text-shadow:0 1px 3px #000,0 0 3px #000}
+.db-calday[data-full="true"] strong,.db-calday[data-full="true"] small{color:#240b19;text-shadow:none}
+.personal-plan-editor{width:min(600px,94vw);max-height:90dvh;overflow:auto;padding:24px;box-sizing:border-box}.personal-plan-editor form{display:grid;gap:14px}.personal-plan-editor label{display:grid;gap:8px;margin:12px 0}.personal-plan-editor input,.personal-plan-editor select,.personal-plan-editor textarea{width:100%;box-sizing:border-box;font-size:16px}.personal-plan-editor textarea{min-height:90px}.personal-plan-editor button{min-height:44px}.loginpanel #recover,.loginpanel #resend,.loginpanel #register{width:100%;margin-top:10px;min-height:44px}
