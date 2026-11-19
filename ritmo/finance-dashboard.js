@@ -49,7 +49,7 @@ function pfExpense(row){
  const type=financeField(form,'Tipo de gasto',{options:[['once','Consumo diário / avulso'],['week','Conta fixa semanal'],['month','Conta fixa mensal']],value:entry?.frequency||'once'});
 
  const duration=financeField(form,'Por quanto tempo?',{options:[['forever','Sem prazo para terminar'],['count','Número de cobranças'],['end','Até uma data']],value:entry?.end?'end':entry?.count?'count':'forever'});
- const count=financeField(form,'Quantidade de cobranças',{type:'number',min:1,max:1200,step:1,value:entry?.count||10});
+ const count=financeField(form,row?'Cobranças a partir desta data':'Quantidade de cobranças',{type:'number',min:1,max:1200,step:1,value:entry?.count?Math.max(1,entry.count-row.index):10});
  const end=financeField(form,'Último vencimento permitido',{type:'date',value:entry?.end||PersonalFinance.addMonths(personalAnchor,3)});
  const paid=financeField(form,'Situação desta cobrança',{options:[['no','Prevista / a pagar'],['yes','Já foi paga']],value:row?.paid?'yes':'no'});
  const scope=row?financeField(form,'Aplicar alteração',{options:[['one','Somente esta cobrança'],['next','Esta cobrança e as próximas']],value:'one'}):null;
@@ -78,9 +78,9 @@ function pfExpense(row){
   for(const correction of Object.values(original.overrides))delete correction.category;
 
   if(scope.value==='one'){original.overrides[row.day]={...original.overrides[row.day],name:record.name,amount:record.amount,category:record.category,paid:paid.value==='yes'};return;}
-  if(record.start<row.day)throw Error('A nova sequência precisa começar nesta cobrança ou depois dela.');
-  original.end=PersonalFinance.addDays(row.day,-1);
-  if(original.end<original.start)next.entries=next.entries.filter(e=>e.id!==original.id);
+ record.interval=record.frequency===original.frequency?original.interval:1;
+ record.overrides[record.start]={paid:paid.value==='yes'};
+ PersonalFinance.editFollowing(next,row,record);return;
  }
  record.overrides[record.start]={paid:paid.value==='yes'};
  next.entries.push(record);
@@ -159,7 +159,8 @@ renderFinance=function(){
  for(const [label,value,cls] of [['Renda prevista',summary.income,'income'],[personalMode==='week'?'Gastos + reserva mensal':'Gastos e contas',planning.total,'cost'],['Sobra prevista',planning.balance,planning.balance<0?'negative':'balance']]){
   const tile=el('article',undefined,'pf-metric pf-metric-'+cls);tile.append(el('small',label),el('strong',personalMoney(value)));dashboard.append(tile);
  }
- if(personalMode==='week')dashboard.append(el('p','O saldo semanal desconta os gastos da semana e a reserva proporcional das contas mensais (mensal × 12 ÷ 52).','pf-note pf-plan-note'));
+ if(personalMode==='week')dashboard.append(el('p','Planejamento semanal: gastos da semana + reserva mensal (mensal × 12 ÷ 52). A reserva usa o mês da segunda-feira desta semana, de forma igual em todos os dias. Não representa saldo bancário.','pf-note pf-plan-note'));
+ if(personalMode==='month')dashboard.append(el('p',model.income?.frequency==='week'?'Renda mensal estimada pela média: valor semanal × 52 ÷ 12. A sobra é uma previsão, não o saldo bancário nem a soma dos recebimentos confirmados.':'A sobra é uma previsão de renda menos compromissos; não representa o saldo bancário.','pf-note pf-plan-note'));
  const followingAnchor=PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1),following=PersonalFinance.summary(model,'month',followingAnchor);
  const future=el('section',undefined,'pf-future'),futureSummary=el('div',undefined,'pf-future-summary');
  future.append(el('strong','Próximo mês · '+new Date(followingAnchor+'T12:00:00Z').toLocaleDateString('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'})));
@@ -184,11 +185,12 @@ renderFinance=function(){
  saving.append(el('p','Contas mensais: valor × 12 ÷ 52. Este planejamento não adiciona gastos ao saldo: cada cobrança continua sendo contada uma única vez.','pf-note'));
  const alerts=el('div');for(const warning of pfAlerts(model,planning)){const item=el('p',warning.text,'pf-warning pf-level-'+warning.level);item.setAttribute('role','alert');alerts.append(item);}
  const add=pfButton('+ Adicionar gasto',()=>pfExpense(),'pf-primary pf-add');
- const categories=el('section',undefined,'pf-categories');categories.append(el('h2','Por categoria'));
+ const categories=el('section',undefined,'pf-categories');categories.append(el('h2',personalMode==='week'?'Por categoria · planejamento':'Por categoria'));
  for(const category of model.categories){
- const rows=summary.rows.filter(r=>r.category===category.id),total=rows.reduce((s,r)=>s+r.amount,0),card=el('details',undefined,'pf-category');card.style.setProperty('--category',category.color);card.dataset.category=category.id;card.open=opened.has(category.id);
+ const rows=summary.rows.filter(r=>r.category===category.id),total=(personalMode==='week'?planning.rows:summary.rows).filter(r=>r.category===category.id).reduce((s,r)=>s+r.amount,0),card=el('details',undefined,'pf-category');card.style.setProperty('--category',category.color);card.dataset.category=category.id;card.open=opened.has(category.id);
  const title=el('summary');title.append(el('strong',category.name),el('span',personalMoney(total)+' · '+(summary.income?Math.round(total/summary.income*100)+'% da renda':'Cadastre sua renda')));
  card.append(title,pfButton('Editar categoria',()=>pfCategory(category)));
+ if(personalMode==='week')card.append(el('p','Vencimentos nesta semana: '+personalMoney(rows.reduce((sum,row)=>sum+row.amount,0))+'. O resumo acima inclui a reserva mensal proporcional.','pf-note'));
  if(category.limit)card.append(el('p','Limite do período: '+personalMoney(category.limit),'pf-note'));
  const groups=new Map();
  for(const row of rows){const id=row.source.id;if(!groups.has(id))groups.set(id,[]);groups.get(id).push(row);}
@@ -206,7 +208,7 @@ renderFinance=function(){
  }
  card.append(group);
  }
- if(!rows.length)card.append(el('p','Sem gastos neste período.','pf-note'));categories.append(card);
+ if(!rows.length)card.append(el('p',personalMode==='week'?'Sem vencimentos nesta semana.':'Sem gastos neste período.','pf-note'));categories.append(card);
  }
  categories.append(pfButton('+ Nova categoria',()=>pfCategory()));
  const advanced=el('details',undefined,'pf-help');advanced.append(el('summary','Histórico anterior e notificações'));

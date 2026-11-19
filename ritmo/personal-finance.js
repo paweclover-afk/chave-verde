@@ -14,8 +14,9 @@
   for(const e of model.entries){
    if(typeof e.id!=='string'||ids.has(e.id)||typeof e.name!=='string'||!e.name.trim()||e.name.length>160||!amount(e.amount)||e.amount===0||!validDate(e.start)||!['once','week','month'].includes(e.frequency)||!Number.isInteger(e.interval)||e.interval<1||e.interval>120||!Number.isInteger(e.count)||e.count<0||e.count>1200||e.end!==undefined&&(!validDate(e.end)||e.end<e.start)||!model.categories.some(c=>c.id===e.category)||!e.overrides||typeof e.overrides!=='object'||Array.isArray(e.overrides))throw Error('Gasto inválido.');
    ids.add(e.id);
+   if(e.monthDay!==undefined&&(!Number.isInteger(e.monthDay)||e.monthDay<1||e.monthDay>31||e.frequency!=='month'))throw Error('Dia mensal inválido.');
    for(const [day,v] of Object.entries(e.overrides)){
-    if(!validDate(day)||!v||typeof v!=='object'||v.amount!==undefined&&(!amount(v.amount)||v.amount===0)||v.paid!==undefined&&typeof v.paid!=='boolean'||v.deleted!==undefined&&typeof v.deleted!=='boolean')throw Error('Correção de cobrança inválida.');
+    if(!validDate(day)||!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['name','category','amount','paid','deleted'].includes(k))||v.name!==undefined&&(typeof v.name!=='string'||!v.name.trim()||v.name.length>160)||v.category!==undefined&&!model.categories.some(c=>c.id===v.category)||v.amount!==undefined&&(!amount(v.amount)||v.amount===0)||v.paid!==undefined&&typeof v.paid!=='boolean'||v.deleted!==undefined&&typeof v.deleted!=='boolean')throw Error('Correção de cobrança inválida.');
    }
   }
   if(model.alerts.some(x=>typeof x!=='string'||x.length>180))throw Error('Histórico de alertas inválido.');
@@ -24,7 +25,8 @@
   const rows=[];
   for(const entry of entries){
    for(let index=0;index<(entry.count||1200);index++){
-    const day=entry.frequency==='month'?addMonths(entry.start,index*entry.interval):entry.frequency==='week'?addDays(entry.start,index*7*entry.interval):entry.start;
+    let day=entry.frequency==='month'?addMonths(entry.start,index*entry.interval):entry.frequency==='week'?addDays(entry.start,index*7*entry.interval):entry.start;
+    if(entry.frequency==='month'&&entry.monthDay){const first=addMonths(entry.start.slice(0,7)+'-01',index*entry.interval);day=first.slice(0,7)+'-'+String(Math.min(entry.monthDay,Number(addDays(addMonths(first,1),-1).slice(8)))).padStart(2,'0');}
     if(day>to||entry.end&&day>entry.end)break;
     const change=entry.overrides[day]||{};
     if(day>=from&&!change.deleted)rows.push({...entry,...change,source:entry,day,index,amount:change.amount??entry.amount,paid:change.paid??entry.frequency==='once'});
@@ -49,20 +51,46 @@
   return {bills:bills.map(row=>({name:row.name,day:row.day,monthly:row.amount,weekly:Math.ceil(row.amount*12/52)})),weekly:bills.reduce((sum,row)=>sum+Math.ceil(row.amount*12/52),0)};
  }
  function weeklyPlan(model,anchor){
-  const actual=summary(model,'week',anchor),reserve=weeklyReserve(model,anchor);
+  const actual=summary(model,'week',anchor),reserve=weeklyReserve(model,actual.from);
   const expenses=actual.rows.filter(row=>row.frequency!=='month').reduce((sum,row)=>sum+row.amount,0);
-  const month=period('month',anchor);
+  const month=period('month',actual.from);
   const rows=actual.rows.filter(row=>row.frequency!=='month').concat(occurrences(model.entries,month.from,month.to).filter(row=>row.frequency==='month').map(row=>({...row,amount:Math.ceil(row.amount*12/52)})));
   return {...actual,rows,reserve:reserve.weekly,total:expenses+reserve.weekly,balance:actual.income-expenses-reserve.weekly};
  }
  function weeklyCommitments(model,anchor,mode='week'){
-  const reserve=weeklyReserve(model,anchor),range=period(mode,anchor);
+  const range=period(mode,anchor),reserve=weeklyReserve(model,mode==='week'?range.from:anchor);
   const rows=occurrences(model.entries,range.from,range.to).filter(row=>row.frequency==='week'),groups=new Map();
   for(const row of rows){if(!groups.has(row.source.id))groups.set(row.source.id,[]);groups.get(row.source.id).push(row);}
   const installments=[...groups.values()].map(bills=>({name:bills[0].source.name,weekly:mode==='month'?Math.ceil(bills.reduce((sum,row)=>sum+row.amount,0)/bills.length/bills[0].interval):bills.reduce((sum,row)=>sum+row.amount,0)}));
   const weeklyInstallments=installments.reduce((sum,bill)=>sum+bill.weekly,0);
   return {...reserve,installments,weeklyInstallments,total:reserve.weekly+weeklyInstallments};
  }
- const api={validate,occurrences,period,income,summary,addDays,addMonths,weeklyReserve,weeklyPlan,weeklyCommitments};
+ function editFollowing(model,row,record){
+  const original=model.entries.find(e=>e.id===row.source.id);
+  if(!original)throw Error('Esta conta mudou. Atualize os registros.');
+  if(record.start<row.day)throw Error('A nova sequência precisa começar nesta cobrança ou depois dela.');
+  const sameSchedule=record.start===row.day&&record.frequency===original.frequency&&record.interval===original.interval;
+  if(sameSchedule&&record.frequency==='month')record.monthDay=original.monthDay||Number(original.start.slice(8));
+  const future=occurrences([original],row.day,'9999-12-31');
+  const dates=new Set(occurrences([record],record.start,'9999-12-31').map(r=>r.day));
+  if(future.some(r=>r.paid&&(!sameSchedule||!dates.has(r.day))))throw Error('A alteração removeria ou mudaria a data de uma cobrança paga. Desfaça o pagamento antes de mudar o calendário.');
+  if(sameSchedule){
+   for(const [day,change] of Object.entries(original.overrides))if(day>=row.day&&dates.has(day)){
+    const preserved={};
+    if(change.paid!==undefined)preserved.paid=change.paid;
+    if(change.deleted!==undefined)preserved.deleted=change.deleted;
+    if(change.paid&&day!==row.day){const settled=future.find(r=>r.day===day);if(settled){preserved.amount=settled.amount;preserved.name=settled.name;}}
+    record.overrides[day]={...preserved,...record.overrides[day]};
+   }
+  }
+  // Settled future amounts stay attached to their payment; only the edited
+  // occurrence may have its status or amount explicitly corrected by the form.
+  for(const settled of future.filter(r=>r.paid&&r.day!==row.day))record.overrides[settled.day]={...record.overrides[settled.day],paid:true,amount:settled.amount,name:settled.name};
+  original.end=addDays(row.day,-1);
+  for(const day of Object.keys(original.overrides))if(day>=row.day)delete original.overrides[day];
+  if(original.end<original.start)model.entries=model.entries.filter(e=>e.id!==original.id);
+  model.entries.push(record);
+ }
+ const api={validate,occurrences,period,income,summary,addDays,addMonths,weeklyReserve,weeklyPlan,weeklyCommitments,editFollowing};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.PersonalFinance=api;
 })(typeof window==='object'?window:globalThis);
