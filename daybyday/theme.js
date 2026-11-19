@@ -2,7 +2,7 @@
  'use strict';
  let saved;try{saved=localStorage.getItem('daybyday-black-pink-v2');}catch{}
  const root=document.documentElement;root.dataset.theme=saved==='light'?'light':'dark';
- function updateTheme(){const dark=root.dataset.theme==='dark',button=document.getElementById('theme-toggle');if(button){button.textContent=dark?'☾ Preto e branco · trocar':'☀ Branco e preto · trocar';button.setAttribute('aria-pressed',String(dark));button.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');}document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#050505':'#f5f5f5');}
+ function updateTheme(){const dark=root.dataset.theme==='dark',button=document.getElementById('theme-toggle');if(button){button.textContent=dark?'☾ Carbono e prata · trocar':'☀ Prata claro · trocar';button.setAttribute('aria-pressed',String(dark));button.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');}document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#050505':'#f5f5f5');}
  updateTheme();let promptEvent=null;
  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;const native=document.getElementById('install-native');if(native)native.hidden=false;});
  window.addEventListener('appinstalled',()=>{promptEvent=null;document.getElementById('install-app').hidden=true;document.getElementById('install-help').close();});
