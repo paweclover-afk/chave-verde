@@ -7,14 +7,15 @@
  const date=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&!isNaN(Date.parse(d+'T12:00:00Z'))&&new Date(d+'T12:00:00Z').toISOString().slice(0,10)===d;
  const time=t=>typeof t==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(t);
  function validatePlan(p){
-  if(!keys(p,['workouts','mobility','meals','guide'])||!Array.isArray(p.workouts)||p.workouts.length>30||!Array.isArray(p.mobility)||p.mobility.length>100||!Array.isArray(p.meals)||p.meals.length>50||!obj(p.guide)||Object.keys(p.guide).length>30)throw Error('Plano pessoal inválido.');
+  if(!keys(p,['workouts','mobility','meals','guide','foodNotes'])||!Array.isArray(p.workouts)||p.workouts.length>30||!Array.isArray(p.mobility)||p.mobility.length>100||!Array.isArray(p.meals)||p.meals.length>50||!obj(p.guide)||Object.keys(p.guide).length>30)throw Error('Plano pessoal inválido.');
+  if(p.foodNotes!==undefined&&!text(p.foodNotes,10000))throw Error('Orientações alimentares inválidas.');
   const ids=new Set();
   for(const w of p.workouts){
-   if(!keys(w,['id','title','day','notes','exercises'])||!text(w.id,100)||!w.id||ids.has(w.id)||!text(w.title,160)||!w.title.trim()||!Number.isInteger(w.day)||w.day<0||w.day>6||!text(w.notes,2000)||!Array.isArray(w.exercises)||w.exercises.length>100)throw Error('Treino inválido.');ids.add(w.id);
+   if(!keys(w,['id','title','day','notes','exercises'])||!text(w.id,100)||!w.id||ids.has(w.id)||!text(w.title,160)||!w.title.trim()||!Number.isInteger(w.day)||w.day< -1||w.day>6||!text(w.notes,2000)||!Array.isArray(w.exercises)||w.exercises.length>100)throw Error('Treino inválido.');ids.add(w.id);
    for(const e of w.exercises){if(!keys(e,['id','name','tempo','rest','note','options','sets','timed'])||!text(e.id,100)||!e.id||ids.has(e.id)||!text(e.name,160)||!e.name.trim()||!text(e.tempo,100)||!text(e.rest,100)||!text(e.note,2000)||!Array.isArray(e.options)||e.options.length>30||e.options.some(x=>!text(x,80))||!Array.isArray(e.sets)||!e.sets.length||e.sets.length>20||e.sets.some(x=>!text(x,160))||typeof e.timed!=='boolean')throw Error('Exercício inválido.');ids.add(e.id);}
   }
   for(const m of p.mobility)if(!Array.isArray(m)||m.length!==2||m.some(x=>!text(x,1000))||!m[0].trim())throw Error('Movimento inválido.');
-  for(const m of p.meals)if(!keys(m,['title','time','ingredients','substitutions'])||!text(m.title,160)||!m.title.trim()||!time(m.time)||!text(m.ingredients,10000)||!Array.isArray(m.substitutions)||m.substitutions.length>30||m.substitutions.some(x=>!text(x,2000)))throw Error('Refeição inválida.');
+  for(const m of p.meals)if(!keys(m,['title','time','ingredients','substitutions'])||!text(m.title,160)||!m.title.trim()||(m.time!==''&&!time(m.time))||!text(m.ingredients,10000)||!Array.isArray(m.substitutions)||m.substitutions.length>30||m.substitutions.some(x=>!text(x,2000)))throw Error('Refeição inválida.');
   for(const [k,v] of Object.entries(p.guide))if(!text(k,160)||!text(v,2000))throw Error('Guia inválido.');
   return p;
  }
