@@ -1,36 +1,36 @@
 /* DayByDay: daily records and monthly checklists share the private account. */
 #daybyday{max-width:1100px;margin:auto}
 #daybydaycontent .card{margin-bottom:20px}
-.db-intro{background:linear-gradient(120deg,#edf4e7,#fff9eb)}
+.db-intro{background:linear-gradient(120deg,#f2f2f2,#f9f9f9)}
 .db-intro h2{font-size:30px;margin:15px 0 8px;letter-spacing:-1px}
 .db-actions{display:flex;gap:8px;flex-wrap:wrap}
-.db-progress{padding:20px;background:#f2f5ee;border-radius:14px;margin:20px 0}
+.db-progress{padding:20px;background:#f4f4f4;border-radius:14px;margin:20px 0}
 .db-progress .title{margin-bottom:12px;display:flex;justify-content:space-between;gap:12px}
-.db-progress .title strong:last-child{color:#244e3d;font-size:24px}
-.db-progress progress{width:100%;height:12px;border:0;border-radius:20px;overflow:hidden;background:#dce5d4;accent-color:#244e3d;display:block}
-.db-progress progress::-webkit-progress-bar{background:#dce5d4;border-radius:20px}
-.db-progress progress::-webkit-progress-value{background:#244e3d;border-radius:20px}
-.db-progress progress::-moz-progress-bar{background:#244e3d;border-radius:20px}
+.db-progress .title strong:last-child{color:#444444;font-size:24px}
+.db-progress progress{width:100%;height:12px;border:0;border-radius:20px;overflow:hidden;background:#e2e2e2;accent-color:#444444;display:block}
+.db-progress progress::-webkit-progress-bar{background:#e2e2e2;border-radius:20px}
+.db-progress progress::-webkit-progress-value{background:#444444;border-radius:20px}
+.db-progress progress::-moz-progress-bar{background:#444444;border-radius:20px}
 .db-progress p{margin:10px 0 0}
 .db-timeline{display:grid;gap:10px}
-.db-item{display:flex;align-items:center;gap:15px;border:1px solid var(--line);border-left:4px solid var(--db-color,#8d9a93);border-radius:13px;padding:14px;background:#fff}
-.db-health{--db-color:#588a56}.db-study{--db-color:#638dc1}.db-work{--db-color:#c29a4d}.db-self{--db-color:#ba8295}.db-english{--db-color:#569eaa}.db-pt{--db-color:#c38a64}.db-cook{--db-color:#4d9d8c}
+.db-item{display:flex;align-items:center;gap:15px;border:1px solid var(--line);border-left:4px solid var(--db-color,#979797);border-radius:13px;padding:14px;background:#ffffff}
+.db-health{--db-color:#7c7c7c}.db-study{--db-color:#888888}.db-work{--db-color:#9d9d9d}.db-self{--db-color:#8f8f8f}.db-english{--db-color:#909090}.db-pt{--db-color:#939393}.db-cook{--db-color:#8b8b8b}
 .db-checklabel{display:flex;align-items:center;gap:14px;flex:1;min-width:0;margin:0;cursor:pointer;min-height:50px}
-.db-checklabel input[type=checkbox],.db-monthcheck input[type=checkbox]{appearance:auto;width:25px;height:25px;min-height:25px;max-width:25px;flex:0 0 25px;margin:0;accent-color:#244e3d;padding:0}
+.db-checklabel input[type=checkbox],.db-monthcheck input[type=checkbox]{appearance:auto;width:25px;height:25px;min-height:25px;max-width:25px;flex:0 0 25px;margin:0;accent-color:#444444;padding:0}
 .db-body{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
 .db-body strong{font-size:16px;line-height:1.4}
-.db-body small{color:#647268;font-weight:400;line-height:1.5}
-.db-body .db-time{font-size:11px;letter-spacing:.3px;color:#45614e;font-weight:600}
-.db-done{background:#f0f5ed}.db-done .db-body strong{text-decoration:line-through;color:#647268}
+.db-body small{color:#6e6e6e;font-weight:400;line-height:1.5}
+.db-body .db-time{font-size:11px;letter-spacing:.3px;color:#5a5a5a;font-weight:600}
+.db-done{background:#f3f3f3}.db-done .db-body strong{text-decoration:line-through;color:#6e6e6e}
 .db-tools{display:flex;gap:6px}.db-tools button{font-size:12px;min-height:44px;padding:8px 11px}
 .db-monthgroups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:15px}
 .db-monthgroup{border:1px solid var(--line);border-radius:13px;padding:18px}
 .db-monthgroup h4{margin:0 0 12px;font-size:15px}
 .db-monthcheck{display:flex;align-items:center;gap:12px;min-height:50px;cursor:pointer;font-size:14px;font-weight:400;line-height:1.5;margin:4px 0}
-.db-monthcheck:has(input:checked) span{text-decoration:line-through;color:#647268}
+.db-monthcheck:has(input:checked) span{text-decoration:line-through;color:#6e6e6e}
 .db-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:18px}
-.db-calday{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border:1px solid var(--line);border-radius:10px;background:#f7f8f3;color:var(--ink);min-height:64px;min-width:0}
-.db-calday.active{background:#244e3d;color:#fff;border-color:#244e3d}
+.db-calday{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border:1px solid var(--line);border-radius:10px;background:#f7f7f7;color:var(--ink);min-height:64px;min-width:0}
+.db-calday.active{background:#444444;color:#ffffff;border-color:#444444}
 .db-calday small{font-size:11px}
 .db-editor{width:470px;max-width:calc(100vw - 24px);max-height:85dvh;overflow:auto}
 .db-editor input,.db-editor select{font-size:16px;min-height:48px}
@@ -41,7 +41,7 @@
 .personal-message{width:500px;max-width:calc(100vw - 28px);max-height:85dvh;overflow:auto}.personal-message h2{font-size:23px;line-height:1.4;margin:0 0 22px}.personal-message .primary{width:100%;margin-top:24px;min-height:48px}
 
 /* Round checkboxes and completed-task styling. */
-body[data-screen=daybyday] #daybyday .db-item{position:relative;display:flex;align-items:flex-start;border:1px solid var(--line);border-radius:20px;background:var(--panel,#fff);padding:18px 16px 18px 20px;gap:8px;margin:0 0 12px;overflow:visible}
+body[data-screen=daybyday] #daybyday .db-item{position:relative;display:flex;align-items:flex-start;border:1px solid var(--line);border-radius:20px;background:var(--panel,#ffffff);padding:18px 16px 18px 20px;gap:8px;margin:0 0 12px;overflow:visible}
 body[data-screen=daybyday] #daybyday .db-item:before{content:'';position:absolute;left:-1px;top:15px;bottom:15px;width:5px;border-radius:10px;background:var(--green)}
 body[data-screen=daybyday] #daybyday .db-checklabel{display:flex;align-items:flex-start;gap:13px;flex:1;min-width:0}
 body[data-screen=daybyday] #daybyday input[type=checkbox]{appearance:none;flex-shrink:0;width:28px;height:28px;min-height:28px;margin:2px 0 0;border:2px solid var(--muted);border-radius:50%;background:transparent;display:grid;place-items:center}
@@ -55,17 +55,17 @@ body[data-screen=daybyday] #daybyday .db-done{opacity:.65}
 body[data-screen=daybyday] #daybyday .db-done .db-body strong{text-decoration:line-through}
 body[data-screen=daybyday] #daybyday .db-tools{flex-shrink:0;margin:0;display:block}
 
-body[data-screen=daybyday] .home-item-menu[open] button{background:var(--panel,#fff);color:var(--ink)}
+body[data-screen=daybyday] .home-item-menu[open] button{background:var(--panel,#ffffff);color:var(--ink)}
 body[data-screen=daybyday] #daybyday input[type=checkbox]:focus-visible{outline:3px solid var(--green);outline-offset:4px}
 
 /* The calendar tile itself fills with completion progress. */
 .db-calday{position:relative;overflow:hidden;isolation:isolate}
-.db-calday::before{content:'';position:absolute;inset:auto 0 0;height:var(--day-fill,0%);background:#f9a8d4;opacity:1;z-index:-1;transition:height .5s ease}
-.db-calday::after{content:'';position:absolute;left:0;right:0;bottom:var(--day-fill,0%);height:2px;background:#f9a8d4;opacity:.65;z-index:-1;transition:bottom .5s ease}
+.db-calday::before{content:'';position:absolute;inset:auto 0 0;height:var(--day-fill,0%);background:#bcbcbc;opacity:1;z-index:-1;transition:height .5s ease}
+.db-calday::after{content:'';position:absolute;left:0;right:0;bottom:var(--day-fill,0%);height:2px;background:#bcbcbc;opacity:.65;z-index:-1;transition:bottom .5s ease}
 .db-calday[style*="--day-fill: 0%"]::after{display:none}
 .db-calday strong,.db-calday small{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){.db-calday::before,.db-calday::after{transition:none}}
 
-.db-calday strong,.db-calday small{text-shadow:0 1px 3px #000,0 0 3px #000}
-.db-calday[data-full="true"] strong,.db-calday[data-full="true"] small{color:#240b19;text-shadow:none}
+.db-calday strong,.db-calday small{text-shadow:0 1px 3px #000000,0 0 3px #000000}
+.db-calday[data-full="true"] strong,.db-calday[data-full="true"] small{color:#111111;text-shadow:none}
 .personal-plan-editor{width:min(600px,94vw);max-height:90dvh;overflow:auto;padding:24px;box-sizing:border-box}.personal-plan-editor form{display:grid;gap:14px}.personal-plan-editor label{display:grid;gap:8px;margin:12px 0}.personal-plan-editor input,.personal-plan-editor select,.personal-plan-editor textarea{width:100%;box-sizing:border-box;font-size:16px}.personal-plan-editor textarea{min-height:90px}.personal-plan-editor button{min-height:44px}.loginpanel #recover,.loginpanel #resend,.loginpanel #register{width:100%;margin-top:10px;min-height:44px}

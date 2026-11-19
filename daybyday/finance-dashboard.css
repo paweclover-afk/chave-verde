@@ -1,37 +1,37 @@
 .pf-dashboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
-.pf-metric{display:grid;gap:12px;padding:20px 16px;border-radius:17px;border:1px solid #c7d8ec;background:#fff}
+.pf-metric{display:grid;gap:12px;padding:20px 16px;border-radius:17px;border:1px solid #d6d6d6;background:#ffffff}
 .pf-metric small{font-size:13px;font-weight:700}
 .pf-metric strong{font-size:clamp(17px,2.4vw,29px);overflow-wrap:anywhere}
-.pf-metric-income{background:#e4f7ec;color:#175d3b}
-.pf-metric-cost{background:#fff0db;color:#805011}
-.pf-metric-balance{background:#e3efff;color:#1c508e}
-.pf-metric-negative{background:#ffe3e3;color:#932e34}
-.pf-future{display:grid;gap:10px;background:#fff;border:1px solid #d0dced;padding:18px;border-radius:16px;margin:16px 0}
+.pf-metric-income{background:#f2f2f2;color:#4c4c4c}
+.pf-metric-cost{background:#f2f2f2;color:#565656}
+.pf-metric-balance{background:#eeeeee;color:#494949}
+.pf-metric-negative{background:#e9e9e9;color:#444444}
+.pf-future{display:grid;gap:10px;background:#ffffff;border:1px solid #dbdbdb;padding:18px;border-radius:16px;margin:16px 0}
 .pf-future p{line-height:1.7;margin:0}
-.pf-future progress{width:100%;accent-color:#347cdd;height:12px}
-.pf-future small{color:#536174}
-.pf-welcome{max-width:500px;margin:20px auto;padding:28px;background:#fff;border-radius:20px}
+.pf-future progress{width:100%;accent-color:#747474;height:12px}
+.pf-future small{color:#5f5f5f}
+.pf-welcome{max-width:500px;margin:20px auto;padding:28px;background:#ffffff;border-radius:20px}
 .pf-welcome h2{font-size:30px;line-height:1.2}
-.pf-welcome p{color:#526176;line-height:1.7}
+.pf-welcome p{color:#5f5f5f;line-height:1.7}
 .pf-welcome button{margin:8px 10px 0 0;min-width:135px}
-.pf-eyebrow{color:#276cc1;font-size:12px;font-weight:800;letter-spacing:1px}
+.pf-eyebrow{color:#636363;font-size:12px;font-weight:800;letter-spacing:1px}
 @media(max-width:560px){.pf-dashboard{grid-template-columns:1fr}.pf-metric{display:flex;justify-content:space-between;align-items:center;padding:17px}.pf-metric strong{font-size:23px}.pf-toolbar label{width:100%}}
 /* Finance follows the app theme, including dialogs mounted outside the page. */
 :root{
- --pf-bg:#f7f6f4;--pf-surface:#fff;--pf-text:#28242a;--pf-muted:#655d65;
- --pf-border:#ded8dd;--pf-control:#fff;--pf-accent:#963d70;--pf-accent-text:#fff;
- --pf-income-bg:#e5f5ec;--pf-income-text:#1c6542;--pf-cost-bg:#fff0de;--pf-cost-text:#795017;
- --pf-balance-bg:#f7e8f1;--pf-balance-text:#81365f;--pf-negative-bg:#ffe5e5;--pf-negative-text:#932f3c;
- --pf-receipt:#fffdf7;--pf-preview-bg:#f7e8f1;--pf-preview-text:#77365c;
- --pf-warning-bg:#fff0b8;--pf-warning-text:#674700;--pf-danger-bg:#ffe0cb;--pf-danger-text:#823812
+ --pf-bg:#f6f6f6;--pf-surface:#ffffff;--pf-text:#252525;--pf-muted:#5f5f5f;
+ --pf-border:#dadada;--pf-control:#ffffff;--pf-accent:#545454;--pf-accent-text:#ffffff;
+ --pf-income-bg:#f1f1f1;--pf-income-text:#535353;--pf-cost-bg:#f2f2f2;--pf-cost-text:#555555;
+ --pf-balance-bg:#ececec;--pf-balance-text:#494949;--pf-negative-bg:#ebebeb;--pf-negative-text:#454545;
+ --pf-receipt:#fdfdfd;--pf-preview-bg:#ececec;--pf-preview-text:#474747;
+ --pf-warning-bg:#efefef;--pf-warning-text:#494949;--pf-danger-bg:#e5e5e5;--pf-danger-text:#454545
 }
 :root[data-theme=dark]{
- --pf-bg:#090909;--pf-surface:#151215;--pf-text:#f7edf3;--pf-muted:#d0bdc8;
- --pf-border:#41313b;--pf-control:#0c0b0c;--pf-accent:#f9a8d4;--pf-accent-text:#2d1021;
- --pf-income-bg:#11271e;--pf-income-text:#9be4bc;--pf-cost-bg:#2b2114;--pf-cost-text:#f4cc91;
- --pf-balance-bg:#321c2b;--pf-balance-text:#f9b9dc;--pf-negative-bg:#351b22;--pf-negative-text:#ffa8b6;
- --pf-receipt:#181418;--pf-preview-bg:#2d1b27;--pf-preview-text:#f4bad9;
- --pf-warning-bg:#342b15;--pf-warning-text:#ffdf91;--pf-danger-bg:#3a211a;--pf-danger-text:#ffc19d
+ --pf-bg:#090909;--pf-surface:#131313;--pf-text:#f0f0f0;--pf-muted:#c2c2c2;
+ --pf-border:#353535;--pf-control:#0b0b0b;--pf-accent:#bcbcbc;--pf-accent-text:#171717;
+ --pf-income-bg:#222222;--pf-income-text:#d2d2d2;--pf-cost-bg:#222222;--pf-cost-text:#d0d0d0;
+ --pf-balance-bg:#222222;--pf-balance-text:#c9c9c9;--pf-negative-bg:#212121;--pf-negative-text:#bcbcbc;
+ --pf-receipt:#151515;--pf-preview-bg:#202020;--pf-preview-text:#c9c9c9;
+ --pf-warning-bg:#2b2b2b;--pf-warning-text:#e0e0e0;--pf-danger-bg:#262626;--pf-danger-text:#cccccc
 }
 .pf-app{background:var(--pf-bg);color:var(--pf-text);--ink:var(--pf-text);--muted:var(--pf-muted);--card:var(--pf-surface);--line:var(--pf-border);--bg:var(--pf-bg)}
 .pf-primary{background:var(--pf-accent)!important;color:var(--pf-accent-text)!important;border-color:var(--pf-accent)!important}

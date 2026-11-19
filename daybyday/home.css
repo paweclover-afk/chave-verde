@@ -1,13 +1,13 @@
 /* The compact layout applies only while the Início view is active. */
 .home-top,.home-date,.home-percent{display:none}
-body[data-screen=overview]{--home-surface:var(--panel,#fff);--home-soft:var(--panel-soft,#f2f2f2);--home-accent:var(--green,#34754e)}
+body[data-screen=overview]{--home-surface:var(--panel,#ffffff);--home-soft:var(--panel-soft,#f2f2f2);--home-accent:var(--green,#646464)}
 body[data-screen=overview] main{display:flex;flex-direction:column;gap:18px}
 body[data-screen=overview] main>header,body[data-screen=overview] .heading,body[data-screen=overview] .foot,body[data-screen=overview] .mobilebackup{display:none}
 body[data-screen=overview] .home-top{display:flex;align-items:center;justify-content:space-between;order:0}
 body[data-screen=overview] .home-brand{font-size:27px;font-weight:850;letter-spacing:-1px}
-body[data-screen=overview] .home-brand span{display:inline-flex;align-items:center;justify-content:center;background:#20c76c;color:#05180c;width:28px;height:28px;border-radius:8px;font-size:23px}
+body[data-screen=overview] .home-brand span{display:inline-flex;align-items:center;justify-content:center;background:#9d9d9d;color:#131313;width:28px;height:28px;border-radius:8px;font-size:23px}
 body[data-screen=overview] #home-online{padding:7px 12px;background:var(--home-surface);border:1px solid var(--line);border-radius:30px;color:var(--muted);font-size:12px}
-body[data-screen=overview] #home-online:before{content:'';display:inline-block;margin-right:7px;background:#20c76c;border-radius:50%;width:7px;height:7px}
+body[data-screen=overview] #home-online:before{content:'';display:inline-block;margin-right:7px;background:#9d9d9d;border-radius:50%;width:7px;height:7px}
 body[data-screen=overview] .cloudbar{order:1;margin:0;padding:8px 10px;border-radius:12px;gap:6px;flex-wrap:wrap}
 body[data-screen=overview] .cloudbar small{display:none}
 body[data-screen=overview] #cloudstatus{font-size:11px}
@@ -21,7 +21,7 @@ body[data-screen=overview] .datecard>.title{display:none}
 body[data-screen=overview] .days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:0}
 body[data-screen=overview] .day{min-width:0;padding:10px 2px;border:1px solid var(--line);border-radius:16px;background:var(--home-surface);font-size:12px;color:var(--muted)}
 body[data-screen=overview] .day b{font-size:16px;margin-top:6px;color:var(--ink)}
-body[data-screen=overview] .day.selected{border-color:var(--home-accent);background:var(--selected,#e4efe6);color:var(--home-accent)}
+body[data-screen=overview] .day.selected{border-color:var(--home-accent);background:var(--selected,#ececec);color:var(--home-accent)}
 body[data-screen=overview] #homehero{order:4;border-radius:21px;display:flex;flex-direction:column;align-items:stretch;gap:17px;padding:20px;background:var(--home-surface);border:1px solid var(--line);margin:0}
 body[data-screen=overview] #homehero small{color:var(--home-accent);font-size:11px;font-weight:800;letter-spacing:.5px}
 body[data-screen=overview] #homehero h2{font-size:23px;line-height:1.3;margin:14px 0 8px}
