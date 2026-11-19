@@ -38,3 +38,13 @@ input:disabled,textarea:disabled,select:disabled{opacity:1!important;cursor:not-
 body[data-screen=overview] .home-brand span{background:var(--ink);color:var(--bg)}
 body[data-screen=overview] #home-online:before{background:var(--ink)}
 @media print{body{background:#ffffff;color:#111111}.card{box-shadow:none}}
+
+.meal-daily-progress{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:18px;margin:18px 0;border:1px solid var(--line);border-radius:14px;background:var(--panel-soft);color:var(--ink)}
+.meal-all-done{flex-basis:100%;font-weight:700}
+.meal-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.meal-heading h3{margin:12px 0}
+.meal-completion-toggle{display:inline-flex;align-items:center;gap:12px;min-height:48px;font-size:15px;text-align:left;white-space:normal}
+.meal-check-icon{display:inline-grid;place-items:center;flex:none;width:30px;height:30px;border:2px solid var(--muted);border-radius:9px;background:var(--control);font-size:24px;font-weight:800;line-height:1}
+.meal-completion-toggle[aria-checked=true] .meal-check-icon{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.meal-completed{border-left:3px solid var(--ink);padding-left:16px}
+@media(max-width:600px){.meal-heading{display:block}.meal-completion-toggle{width:100%;margin:4px 0 14px}}

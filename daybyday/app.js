@@ -180,9 +180,29 @@ function renderMobility(){
  P.mobility.forEach(([name,reps],i)=>{const row=el('div',undefined,'event'),body=el('div',undefined,'eventbody'),done=state.mobility[k][i],check=el('button',done?'✓':'','check'+(done?' done':''));body.append(el('strong',name),el('small',reps));check.setAttribute('aria-label',(done?'Desmarcar ':'Concluir ')+name);check.setAttribute('aria-pressed',!!done);check.onclick=()=>{while(state.mobility[k].length<P.mobility.length)state.mobility[k].push(false);state.mobility[k][i]=!done;persist();renderMobility();};row.append(el('div',String(i+1).padStart(2,'0'),'time'),body,check);$('mobilitylist').append(row);});
 }
 function renderFood(){
- const content=$('mealcontent');content.replaceChildren();appendPlanButton(content,'meals');if(P.foodNotes)content.append(el('pre',P.foodNotes,'mealtext smallnote'));
+ const content=$('mealcontent'),day=key(),choices=state.mealchoices[day]||[];content.replaceChildren();
+ if(P.meals.length){
+  const count=P.meals.filter((_,i)=>choices[i]===1).length,summary=el('div',undefined,'meal-daily-progress');
+  summary.setAttribute('role','status');summary.append(el('strong',count+' de '+P.meals.length+' refeições realizadas'),el('span',dateLabel(day),'smallnote'));
+  if(count===P.meals.length)summary.append(el('span','✓ Todas as refeições do dia concluídas','meal-all-done'));
+  content.append(summary);
+ }
+ appendPlanButton(content,'meals');if(P.foodNotes)content.append(el('pre',P.foodNotes,'mealtext smallnote'));
  if(!P.meals.length)content.append(el('p','Cadastre seus horários, refeições, porções e substituições.','smallnote'));
- P.meals.forEach((meal,i)=>{const section=el('section',undefined,'mealblock');section.append(el('h3',(meal.time?meal.time+' · ':'')+meal.title),el('pre',meal.ingredients,'mealtext'));for(const sub of meal.substitutions){const detail=el('details');detail.append(el('summary','Opção de substituição'),el('pre',sub,'mealtext'));section.append(detail);}const button=el('button',state.mealchoices[key()]?.[i]?'✓ Refeição realizada':'Marcar como realizada','secondary');button.setAttribute('aria-pressed',!!state.mealchoices[key()]?.[i]);button.onclick=()=>{state.mealchoices[key()]??=[];while(state.mealchoices[key()].length<P.meals.length)state.mealchoices[key()].push(0);state.mealchoices[key()][i]=state.mealchoices[key()][i]?0:1;persist();renderFood();};section.append(button);content.append(section);});
+ P.meals.forEach((meal,i)=>{
+  const done=choices[i]===1,section=el('section',undefined,'mealblock'+(done?' meal-completed':'')),heading=el('div',undefined,'meal-heading'),title=el('h3',(meal.time?meal.time+' · ':'')+meal.title),button=el('button',undefined,'meal-completion-toggle secondary'),icon=el('span',done?'✓':'','meal-check-icon');
+  icon.setAttribute('aria-hidden','true');button.type='button';button.setAttribute('role','checkbox');button.setAttribute('aria-checked',String(done));button.setAttribute('aria-label',meal.title+' realizada em '+dateLabel(day));button.append(icon,el('span',done?'Refeição realizada':'Marcar como realizada'));
+  button.onclick=()=>{
+   if(window.RitmoCloud.blocked()){toast('Atualize os registros antes de alterar suas refeições.');return;}
+   const before=state.mealchoices[day]?state.mealchoices[day].slice():undefined;
+   state.mealchoices[day]??=[];while(state.mealchoices[day].length<P.meals.length)state.mealchoices[day].push(0);
+   state.mealchoices[day][i]=done?0:1;
+   if(!persist()){if(before)state.mealchoices[day]=before;else delete state.mealchoices[day];toast('Não foi possível guardar a marcação. Tente novamente.');}
+   renderFood();document.querySelector('[data-meal-index="'+i+'"]')?.focus({preventScroll:true});
+  };
+  button.dataset.mealIndex=i;heading.append(title,button);section.append(heading,el('pre',meal.ingredients,'mealtext'));
+  for(const sub of meal.substitutions){const detail=el('details');detail.append(el('summary','Opção de substituição'),el('pre',sub,'mealtext'));section.append(detail);}content.append(section);
+ });
 }
 function evolutionGroups(){
  const groups=new Map(),period=new Set(evolutionDates().map(T.dateKey));
