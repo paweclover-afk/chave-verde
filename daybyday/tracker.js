@@ -56,13 +56,29 @@
     return data;
   }
   function validateDaybyday(v){
-    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','finance'].includes(k)))throw Error('DayByDay inválido.');
+    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','finance','wellness'].includes(k)))throw Error('DayByDay inválido.');
     if(v.items!==undefined){
       if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
       const ids=new Set();
       for(const x of v.items){
         if(!x||typeof x!=='object'||typeof x.id!=='string'||!x.id||x.id.length>100||ids.has(x.id)||typeof x.name!=='string'||!x.name.trim()||x.name.length>160||typeof x.details!=='string'||x.details.length>500||!/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time)||typeof x.done!=='boolean'||!['rest','health','study','work','self','english','pt','cook'].includes(x.category))throw Error('Atividade DayByDay inválida.');
         ids.add(x.id);
+      }
+    }
+    if(v.wellness!==undefined){
+      const w=v.wellness, text=(x,n)=>typeof x==='string'&&x.length<=n;
+      if(!w||typeof w!=='object'||Array.isArray(w)||Object.keys(w).some(k=>!['training','meals','mobility','notes','water'].includes(k))||!text(w.notes,2000)||!Number.isInteger(w.water)||w.water<0||w.water>1000)throw Error('Registro de saúde inválido.');
+      for(const kind of ['training','meals','mobility']){
+        if(!Array.isArray(w[kind])||w[kind].length>100)throw Error('Lista de saúde inválida.');
+        const ids=new Set();
+        for(const x of w[kind]){
+          if(!x||typeof x!=='object'||!text(x.id,100)||!x.id||ids.has(x.id)||!text(x.name,160)||!x.name.trim()||!text(x.details,1000)||typeof x.done!=='boolean'||Object.keys(x).some(k=>!['id','name','details','done','sets'].includes(k)))throw Error('Atividade de saúde inválida.');
+          ids.add(x.id);
+          if(kind==='training'){
+            if(!Array.isArray(x.sets)||x.sets.length>20)throw Error('Séries inválidas.');
+            for(const row of x.sets)if(!row||!Number.isFinite(row.kg)||row.kg<0||row.kg>2000||!Number.isInteger(row.reps)||row.reps<1||row.reps>1000)throw Error('Carga ou repetições inválidas.');
+          }else if(x.sets!==undefined)throw Error('Séries fora do treino.');
+        }
       }
     }
     if(v.finance!==undefined)validateFinance(v.finance);

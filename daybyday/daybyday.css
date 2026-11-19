@@ -40,3 +40,4 @@
 @media(max-width:900px){.personal-app main{padding-bottom:28px}.personal-app #app-shell>aside{padding:14px 18px}}
 
 .personal-app #recover,.personal-app #resend{width:100%;min-height:48px;margin-top:12px}
+.wellness-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.wellness-tabs button[aria-pressed=true]{outline:2px solid currentColor}.wellness-item{border-top:1px solid currentColor;padding:18px 0;margin-top:14px}.wellness-item>label{display:flex;align-items:center;gap:12px}.wellness-item input[type=checkbox]{width:22px;height:22px;flex-shrink:0}#wellness-section form{display:grid;gap:12px;margin:14px 0;max-width:560px}#wellness-section input,#wellness-section textarea{max-width:100%;box-sizing:border-box}#wellness-section textarea{min-height:100px}#wellness-section details{margin:16px 0}#wellness-section p{overflow-wrap:anywhere}#wellness-section button{min-height:44px}
