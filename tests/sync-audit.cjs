@@ -80,7 +80,7 @@ test('previsão do próximo mês soma somente as parcelas restantes dentro do m�
  const model={income:{frequency:'week',amount:80000},entries:[phone,rent]};
  const january=finance.summary(model,'month',finance.addMonths('2026-12-01',1));
  assert.equal(january.rows.filter(row=>row.frequency==='week').length,2);
- assert.equal(january.total,106800);assert.equal(january.balance,239867);
+ assert.equal(january.total,106800);assert.equal(january.balance,213200);
  assert.equal(finance.summary(model,'month','2027-02-01').total,80000);
  phone.count=0;phone.end='2027-01-08';
  assert.equal(finance.summary(model,'month','2027-01-01').total,106800);

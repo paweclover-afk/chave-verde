@@ -9,11 +9,11 @@
   return count;
  }
  function message(days){
-  if(days===2)return 'Dois dias seguidos completando todas as tarefas! Sua constância está crescendo. Continue valorizando cada passo dessa evolução. 💖';
-  if(days===3)return 'Três dias seguidos dando o seu melhor! Você está transformando atitude em hábito. Tenha orgulho de tudo o que está construindo. 🌟';
-  if(days>=7)return days+' dias seguidos com todas as tarefas concluídas! Cada dia conta nessa conquista. Sua dedicação merece ser celebrada! 🏆';
-  if(days>3)return days+' dias seguidos cumprindo suas tarefas! Sua dedicação está fazendo a diferença. Siga no seu ritmo, um dia de cada vez. ✨';
-  return 'Você fez acontecer, uma tarefa de cada vez. Tenha orgulho do seu esforço e aproveite essa conquista! Amanhã é uma nova oportunidade de cuidar de você. 💖';
+  if(days===2)return 'Dois dias seguidos! Sua constância faz a diferença. Continue assim! 💖';
+  if(days===3)return 'Três dias seguidos! Você está transformando atitude em hábito. Orgulhe-se! 🌟';
+  if(days>=7)return days+' dias seguidos! Sua dedicação merece essa comemoração. Que conquista! 🏆';
+  if(days>3)return days+' dias seguidos! Você está evoluindo. Siga no seu ritmo, um dia de cada vez. ✨';
+  return 'Você fez acontecer! Tenha orgulho do seu esforço e celebre essa conquista. 💖';
  }
  const api={complete,streak,message};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.RitmoCompletion=api;

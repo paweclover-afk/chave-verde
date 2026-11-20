@@ -39,7 +39,7 @@
   if(mode==='month'){const start=anchor.slice(0,7)+'-01';return {from:start,to:addDays(addMonths(start,1),-1)};}
   const d=new Date(anchor+'T12:00:00Z');return {from:addDays(anchor,-(d.getUTCDay()+6)%7),to:addDays(anchor,6-(d.getUTCDay()+6)%7)};
  }
- function income(income,mode){if(!income)return 0;if(income.frequency===mode)return income.amount;return Math.round(income.amount*(mode==='month'?52/12:12/52));}
+ function income(income,mode){if(!income)return 0;if(income.frequency===mode)return income.amount;return Math.round(income.amount*(mode==='month'?4:1/4));}
  function summary(model,mode,anchor){
   const range=period(mode,anchor),rows=occurrences(model.entries,range.from,range.to);
   const spent=rows.filter(r=>r.frequency==='once').reduce((s,r)=>s+r.amount,0),fixed=rows.filter(r=>r.frequency!=='once').reduce((s,r)=>s+r.amount,0),paid=rows.filter(r=>r.paid).reduce((s,r)=>s+r.amount,0),revenue=income(model.income,mode);

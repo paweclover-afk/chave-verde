@@ -92,7 +92,7 @@ function celebrateCompletion(items){
  const sequence=RitmoCompletion.streak(state.daybyday,key());
  record.celebrated=true;persist();
  const dialog=el('dialog',undefined,'completion-celebration');
- const heading=el('h2','Parabéns! Você atingiu 100% das suas tarefas!');
+ const heading=el('h2','Parabéns! 100% concluído!');
  heading.id='completion-heading';
  dialog.setAttribute('aria-labelledby',heading.id);
  const close=el('button','Comemorar!','primary');

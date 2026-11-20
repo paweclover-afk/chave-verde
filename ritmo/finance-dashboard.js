@@ -34,7 +34,7 @@ function pfIncome(){
  const frequency=financeField(form,'Você recebe por semana ou por mês?',{options:[['week','Por semana'],['month','Por mês']],value:current?.frequency||'month'});
  const amount=financeField(form,'Quanto você ganha? ('+(ledger().dashboardCurrency==='EUR'?'EUR':'BRL')+')',{...amountField,value:current?current.amount/100:''});
  const preview=el('p',undefined,'pf-note');form.append(preview);
- const update=()=>{const n=Math.round((amount.valueAsNumber||0)*100);preview.textContent=frequency.value==='week'?'Estimativa mensal: '+personalMoney(Math.round(n*52/12)):'Estimativa semanal: '+personalMoney(Math.round(n*12/52));};
+ const update=()=>{const n=Math.round((amount.valueAsNumber||0)*100);preview.textContent=frequency.value==='week'?'Renda mensal planejada (4 semanas): '+personalMoney(PersonalFinance.income({amount:n,frequency:'week'},'month')):'Equivalente semanal (mês ÷ 4): '+personalMoney(PersonalFinance.income({amount:n,frequency:'month'},'week'));};
  amount.oninput=frequency.onchange=update;update();
  return ()=>savePersonal(model=>{model.income={frequency:frequency.value,amount:cents(amount)};});
  });
@@ -160,7 +160,7 @@ renderFinance=function(){
   const tile=el('article',undefined,'pf-metric pf-metric-'+cls);tile.append(el('small',label),el('strong',personalMoney(value)));dashboard.append(tile);
  }
  if(personalMode==='week')dashboard.append(el('p','Planejamento semanal: gastos da semana + reserva mensal (mensal × 12 ÷ 52). A reserva usa o mês da segunda-feira desta semana, de forma igual em todos os dias. Não representa saldo bancário.','pf-note pf-plan-note'));
- if(personalMode==='month')dashboard.append(el('p',model.income?.frequency==='week'?'Renda mensal estimada pela média: valor semanal × 52 ÷ 12. A sobra é uma previsão, não o saldo bancário nem a soma dos recebimentos confirmados.':'A sobra é uma previsão de renda menos compromissos; não representa o saldo bancário.','pf-note pf-plan-note'));
+ if(personalMode==='month')dashboard.append(el('p',model.income?.frequency==='week'?'Renda mensal planejada com 4 semanas: valor semanal × 4. A sobra é uma previsão, não o saldo bancário nem a soma dos recebimentos confirmados.':'A sobra é uma previsão de renda menos compromissos; não representa o saldo bancário.','pf-note pf-plan-note'));
  const followingAnchor=PersonalFinance.addMonths(personalAnchor.slice(0,7)+'-01',1),following=PersonalFinance.summary(model,'month',followingAnchor);
  const future=el('section',undefined,'pf-future'),futureSummary=el('div',undefined,'pf-future-summary');
  future.append(el('strong','Próximo mês · '+new Date(followingAnchor+'T12:00:00Z').toLocaleDateString('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'})));
