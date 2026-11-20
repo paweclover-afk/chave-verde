@@ -87,17 +87,18 @@ const celebrationPhrases=[
 ];
 let lastCelebrationPhrase=-1;
 function celebrateCompletion(items){
- if(!items.length||!items.every(item=>item.done))return;
- const count=celebrationPhrases.length;
- lastCelebrationPhrase=(lastCelebrationPhrase+1+Math.floor(Math.random()*(count-1)))%count;
+ const record=state.daybyday[key()];
+ if(items!==record?.items||record.celebrated||!RitmoCompletion.complete(items)||document.querySelector('.completion-celebration[open]'))return;
+ const sequence=RitmoCompletion.streak(state.daybyday,key());
+ record.celebrated=true;persist();
  const dialog=el('dialog',undefined,'completion-celebration');
- const heading=el('h2','100% das tarefas concluídas!');
+ const heading=el('h2','Parabéns! Você atingiu 100% das suas tarefas!');
  heading.id='completion-heading';
  dialog.setAttribute('aria-labelledby',heading.id);
  const close=el('button','Comemorar!','primary');
  close.type='button';
  close.onclick=()=>dialog.close();
- dialog.append(el('div','🏆','completion-trophy'),heading,el('p',celebrationPhrases[lastCelebrationPhrase]),close);
+ dialog.append(el('div','🏆','completion-trophy'),heading,el('span',sequence===1?'1 dia completo':sequence+' dias seguidos!','completion-streak'),el('p',RitmoCompletion.message(sequence)),close);
  dialog.firstChild.setAttribute('aria-hidden','true');
  dialog.onclose=()=>dialog.remove();
  document.body.append(dialog);
@@ -458,7 +459,7 @@ function renderDaybyday(){
  add.onclick=()=>editDaybyday();reset.disabled=!done;reset.onclick=()=>{if(!confirm('Desmarcar apenas as atividades DayByDay de '+dateLabel(d)+'?'))return;const snapshot=structuredClone(items);items.forEach(x=>x.done=false);persist();render();toast('Marcações do dia removidas.',()=>{state.daybyday[d].items=snapshot;persist();render();});};actions.append(add,reset);title.append(el('h3',selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})),actions);daily.append(title,daybydayProgress('Atividades concluídas no dia',done,items.length));
  const list=el('div',undefined,'db-timeline');
  for(const item of [...items].sort((a,b)=>a.time.localeCompare(b.time))){
-  const row=el('div',undefined,'db-item db-'+item.category+(item.done?' db-done':'')),label=el('label',undefined,'db-checklabel'),check=el('input'),body=el('span',undefined,'db-body'),tools=el('div',undefined,'db-tools'),edit=el('button','Editar','secondary'),remove=el('button','Excluir','secondary');check.type='checkbox';check.checked=item.done;check.onchange=()=>{item.done=check.checked;persist();render();const restored=document.querySelector('[data-db-id="'+CSS.escape(item.id)+'"]');restored?.focus();if(item.done)celebrateCompletion(items);};check.dataset.dbId=item.id;check.setAttribute('aria-label',item.name+' às '+item.time);body.append(el('small',item.time+' · '+daybydayCategories[item.category]+(item.optional?' · Opcional':''),'db-time'),el('strong',item.name));if(item.details)body.append(el('small',item.details));label.append(check,body);edit.setAttribute('aria-label','Editar '+item.name);edit.onclick=()=>editDaybyday(item);remove.setAttribute('aria-label','Excluir '+item.name);remove.onclick=()=>{const snapshot=structuredClone(items);state.daybyday[d].items=items.filter(x=>x.id!==item.id);if(state.daybyday['2000-01-02']?.routines?.some(r=>r.id===item.id)){state.daybyday[d].skippedRoutines??=[];state.daybyday[d].skippedRoutines.push(item.id);}persist();render();toast('Atividade removida desta data.',()=>{state.daybyday[d].items=snapshot;if(state.daybyday[d].skippedRoutines)state.daybyday[d].skippedRoutines=state.daybyday[d].skippedRoutines.filter(id=>id!==item.id);persist();render();});};tools.append(edit,remove);row.append(label,tools);list.append(row);
+  const row=el('div',undefined,'db-item db-'+item.category+(item.done?' db-done':'')),label=el('label',undefined,'db-checklabel'),check=el('input'),body=el('span',undefined,'db-body'),tools=el('div',undefined,'db-tools'),edit=el('button','Editar','secondary'),remove=el('button','Excluir','secondary');check.type='checkbox';check.checked=item.done;check.onchange=()=>{item.done=check.checked;persist();render();const restored=document.querySelector('[data-db-id="'+CSS.escape(item.id)+'"]');restored?.focus();if(item.done)celebrateCompletion(state.daybyday[key()].items);};check.dataset.dbId=item.id;check.setAttribute('aria-label',item.name+' às '+item.time);body.append(el('small',item.time+' · '+daybydayCategories[item.category]+(item.optional?' · Opcional':''),'db-time'),el('strong',item.name));if(item.details)body.append(el('small',item.details));label.append(check,body);edit.setAttribute('aria-label','Editar '+item.name);edit.onclick=()=>editDaybyday(item);remove.setAttribute('aria-label','Excluir '+item.name);remove.onclick=()=>{const snapshot=structuredClone(items);state.daybyday[d].items=items.filter(x=>x.id!==item.id);if(state.daybyday['2000-01-02']?.routines?.some(r=>r.id===item.id)){state.daybyday[d].skippedRoutines??=[];state.daybyday[d].skippedRoutines.push(item.id);}persist();render();toast('Atividade removida desta data.',()=>{state.daybyday[d].items=snapshot;if(state.daybyday[d].skippedRoutines)state.daybyday[d].skippedRoutines=state.daybyday[d].skippedRoutines.filter(id=>id!==item.id);persist();render();});};tools.append(edit,remove);row.append(label,tools);list.append(row);
  }
  if(view==='daybyday')for(const tools of list.querySelectorAll('.db-tools')){
   const menu=el('details',undefined,'home-item-menu'),summary=el('summary','•••');

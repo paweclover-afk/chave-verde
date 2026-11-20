@@ -123,6 +123,7 @@ html[data-theme=light] input:-webkit-autofill,html[data-theme=light] textarea:-w
 }
 .completion-celebration button{min-height:44px}
 .completion-trophy{font-size:50px;line-height:1.2}
+.completion-streak{display:inline-block;margin:8px 0;padding:8px 14px;border-radius:24px;background:#f9a8d4;color:#321020;font-weight:800;font-size:17px}
 .completion-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .completion-confetti i{
  position:absolute;top:-14px;left:var(--confetti-x);width:8px;height:12px;
