@@ -433,7 +433,13 @@ $('auditload').onclick=async()=>{const date=key();$('auditlist').textContent='Co
 $('moremenu-toggle').onclick=()=>$('moremenu').showModal();$('closemore').onclick=()=>$('moremenu').close();
 function daybydayItems(d=key()){
  state.daybyday[d]??={};
- if(!state.daybyday[d].items){state.daybyday[d].items=[];}
+ let initialized=false;
+ if(!state.daybyday[d].items?.length&&!state.daybyday[d].templateInitialized){
+  const weekday=new Date(d+'T12:00:00').getDay();
+  state.daybyday[d].items=(DayByDay.weekly[DayByDay.days[weekday]]||[]).map((x,i)=>({id:'model-'+i,time:x.t,name:x.n,details:x.d,category:x.c.replace('cat-',''),done:false}));
+  state.daybyday[d].templateInitialized=true;initialized=true;
+ }else if(state.daybyday[d].items?.length){state.daybyday[d].templateInitialized=true;}
+ state.daybyday[d].items??=[];
  const routines=state.daybyday['2000-01-02']?.routines||[];
  const weekday=String(new Date(d+'T12:00:00').getDay());
  let added=false;
@@ -442,7 +448,7 @@ function daybydayItems(d=key()){
   if(state.daybyday[d].items.length>=100)break;
   const {from,repeat,...item}=routine;state.daybyday[d].items.push({...item,done:false});added=true;
  }
- if(added)persist();
+ if(added||initialized)persist();
  return state.daybyday[d].items;
 }
 const daybydayCategories={rest:'Descanso e rotina',health:'Saúde',study:'Estudos',work:'Trabalho',self:'Autocuidado',english:'Idiomas',pt:'Português',cook:'Cozinha'};

@@ -57,6 +57,7 @@
     return data;
   }
   function validateDaybyday(v){
+    if(v?.templateInitialized!==undefined&&typeof v.templateInitialized!=='boolean')throw Error('Estado de rotina inválido.');
     const model=typeof module==='object'&&module.exports?require('./platform-model.js'):root.DaybydayModel;
     if(v?.platform!==undefined)model.validateDaily(v.platform);
     if(v?.userPlan!==undefined)model.validatePlan(v.userPlan);
@@ -69,7 +70,7 @@
       for(const routine of v.routines)if(!routine||typeof routine.from!=='string'||!/^20[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(routine.from)||!['daily','0','1','2','3','4','5','6'].includes(routine.repeat))throw Error('Repetição de rotina inválida.');
       validateDaybyday({items:v.routines});
     }
-    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines','finance','wellness','platform','userPlan'].includes(k)))throw Error('DayByDay inválido.');
+    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines','templateInitialized','finance','wellness','platform','userPlan'].includes(k)))throw Error('DayByDay inválido.');
     if(v.items!==undefined){
       if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
     const ids=new Set();
