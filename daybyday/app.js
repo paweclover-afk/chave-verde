@@ -444,9 +444,14 @@ function daybydayItems(d=key()){
  const weekday=String(new Date(d+'T12:00:00').getDay());
  let added=false;
  for(const routine of routines){
-  if(d<routine.from||state.daybyday[d].skippedRoutines?.includes(routine.id)||!(routine.repeat==='daily'||routine.repeat===weekday)||state.daybyday[d].items.some(item=>item.id===routine.id))continue;
-  if(state.daybyday[d].items.length>=100)break;
-  const {from,repeat,...item}=routine;state.daybyday[d].items.push({...item,done:false});added=true;
+  if(d<routine.from||state.daybyday[d].skippedRoutines?.includes(routine.id)||!(routine.repeat==='daily'||routine.repeat===weekday))continue;
+  const {from,repeat,replacesId,replacesName,...item}=routine;
+  const existing=state.daybyday[d].items.find(x=>x.id===routine.id);
+  if(existing){const next={...item,done:existing.done};if(JSON.stringify(existing)!==JSON.stringify(next)){Object.assign(existing,next);added=true;}continue;}
+  const replaced=replacesId?state.daybyday[d].items.find(x=>x.id===replacesId&&x.name===replacesName):null;
+  if(!replaced&&state.daybyday[d].items.length>=100)break;
+  if(replaced)state.daybyday[d].items=state.daybyday[d].items.filter(x=>x!==replaced);
+  state.daybyday[d].items.push({...item,done:replaced?.done||false});added=true;
  }
  if(added||initialized)persist();
  return state.daybyday[d].items;
@@ -488,13 +493,16 @@ function editDaybyday(item){
  category.setAttribute('aria-label','Categoria');
  for(const [value,title] of Object.entries(daybydayCategories)){const option=el('option',title);option.value=value;category.append(option);}
  category.value=item?.category||'rest';label.append(category);form.append(label);
- const repeatLabel=el('label','Repetir'),repeat=el('select');repeat.setAttribute('aria-label','Repetir');
- for(const [value,title] of [['once','Somente nesta data'],['daily','Todos os dias'],['1','Toda segunda-feira'],['2','Toda terça-feira'],['3','Toda quarta-feira'],['4','Toda quinta-feira'],['5','Toda sexta-feira'],['6','Todo sábado'],['0','Todo domingo']]){
-  const option=el('option',title);option.value=value;repeat.append(option);
+ const scope=el('fieldset',undefined,'db-repeat-options');scope.append(el('legend','Aplicar em'));
+ const repeat=el('select');repeat.setAttribute('aria-label','Dia da semana');
+ for(const [value,title]of [['1','Toda segunda-feira'],['2','Toda terça-feira'],['3','Toda quarta-feira'],['4','Toda quinta-feira'],['5','Toda sexta-feira'],['6','Todo sábado'],['0','Todo domingo']]){const option=el('option',title);option.value=value;repeat.append(option);}
+ repeat.value=String(new Date(d+'T12:00:00').getDay());repeat.hidden=true;
+ let mode='once';
+ for(const [value,title]of [['once','Só este dia'],['daily','Todos os dias'],['weekly','Dia específico da semana']]){
+  const label=el('label'),radio=el('input');radio.type='radio';radio.name='activity-scope';radio.value=value;radio.checked=value==='once';radio.onchange=()=>{mode=value;repeat.hidden=value!=='weekly';};label.append(radio,document.createTextNode(title));scope.append(label);
  }
- repeatLabel.append(repeat);
- if(!item)form.append(repeatLabel);
- form.append(el('p',item?'A edição vale para '+dateLabel(d)+'.':'A rotina começa a partir de '+dateLabel(d)+'. Cada dia terá suas próprias marcações.','smallnote'));
+ scope.append(repeat);form.append(scope);
+ form.append(el('p',item?'Só este dia altera apenas '+dateLabel(d)+'. Todos os dias aplica a mudança a partir dessa data, sem alterar os dias anteriores.':'A repetição começa a partir de '+dateLabel(d)+'. Cada dia tem seu próprio check.','smallnote'));
  const actions=el('div',undefined,'actions'),cancel=el('button','Cancelar','secondary'),save=el('button','Salvar atividade','primary'),error=el('p',undefined,'smallnote');
  error.setAttribute('role','status');cancel.type='button';cancel.onclick=()=>dialog.close();save.type='submit';
  actions.append(cancel,save);form.append(error,actions);dialog.append(form);document.body.append(dialog);dialog.onclose=()=>dialog.remove();
@@ -504,16 +512,23 @@ function editDaybyday(item){
   if(!name.value.trim()){name.setCustomValidity('Informe o nome da atividade.');name.reportValidity();return;}
   const items=daybydayItems(d);
   if(!item&&items.length>=100){error.textContent='Limite de 100 atividades nesta data.';return;}
+  const configuration=structuredClone(state.daybyday['2000-01-02']||{items:[],routines:[]});configuration.routines??=[];
+  const series=item?configuration.routines.find(r=>r.id===item.id):null;
   const record={id:item?.id||crypto.randomUUID(),name:name.value.trim(),time:time.value,details:details.value.trim(),category:category.value,done:item?.done||false};
-  if(!item&&repeat.value!=='once'){
-   const configuration=state.daybyday['2000-01-02']||{items:[],routines:[]};
-   if((configuration.routines||[]).length>=50){error.textContent='Limite de 50 rotinas atingido.';return;}
-   configuration.routines??=[];
-   configuration.routines.push({...record,from:d,repeat:repeat.value});
-   state.daybyday['2000-01-02']=configuration;
-   daybydayItems(d);
-  }else state.daybyday[d].items=item?items.map(x=>x.id===item.id?record:x):[...items,record];
-  persist();dialog.close();switchView('daybyday');toast(repeat.value==='once'?'Atividade salva.':'Rotina salva e sincronizando.');
+  if(mode!=='once'){
+   if(!series&&configuration.routines.length>=50){error.textContent='Limite de 50 rotinas atingido.';return;}
+   if(item&&!series)record.id=crypto.randomUUID();
+   const routine={...record,done:false,from:d,repeat:mode==='daily'?'daily':repeat.value,...(series?.replacesId?{replacesId:series.replacesId,replacesName:series.replacesName}:item&&!series?{replacesId:item.id,replacesName:item.name}:{})};
+   configuration.routines=configuration.routines.filter(r=>r.id!==record.id);configuration.routines.push(routine);state.daybyday['2000-01-02']=configuration;
+   if(state.daybyday[d].skippedRoutines)state.daybyday[d].skippedRoutines=state.daybyday[d].skippedRoutines.filter(id=>id!==record.id);
+   if(item)state.daybyday[d].items=items.map(x=>x.id===item.id?record:x);
+   for(const date of new Set([d,...Object.keys(state.daybyday).filter(date=>date>=d)]))daybydayItems(date);
+  }else{
+   state.daybyday[d].items=item?items.map(x=>x.id===item.id?record:x):[...items,record];
+   if(series){state.daybyday[d].skippedRoutines??=[];if(!state.daybyday[d].skippedRoutines.includes(item.id))state.daybyday[d].skippedRoutines.push(item.id);}
+  }
+  if(!persist()){error.textContent='Não foi possível guardar a alteração. Confira a sincronização antes de fechar.';return;}
+  dialog.close();switchView('daybyday');toast(mode==='once'?'Atividade salva só neste dia.':'Rotina salva a partir desta data.');
  };
  name.oninput=()=>name.setCustomValidity('');dialog.showModal();
 }

@@ -68,6 +68,7 @@
     if(v?.routines!==undefined){
       if(!Array.isArray(v.routines)||v.routines.length>50)throw Error('Limite de 50 rotinas atingido.');
       for(const routine of v.routines)if(!routine||typeof routine.from!=='string'||!/^20[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(routine.from)||!['daily','0','1','2','3','4','5','6'].includes(routine.repeat))throw Error('Repetição de rotina inválida.');
+      for(const routine of v.routines)if(routine.replacesId!==undefined&&(typeof routine.replacesId!=='string'||routine.replacesId.length>100||typeof routine.replacesName!=='string'||routine.replacesName.length>160))throw Error('Origem da rotina inválida.');
       validateDaybyday({items:v.routines});
     }
     if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines','templateInitialized','finance','wellness','platform','userPlan'].includes(k)))throw Error('DayByDay inválido.');

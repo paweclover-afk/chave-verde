@@ -48,3 +48,9 @@ body[data-screen=overview] #home-online:before{background:var(--ink)}
 .meal-completion-toggle[aria-checked=true] .meal-check-icon{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .meal-completed{border-left:3px solid var(--ink);padding-left:16px}
 @media(max-width:600px){.meal-heading{display:block}.meal-completion-toggle{width:100%;margin:4px 0 14px}}
+
+.db-repeat-options{border:1px solid var(--line);border-radius:12px;padding:14px;margin:18px 0}
+.db-repeat-options legend{padding:0 7px;font-weight:700}
+.db-repeat-options label{display:flex;align-items:center;gap:10px;min-height:44px;margin:4px 0;cursor:pointer}
+.db-repeat-options input[type=radio]{width:22px;height:22px;margin:0;accent-color:var(--ink);flex:none}
+.db-repeat-options select{margin-top:10px}
