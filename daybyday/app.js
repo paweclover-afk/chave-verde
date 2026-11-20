@@ -433,6 +433,10 @@ $('auditload').onclick=async()=>{const date=key();$('auditlist').textContent='Co
 $('moremenu-toggle').onclick=()=>$('moremenu').showModal();$('closemore').onclick=()=>$('moremenu').close();
 function daybydayItems(d=key()){
  state.daybyday[d]??={};
+ const dow=new Date(d+'T12:00:00').getDay();
+ const excluded=name=>((dow===0||dow===6)&&/^escola(?:\s|$)/i.test(name))||(dow===0&&/^academia(?:\s|$)/i.test(name));
+ let corrected=false;
+ if(d>=T.dateKey(new Date())&&state.daybyday[d].items){const before=state.daybyday[d].items.length;state.daybyday[d].items=state.daybyday[d].items.filter(x=>x.done||!excluded(x.name));corrected=before!==state.daybyday[d].items.length;}
  let initialized=false;
  if(!state.daybyday[d].items?.length&&!state.daybyday[d].templateInitialized){
   const weekday=new Date(d+'T12:00:00').getDay();
@@ -444,7 +448,7 @@ function daybydayItems(d=key()){
  const weekday=String(new Date(d+'T12:00:00').getDay());
  let added=false;
  for(const routine of routines){
-  if(d<routine.from||state.daybyday[d].skippedRoutines?.includes(routine.id)||!(routine.repeat==='daily'||routine.repeat===weekday))continue;
+  if((d>=T.dateKey(new Date())&&excluded(routine.name))||d<routine.from||state.daybyday[d].skippedRoutines?.includes(routine.id)||!(routine.repeat==='daily'||routine.repeat===weekday))continue;
   const {from,repeat,replacesId,replacesName,...item}=routine;
   const existing=state.daybyday[d].items.find(x=>x.id===routine.id);
   if(existing){const next={...item,done:existing.done};if(JSON.stringify(existing)!==JSON.stringify(next)){Object.assign(existing,next);added=true;}continue;}
@@ -453,7 +457,7 @@ function daybydayItems(d=key()){
   if(replaced)state.daybyday[d].items=state.daybyday[d].items.filter(x=>x!==replaced);
   state.daybyday[d].items.push({...item,done:replaced?.done||false});added=true;
  }
- if(added||initialized)persist();
+ if(added||initialized||corrected)persist();
  return state.daybyday[d].items;
 }
 const daybydayCategories={rest:'Descanso e rotina',health:'Saúde',study:'Estudos',work:'Trabalho',self:'Autocuidado',english:'Idiomas',pt:'Português',cook:'Cozinha'};

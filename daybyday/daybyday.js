@@ -83,7 +83,7 @@ const weekly = {
     {t:"06:45",n:"Café + Duolingo",c:"cat-english",d:""},
     {t:"07:15",n:"Flashcards + Shadowing + IA",c:"cat-english",d:""},
     {t:"08:00",n:"Academia",c:"cat-health",d:"Treino — Sábado"},
-    {t:"09:00",n:"Escola (Inglês)",c:"cat-study",d:"Se houver aula"},
+
     {t:"12:10",n:"Almoço + Notícias",c:"cat-pt",d:""},
     {t:"13:00",n:"Tempo livre / Lutar?",c:"cat-health",d:"Buscar aula de luta"},
     {t:"17:00",n:"Trabalho",c:"cat-work",d:"Se trabalhar; senão: curso"},
