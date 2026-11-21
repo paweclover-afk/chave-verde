@@ -1,7 +1,7 @@
 (function(){
  'use strict';
  const status=document.getElementById('cloudstatus'),login=document.getElementById('loginpanel'),shell=document.getElementById('app-shell');
- const revisions={},synced={},pending={};let busy=false,blocked=false,cacheKey='',owner='',timer,lastBackup=null;
+ const revisions={},synced={},pending={},extras={};let busy=false,blocked=false,cacheKey='',owner='',timer,lastBackup=null;
  function canonical(v){if(Array.isArray(v))return v.map(canonical);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])]));return v;}
  const fingerprint=v=>JSON.stringify(canonical(v));
  function badge(text,kind=''){status.textContent=text;status.dataset.kind=kind;document.getElementById('retrycloud').textContent=blocked?'Atualizar registros':'Sincronizar';}
@@ -49,11 +49,12 @@
  function saveQueue(){try{localStorage.setItem(cacheKey,JSON.stringify({owner,pending}));return true;}catch{badge('Não foi possível guardar alterações neste aparelho. Exporte um backup.','error');return false;}}
  function collect(backup){
    const s=backup.state,days=new Set([...Object.keys(s.agenda),...Object.keys(s.water),...Object.keys(s.mobility),...Object.keys(s.mealchoices),...Object.keys(s.selections),...Object.keys(s.notes||{}),...Object.keys(s.daybyday||{}),...Object.keys(s.foodPlans||{}),...backup.sessions.map(x=>x.date),...(s.finance?[Tracker.financeDay]:[])]),out={};
-   for(const d of days){const dow=new Date(d+'T12:00:00').getDay();out[d]={agenda:(s.agenda[d]||[]).map(e=>({...e,id:String(e.id),done:!!e.done})),water:s.water[d]||0,mobility:s.mobility[d]||Array(6).fill(false),mealchoices:s.mealchoices[d]||[0,3,5,6],selection:s.selections[d]||window.PLAN.workouts.find(w=>w.day===dow)?.id||'off',sessions:backup.sessions.filter(x=>x.date===d),notes:s.notes?.[d]||'',trainingTime:s.trainingTime||'19:30',...(s.daybyday?.[d]?{daybyday:s.daybyday[d]}:{}),...(s.foodPlans?.[d]?{foodPlan:s.foodPlans[d]}:{}),...(s.finance&&d===Tracker.financeDay?{finance:s.finance}:{})};}
+   for(const d of days){const dow=new Date(d+'T12:00:00').getDay();out[d]={...(extras[d]||{}),agenda:(s.agenda[d]||[]).map(e=>({...e,id:String(e.id),done:!!e.done})),water:s.water[d]||0,mobility:s.mobility[d]||Array(6).fill(false),mealchoices:s.mealchoices[d]||[0,3,5,6],selection:s.selections[d]||window.PLAN.workouts.find(w=>w.day===dow)?.id||'off',sessions:backup.sessions.filter(x=>x.date===d),notes:s.notes?.[d]||'',trainingTime:s.trainingTime||'19:30',...(s.daybyday?.[d]?{daybyday:s.daybyday[d]}:{}),...(s.foodPlans?.[d]?{foodPlan:s.foodPlans[d]}:{}),...(s.finance&&d===Tracker.financeDay?{finance:s.finance}:{})};}
    return out;
  }
  function queueState(backup){lastBackup=backup;const days=collect(backup);for(const [day,payload] of Object.entries(days)){const text=fingerprint(payload);if(pending[day]&&fingerprint(pending[day].payload)===text)continue;if(synced[day]===text&&!pending[day])continue;pending[day]={payload:structuredClone(payload),event:crypto.randomUUID(),revision:revisions[day]||0,base:pending[day]?.base||(synced[day]?JSON.parse(synced[day]):{})};}const ok=saveQueue();if(!ok)return false;if(blocked){badge('Há um conflito entre aparelhos. Novas alterações guardadas neste aparelho. Use Atualizar registros para recuperar.','error');return true;}if(Object.keys(pending).length){badge('Salvo neste aparelho · aguardando envio…','pending');clearTimeout(timer);timer=setTimeout(flush,400);}return ok;}
  function applyRemoteDay(day,payload){
+   extras[day]=Object.fromEntries(["importedTraining","importMeta","importReceipt"].filter(k=>payload[k]!==undefined).map(k=>[k,structuredClone(payload[k])]));
    const state=window.RitmoCloud?.initialState;
    if(!state)return;
    for(const [field,value] of Object.entries({agenda:payload.agenda||[],water:payload.water||0,mobility:payload.mobility||Array(6).fill(false),mealchoices:payload.mealchoices||[0,3,5,6],selections:payload.selection||'off',notes:payload.notes||''}))state[field][day]=value;
@@ -109,14 +110,14 @@
    try{
     let data=await api('load');let greeting=null;try{greeting=(await api('message',{event:crypto.randomUUID()})).message;if(greeting&&!greeting.requiresAck)data=await api('load');}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
     const state={agenda:{},water:{},mobility:{},mealchoices:{},selections:{},notes:{},daybyday:{},foodPlans:{},trainingTime:'19:30',sessions:[]};
-    for(const row of data.days){revisions[row.day]=row.revision;synced[row.day]=fingerprint(row.payload);}
+    for(const row of data.days){extras[row.day]=Object.fromEntries(["importedTraining","importMeta","importReceipt"].filter(k=>row.payload[k]!==undefined).map(k=>[k,structuredClone(row.payload[k])]));revisions[row.day]=row.revision;synced[row.day]=fingerprint(row.payload);}
     try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.owner===owner){for(const [day,item] of Object.entries(cached.pending||{})){if(fingerprint(item.payload)===synced[day])continue;pending[day]=item; }}}catch{badge('Não foi possível ler alterações locais. Exporte um backup antes de sair.','error');}
     try{await reconcilePending(data);}catch(conflict){blocked=true;badge(conflict.message,'error');}
     const rows=new Map(data.days.map(r=>[r.day,r.payload]));for(const [day,item] of Object.entries(pending))rows.set(day,item.payload);
     for(const [day,p] of rows){state.agenda[day]=p.agenda||[];state.water[day]=p.water||0;state.mobility[day]=p.mobility||Array(6).fill(false);state.mealchoices[day]=p.mealchoices||[0,3,5,6];state.selections[day]=p.selection||'off';state.notes[day]=p.notes||'';if(p.daybyday)state.daybyday[day]=p.daybyday;if(p.foodPlan)state.foodPlans[day]=p.foodPlan;if(p.finance&&day===Tracker.financeDay)state.finance=p.finance;state.sessions.push(...(p.sessions||[]));state.trainingTime=p.trainingTime||'19:30';}
     window.RitmoCloud={initialState:state,queueState,flush,recoverConflict,pending:()=>Object.keys(pending).length,blocked:()=>blocked,audit:day=>api('audit&day='+encodeURIComponent(day))};
     document.getElementById('accountname').textContent=data.user.email;login.hidden=true;shell.hidden=true;document.getElementById('app-loading').hidden=false;
-    await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js?v=compact-celebration';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;window.scrollTo({top:0,left:0,behavior:'instant'});
+    await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js?v=pdf-import-1';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;window.scrollTo({top:0,left:0,behavior:'instant'});
     const daybyday=document.getElementById('daybyday');
     daybyday.prepend(countdown);
     if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent=greeting.requiresAck?'Já li a mensagem':'Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
@@ -162,6 +163,7 @@
    try{
      const data=await api('load');
      if(busy||blocked||Object.keys(pending).length||!window.canRefreshRitmo?.())return;
+     if(fingerprint(data.plan)!==fingerprint(window.PLAN)){location.reload();return;}
      let changed=false;
      for(const row of data.days)if(row.revision!==(revisions[row.day]||0)){
        applyRemoteDay(row.day,row.payload);revisions[row.day]=row.revision;synced[row.day]=fingerprint(row.payload);changed=true;

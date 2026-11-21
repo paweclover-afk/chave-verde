@@ -1,0 +1,18 @@
+.plan-import-dialog{box-sizing:border-box;width:min(620px,calc(100vw - 24px));max-height:90dvh;overflow:auto;background:var(--card,#151215);color:var(--ink,#f7edf3);border:1px solid var(--line,#41313b);border-radius:18px;padding:20px}
+.plan-import-dialog::backdrop{background:#0009}
+.plan-import-dialog h2{font-size:22px;margin:0 0 12px}
+.plan-import-dialog label{display:grid;gap:7px;margin:12px 0;font-size:14px;line-height:1.5}
+.plan-import-dialog input,.plan-import-dialog textarea,.plan-import-dialog select{box-sizing:border-box;width:100%;max-width:100%;padding:10px;font:inherit;font-size:16px;border:1px solid var(--line,#41313b);border-radius:9px;background:var(--bg,#090909);color:var(--ink,#f7edf3);min-height:44px}
+.plan-import-dialog textarea{min-height:110px;resize:vertical}
+.plan-import-dialog input[type=checkbox]{width:22px;min-height:22px;accent-color:#f9a8d4}
+.plan-import-dialog .plan-import-check{display:flex;align-items:flex-start;gap:10px}
+.plan-import-dialog button{min-height:46px;margin:8px 0;padding:10px 14px;width:100%;font:inherit;font-weight:700;white-space:normal}
+.plan-import-dialog fieldset{min-width:0;margin:16px 0;padding:12px;border:1px solid var(--line,#41313b);border-radius:12px}
+.plan-import-dialog legend{font-weight:700;padding:0 6px}
+.plan-import-dialog details{margin:12px 0}.plan-import-dialog summary{cursor:pointer;font-weight:600;line-height:1.5}
+.plan-import-dialog pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:12px;line-height:1.5}
+.plan-import-status{font-size:14px;line-height:1.6;white-space:pre-wrap}
+[data-plan-import]{min-height:44px;margin:8px 0;white-space:normal}
+.plan-import-header{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-20px;background:var(--card,#151215);z-index:2;padding:12px 0}
+.plan-import-header h2{margin:0}
+.plan-import-header button{flex:0 0 44px;width:44px;min-height:44px;margin:0}

@@ -71,7 +71,7 @@
       for(const routine of v.routines)if(routine.replacesId!==undefined&&(typeof routine.replacesId!=='string'||routine.replacesId.length>100||typeof routine.replacesName!=='string'||routine.replacesName.length>160))throw Error('Origem da rotina inválida.');
       validateDaybyday({items:v.routines});
     }
-    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines','templateInitialized','finance','wellness','platform','userPlan'].includes(k)))throw Error('DayByDay inválido.');
+    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines','templateInitialized','finance','wellness','platform','userPlan','importMeta','importReceipt'].includes(k)))throw Error('DayByDay inválido.');
     if(v.items!==undefined){
       if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
     const ids=new Set();

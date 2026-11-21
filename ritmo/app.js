@@ -10,13 +10,13 @@ if(!state||!state.agenda||!Array.isArray(state.sessions)){
  for(const [d,v] of Object.entries(legacy.water||{})){const parts=d.split('-');if(parts.length===3)state.water[`${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`]=v;}
 }
 let selected=new Date(),view='overview',editing=null,dirty=false;
-let historyExercise=P.workouts[0].exercises[4].id,historyContext='';
+let historyExercise=(P.workouts.flatMap(w=>w.exercises)[4]||P.workouts.flatMap(w=>w.exercises)[0])?.id||'',historyContext='';
 const drafts=new Map(),allExercises=P.workouts.flatMap(w=>w.exercises.map(e=>({...e,workout:w.id,workoutTitle:w.title}))),exerciseById=new Map(allExercises.map(e=>[e.id,e]));
 let toastTimer;
 function toast(msg,undo){clearTimeout(toastTimer);$('toast').replaceChildren(document.createTextNode(msg));if(undo){const b=el('button','Desfazer','undo');b.onclick=()=>{undo();$('toast').hidden=true;};$('toast').append(b);}$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,undo?15000:5000);}
 function persist(){return window.RitmoCloud.queueState(backup());}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
-const key=()=>T.dateKey(selected),dayWorkout=()=>P.workouts.find(w=>w.day===selected.getDay()),chosenWorkout=()=>P.workouts.find(w=>w.id===(state.selections[key()]||dayWorkout()?.id));
+const key=()=>T.dateKey(selected),dayWorkout=()=>P.workouts.find(w=>!w.archived&&w.day===selected.getDay()),chosenWorkout=()=>{const id=state.selections[key()];if(id==='off')return undefined;const w=P.workouts.find(w=>w.id===id);if(w&&(!w.archived||state.sessions.some(s=>s.date===key()&&w.exercises.some(e=>e.id===s.exercise))))return w;return dayWorkout();};
 function switchView(v){if(v==='financeiro')v='finance';if($('moremenu').open)$('moremenu').close();view=v;history.replaceState(null,'','#'+v);render();document.querySelector('#'+v).scrollIntoView({behavior:'auto',block:'start'});}
 function changeDate(d){if(Number.isNaN(d.getTime()))return;selected=d;render();}
 function agenda(){
@@ -155,7 +155,7 @@ function renderAgenda(){
 }
 function openActivity(item){editing=item||null;$('modaltitle').textContent=item?'Editar atividade':'Uma nova atividade';$('form').reset();$('name').value=item?.name||'';$('time').value=item?.time||state.trainingTime;$('type').value=item?.type||'workout';$('details').value=item?.details||'';$('modal').showModal();}
 function renderTraining(){
- const w=chosenWorkout();renderSessionNav(w);$('workouttabs').replaceChildren();for(const t of [...P.workouts,{id:'off',title:'Sábado / domingo · cardio'}]){const b=el('button',t.id==='off'?t.title:['','Segunda','Terça','Quarta','Quinta','Sexta'][t.day]+' · '+t.title,(w?.id||'off')===t.id?'active':'');b.setAttribute('aria-pressed',(w?.id||'off')===t.id);b.onclick=()=>{state.selections[key()]=t.id;persist();render();};$('workouttabs').append(b);}
+ const w=chosenWorkout();renderSessionNav(w);$('workouttabs').replaceChildren();for(const t of [...P.workouts.filter(t=>!t.archived||t.id===w?.id),{id:'off',title:'Descanso / cardio'}]){const b=el('button',t.id==='off'?t.title:(t.archived?'Histórico':['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][t.day])+' · '+t.title,(w?.id||'off')===t.id?'active':'');b.setAttribute('aria-pressed',(w?.id||'off')===t.id);b.onclick=()=>{state.selections[key()]=t.id;persist();render();};$('workouttabs').append(b);}
  const content=$('workoutcontent');content.replaceChildren();
  if(!w){content.append(el('h2','OFF de musculação','trainingheading'),el('p','Sábado e domingo: cardio de 40 min, 120–140 bpm.','cardio'),el('p','Se realizou outro treino nesta data, selecione-o acima para registrar.','smallnote'));return;}
  const heading=el('div',undefined,'trainingheading');heading.append(el('h2','Treino '+w.id.slice(1)+' · '+w.title),el('p','Prescrição de Lucas Ferreira · mantenha as orientações do plano original.','smallnote'));content.append(heading,el('p','Cardio do plano: 30 min · 120–140 bpm','cardio'),el('p','3. Em cada exercício, digite o peso que usou e as repetições que fez. Depois toque em Salvar exercício. Se não realizou uma série, deixe os campos dela vazios.','smallnote'));
@@ -390,7 +390,7 @@ function exportEvolution(){
  download(xml,'ritmo-evolucao-cargas-'+T.dateKey(new Date())+'.xml','application/vnd.ms-excel;charset=utf-8');
 }
 $('exportevolution').onclick=exportEvolution;
-function backup(){return {app:'ritmo-leonarda',version:2,exportedAt:new Date().toISOString(),state:{...state,sessions:undefined},sessions:state.sessions,legacy};}
+function backup(){return {app:'ritmo-leonarda',version:2,plan:P,exportedAt:new Date().toISOString(),state:{...state,sessions:undefined},sessions:state.sessions,legacy};}
 function exportBackup(){download(JSON.stringify(backup(),null,2),'ritmo-backup-'+T.dateKey(new Date())+'.json','application/json');toast('Backup exportado. Ele contém seus registros pessoais.');}
 async function importBackup(event){const file=event.target.files[0];if(!file)return;try{if(file.size>15*1024*1024)throw Error('Use um arquivo JSON de até 15 MB.');const data=T.validateBackup(JSON.parse(await file.text()),P);if(!confirm('Restaurar este backup? Os registros serão combinados. Em datas e exercícios repetidos, os dados do arquivo serão usados. Um backup dos dados atuais será baixado antes.'))return;exportBackup();const sessions=new Map(state.sessions.map(s=>[s.date+'|'+s.exercise,s]));for(const s of data.sessions)sessions.set(s.date+'|'+s.exercise,{...s,rows:T.normalize(s.rows,exerciseById.get(s.exercise).timed)});for(const prop of ['agenda','water','mobility','mealchoices','selections','notes','daybyday','foodPlans'])state[prop]={...state[prop],...data.state[prop]};if(data.state.finance!==undefined)state.finance=data.state.finance;state.trainingTime=data.state.trainingTime;state.sessions=[...sessions.values()];legacy={...legacy,...data.legacy};drafts.clear();dirty=false;if(persist()){render();toast('Backup restaurado e combinado com os registros atuais.');}}catch(error){toast('Não foi possível restaurar: '+error.message);}finally{event.target.value='';}}
 $('exporthistory').onclick=()=>{const records=state.sessions.filter(s=>s.exercise===historyExercise&&T.context(s)===historyContext).sort((a,b)=>a.date.localeCompare(b.date));const quote=s=>'"'+String(s??'').replace(/^[=+@-]/,"'$&").replaceAll('"','""')+'"',rows=[['Data','Treino','Exercício','Equipamento','Referência','Série','Carga kg','Repetições ou segundos','Unidade','Observações']];const e=exerciseById.get(historyExercise);for(const s of records)s.rows.forEach((r,i)=>{if(r.reps!==null)rows.push([s.date,e.workout,e.name,s.variant,s.basis,i+1,r.kg,r.reps,e.timed?'segundos':'repetições',s.notes]);});download('\ufeff'+rows.map(row=>row.map(quote).join(';')).join('\r\n'),'ritmo-historico-'+historyExercise+'.csv','text/csv;charset=utf-8');};
@@ -422,7 +422,7 @@ $('moremenu-toggle').onclick=()=>$('moremenu').showModal();$('closemore').onclic
 function daybydayItems(d=key()){
  state.daybyday[d]??={};
  if(!state.daybyday[d].items){
- const dow=new Date(d+'T12:00:00').getDay(),w=P.workouts.find(x=>x.day===dow);
+ const dow=new Date(d+'T12:00:00').getDay(),w=P.workouts.find(x=>!x.archived&&x.day===dow);
  state.daybyday[d].items=[
  {id:'breakfast',time:'11:00',name:'Refeição 1',details:'Consultar quantidades e alternativas na aba Alimentação.',category:'health'},
  {id:'lunch',time:'16:00',name:'Refeição 2',details:'Seguir as porções do plano alimentar.',category:'health'},
@@ -567,3 +567,5 @@ function renderHomeLayout(){
 
 $('home-today').onclick=()=>changeDate(new Date());
 new MutationObserver(()=>{if(view==='overview'){$('home-online').textContent=$('cloudstatus').dataset.kind==='saved'?'Salvo online':$('cloudstatus').dataset.kind==='error'?'Verificar sincronização':'Salvando…';}}).observe($('cloudstatus'),{attributes:true,childList:true,subtree:true});
+
+window.PlanImportBridge={before:async()=>{if(dirty||drafts.size)throw Error("Salve suas séries antes de atualizar o plano.");await window.RitmoCloud.flush();}};

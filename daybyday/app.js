@@ -575,3 +575,5 @@ function renderHomeLayout(){
 
 $('home-today').onclick=()=>changeDate(new Date());
 new MutationObserver(()=>{if(view==='overview'){$('home-online').textContent=$('cloudstatus').dataset.kind==='saved'?'Salvo online':$('cloudstatus').dataset.kind==='error'?'Verificar sincronização':'Salvando…';}}).observe($('cloudstatus'),{attributes:true,childList:true,subtree:true});
+
+window.PlanImportBridge={before:async()=>{if(dirty||drafts.size)throw Error("Salve suas séries antes de atualizar o plano.");await window.RitmoCloud.flush();}};
