@@ -120,7 +120,7 @@
     await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js?v=hold-2s';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;window.scrollTo({top:0,left:0,behavior:'instant'});
     const daybyday=document.getElementById('daybyday');
     daybyday.prepend(countdown);
-    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent=greeting.presentationKey?'Li a mensagem':greeting.requiresAck?'Já li a mensagem':'Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
+    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent=greeting.presentationKey?'Já li a mensagem':greeting.requiresAck?'Já li a mensagem':'Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
       const error=document.createElement('p');
       error.setAttribute('role','status');
       dialog.addEventListener('cancel',event=>event.preventDefault());
