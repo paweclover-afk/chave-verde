@@ -79,3 +79,36 @@ body[data-screen=overview] .stats .card:first-child .label{max-width:calc(100% -
 .db-item .routine-drag{flex:0 0 44px;width:44px;min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--muted);font-size:26px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .db-item.routine-dragging{outline:2px solid var(--home-accent,var(--green));box-shadow:0 6px 24px #0005;opacity:.85;z-index:5}
 .db-item.routine-dragging .routine-drag{cursor:grabbing;color:var(--home-accent,var(--green))}
+/* Mobile proportions: reserve one compact control column, keeping the text wide. */
+@media(max-width:900px){
+ body[data-screen=overview] main{gap:12px;padding:14px 14px calc(96px + env(safe-area-inset-bottom,0px))}
+ body[data-screen=overview] .home-date{gap:8px}
+ body[data-screen=overview] #home-day{font-size:15px;line-height:1.35}
+ body[data-screen=overview] .days{gap:4px}
+ body[data-screen=overview] .day{aspect-ratio:1;min-height:44px;padding:5px 1px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+ body[data-screen=overview] .day b{margin-top:4px;font-size:15px}
+ body[data-screen=overview] #homehero{padding:16px;gap:12px;border-radius:17px}
+ body[data-screen=overview] #homehero h2{font-size:21px;margin:8px 0 6px}
+ body[data-screen=overview] #homehero p{font-size:13px;line-height:1.45}
+ body[data-screen=overview] #starttraining{min-height:46px;border-radius:12px;font-size:15px}
+ body[data-screen=overview] .stats{gap:10px;align-items:stretch}
+ body[data-screen=overview] .stats>.card{padding:13px;border-radius:16px;display:flex;flex-direction:column}
+ body[data-screen=overview] .stats>.card:nth-child(2){display:none}
+ body[data-screen=overview] .stats>.card:nth-child(3){display:flex}
+ body[data-screen=overview] .stats .value,body[data-screen=overview] .stats>.card:nth-child(3) .value{font-size:26px;margin:12px 0 8px;line-height:1.2}
+ body[data-screen=overview] .stats .bar{margin-top:auto}
+ body[data-screen=overview] .waterbuttons{margin-top:auto;gap:3px;grid-template-columns:28px minmax(0,1fr) 58px}
+ body[data-screen=overview] .waterbuttons button{min-height:36px}
+ body[data-screen=overview] .home-percent{top:13px;right:11px}
+ body[data-screen=overview] #homechecklist .db-daily>.title{margin:6px 0 12px}
+ body[data-screen=overview] #homechecklist .db-item,body[data-screen=daybyday] #daybyday .db-item{position:relative;padding:13px 52px 13px 13px;border-radius:16px;margin-bottom:10px;gap:0;min-height:100px}
+ body[data-screen=overview] #homechecklist .db-checklabel,body[data-screen=daybyday] #daybyday .db-checklabel{gap:10px;width:100%}
+ body[data-screen=overview] #homechecklist .db-body strong,body[data-screen=daybyday] #daybyday .db-body strong{font-size:15px;line-height:1.35;margin:4px 0}
+ body[data-screen=overview] #homechecklist .db-body small,body[data-screen=daybyday] #daybyday .db-body small{font-size:12px;line-height:1.45}
+ body[data-screen=overview] #homechecklist .db-tools,body[data-screen=daybyday] #daybyday .db-tools{position:absolute;top:6px;right:5px;margin:0}
+ .db-item .routine-drag{position:absolute;right:5px;top:48px;min-height:44px;width:40px;min-width:40px;font-size:24px}
+ .db-item .home-item-menu>summary{display:grid;place-items:center;width:40px;min-height:40px;padding:0}
+ .db-item .home-item-menu[open]{position:absolute;right:0;top:0;padding:4px;border-radius:10px;background:var(--panel);box-shadow:0 4px 18px #0003}
+ .db-calendar .db-calday{aspect-ratio:1;min-height:44px;padding:5px 1px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+ .db-calendar .db-calday strong,.db-calendar .db-calday small{margin:0;line-height:1.1}
+}
