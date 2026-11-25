@@ -57,6 +57,7 @@
     return data;
   }
   function validateDaybyday(v){
+    if(v?.order!==undefined&&(!Array.isArray(v.order)||v.order.length>100||new Set(v.order).size!==v.order.length||v.order.some(id=>typeof id!=='string'||!id||id.length>100)))throw Error('Ordem das atividades inválida.');
     if(v?.celebrated!==undefined&&typeof v.celebrated!=='boolean')throw Error('Registro de comemoração inválido.');
     if(v?.skippedRoutines!==undefined&&(!Array.isArray(v.skippedRoutines)||v.skippedRoutines.length>100||v.skippedRoutines.some(id=>typeof id!=='string'||id.length>100)))throw Error('Exceções de rotina inválidas.');
     if(v?.routines!==undefined){
@@ -64,7 +65,7 @@
       for(const routine of v.routines)if(!routine||typeof routine.from!=='string'||!/^20[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(routine.from)||!['daily','0','1','2','3','4','5','6'].includes(routine.repeat))throw Error('Repetição de rotina inválida.');
       validateDaybyday({items:v.routines});
     }
-    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines','celebrated'].includes(k)))throw Error('DayByDay inválido.');
+    if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!['items','monthly','routines','skippedRoutines','celebrated','order'].includes(k)))throw Error('DayByDay inválido.');
     if(v.items!==undefined){
       if(!Array.isArray(v.items)||v.items.length>100)throw Error('Lista DayByDay inválida.');
     const ids=new Set();

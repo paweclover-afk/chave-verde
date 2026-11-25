@@ -76,3 +76,6 @@ body[data-screen=overview] .waterbuttons #cups{font-size:10px}
 @media(max-width:600px){body[data-screen=overview] #app-shell>aside{display:none}body[data-screen=overview] .stats .label{font-size:10px;letter-spacing:0}body[data-screen=overview] .stats>.card{padding:15px}body[data-screen=overview] .home-percent{top:15px;right:12px;font-size:11px}}
 body[data-screen=overview] main h1,body[data-screen=overview] main h2,body[data-screen=overview] main h3,body[data-screen=overview] main .value{font-family:"DM Sans",Arial,sans-serif}
 body[data-screen=overview] .stats .card:first-child .label{max-width:calc(100% - 35px);font-size:9px}
+.db-item .routine-drag{flex:0 0 44px;width:44px;min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--muted);font-size:26px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.db-item.routine-dragging{outline:2px solid var(--home-accent,var(--green));box-shadow:0 6px 24px #0005;opacity:.85;z-index:5}
+.db-item.routine-dragging .routine-drag{cursor:grabbing;color:var(--home-accent,var(--green))}

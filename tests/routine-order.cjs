@@ -1,0 +1,6 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const Order=require('../ritmo/routine-order.js'),Tracker=require('../ritmo/tracker.js'),{merge}=require('../ritmo/sync-merge.js');
+const items=[{id:'a',time:'07:00',done:false},{id:'b',time:'23:00',done:true},{id:'c',time:'12:00',done:false}];
+test('ordem manual prevalece sobre horário e preserva marcações',()=>{const before=structuredClone(items);assert.deepEqual(Order.sorted(items).map(x=>x.id),['a','c','b']);assert.deepEqual(Order.sorted(items,['b','a','c']).map(x=>x.id),['b','a','c']);assert.deepEqual(items,before);assert.equal(Order.sorted(items,['b'])[0].done,true);});
+test('novas atividades e ids removidos não impedem ordenar',()=>{assert.deepEqual(Order.sorted(items,['removed','b']).map(x=>x.id),['b','a','c']);assert.doesNotThrow(()=>Tracker.validateDaybyday({order:['a','b']}));assert.throws(()=>Tracker.validateDaybyday({order:['a','a']}));assert.throws(()=>Tracker.validateDaybyday({order:[3]}));});
+test('reordenar num aparelho combina com marcação em outro',()=>{const base={items,order:['a','c','b']},local=structuredClone(base),remote=structuredClone(base);local.order=['b','a','c'];remote.items[0].done=true;const result=merge(base,local,remote);assert.deepEqual(result.order,local.order);assert.equal(result.items.find(x=>x.id==='a').done,true);});
