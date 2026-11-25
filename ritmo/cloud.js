@@ -108,7 +108,7 @@
  }
  async function boot(){
    try{
-    let data=await api('load');let greeting=null;const messagesPaused=data.days.some(r=>r.day==='2026-10-29'&&r.payload.foodPlan?.message?.paused===true);try{if(messagesPaused){const presentation=await api('countdown-presentation',{event:crypto.randomUUID()});if(presentation.show){greeting=presentation.text?{text:presentation.text}:{countdownOnly:true};data=await api('load');}}else{greeting=(await api('message',{event:crypto.randomUUID()})).message;if(greeting&&!greeting.requiresAck)data=await api('load');}}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
+    let data=await api('load');let greeting=null;const messagesPaused=data.days.some(r=>r.day==='2026-10-29'&&r.payload.foodPlan?.message?.paused===true);try{if(messagesPaused){const presentation=await api('countdown-presentation',{event:crypto.randomUUID()});if(presentation.show){greeting=presentation.text?{text:presentation.text,requiresAck:presentation.requiresAck,presentationKey:presentation.presentationKey}:{countdownOnly:true};data=await api('load');}}else{greeting=(await api('message',{event:crypto.randomUUID()})).message;if(greeting&&!greeting.requiresAck)data=await api('load');}}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
     const state={agenda:{},water:{},mobility:{},mealchoices:{},selections:{},notes:{},daybyday:{},foodPlans:{},trainingTime:'19:30',sessions:[]};
     for(const row of data.days){extras[row.day]=Object.fromEntries(["importedTraining","importMeta","importReceipt"].filter(k=>row.payload[k]!==undefined).map(k=>[k,structuredClone(row.payload[k])]));revisions[row.day]=row.revision;synced[row.day]=fingerprint(row.payload);}
     try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.owner===owner){for(const [day,item] of Object.entries(cached.pending||{})){if(fingerprint(item.payload)===synced[day])continue;pending[day]=item; }}}catch{badge('Não foi possível ler alterações locais. Exporte um backup antes de sair.','error');}
@@ -120,7 +120,7 @@
     await new Promise((resolve,reject)=>{const app=document.createElement('script');app.src='app.js?v=hold-2s';app.onload=resolve;app.onerror=()=>reject(Error('Não foi possível abrir o app. Recarregue a página.'));document.body.append(app);});document.getElementById('app-loading').hidden=true;login.hidden=true;shell.hidden=false;window.scrollTo({top:0,left:0,behavior:'instant'});
     const daybyday=document.getElementById('daybyday');
     daybyday.prepend(countdown);
-    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent=greeting.requiresAck?'Já li a mensagem':'Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
+    if(greeting){const dialog=document.createElement('dialog'),title=document.createElement('h2'),text=document.createElement('p'),close=document.createElement('button');dialog.className='personal-message';title.textContent='Uma mensagem para você ❤️';text.textContent=greeting.text;text.style.whiteSpace='pre-wrap';text.style.lineHeight='1.9';close.className='primary';close.textContent=greeting.presentationKey?'Li a mensagem':greeting.requiresAck?'Já li a mensagem':'Li sua mensagem ❤️';close.type='button';if(greeting.requiresAck){
       const error=document.createElement('p');
       error.setAttribute('role','status');
       dialog.addEventListener('cancel',event=>event.preventDefault());
@@ -130,6 +130,7 @@
           const day='2026-10-29';
           await flush();
           if(busy||pending[day])throw Error('Aguarde a sincronização e tente novamente.');
+          if(greeting.presentationKey){await api('ack-countdown-presentation',{key:greeting.presentationKey,event:crypto.randomUUID()});location.reload();return;}
           const result=await api('ack-message',{id:greeting.id,event:crypto.randomUUID()});
           if(result.previousRevision===revisions[day]){
             const snapshot=JSON.parse(synced[day]);
