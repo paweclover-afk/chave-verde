@@ -108,7 +108,7 @@
  }
  async function boot(){
    try{
-    let data=await api('load');let greeting=null;try{greeting=(await api('message',{event:crypto.randomUUID()})).message;if(greeting&&!greeting.requiresAck)data=await api('load');}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
+    let data=await api('load');let greeting=null;const messagesPaused=data.days.some(r=>r.day==='2026-10-29'&&r.payload.foodPlan?.message?.paused===true);try{greeting=messagesPaused?{countdownOnly:true}:(await api('message',{event:crypto.randomUUID()})).message;if(greeting&&!greeting.requiresAck&&!greeting.countdownOnly)data=await api('load');}catch{}owner=data.user.id;cacheKey='ritmo-pending-'+owner;window.PLAN=data.plan;
     const state={agenda:{},water:{},mobility:{},mealchoices:{},selections:{},notes:{},daybyday:{},foodPlans:{},trainingTime:'19:30',sessions:[]};
     for(const row of data.days){extras[row.day]=Object.fromEntries(["importedTraining","importMeta","importReceipt"].filter(k=>row.payload[k]!==undefined).map(k=>[k,structuredClone(row.payload[k])]));revisions[row.day]=row.revision;synced[row.day]=fingerprint(row.payload);}
     try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.owner===owner){for(const [day,item] of Object.entries(cached.pending||{})){if(fingerprint(item.payload)===synced[day])continue;pending[day]=item; }}}catch{badge('Não foi possível ler alterações locais. Exporte um backup antes de sair.','error');}
@@ -143,7 +143,7 @@
         }catch(e){error.textContent=e.message;close.disabled=false;}
       };
       dialog.append(title,text,error,close);
-    }else{close.onclick=()=>dialog.close();dialog.append(title,text,close);}
+    }else{close.onclick=()=>dialog.close();if(greeting.countdownOnly){close.textContent='Continuar';dialog.setAttribute('aria-label','Progresso');dialog.append(close);}else dialog.append(title,text,close);}
     close.before(countdown);
     dialog.onclose=()=>{if(dialog.contains(countdown))daybyday.prepend(countdown);dialog.remove();window.showFinanceReminders?.(owner);};document.body.append(dialog);dialog.showModal();}else window.showFinanceReminders?.(owner);
     updateCountdown();
