@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {period,handleCountdown}=require('../lib/countdown-presentation.cjs');
+const {period,handleCountdown,welcome}=require('../lib/countdown-presentation.cjs');
 test('contagem diária renova às 4h de Londres e exceção tem turno noturno',()=>{
  assert.deepEqual(period(new Date('2026-11-25T12:00:00Z')),{date:'2026-11-25',slot:'day'});
  assert.deepEqual(period(new Date('2026-11-25T18:00:00Z')),{date:'2026-11-25',slot:'evening'});
@@ -15,5 +15,5 @@ test('limite é compartilhado entre aparelhos e permite só uma apresentação p
  async function call(){const res={status(n){this.code=n;return this;},json(body){this.body=body;return this;}};await handleCountdown({method:'POST',body:{event:'11111111-1111-4111-8111-111111111111'}},res,db,'owner');return res.body;}
  assert.deepEqual(await call(),{show:true,text:'Como usar'});assert.deepEqual(await call(),{show:false});
  t.mock.timers.tick(6*3600000);assert.deepEqual(await call(),{show:true,text:'Como usar'});assert.deepEqual(await call(),{show:false});
- t.mock.timers.tick(9*3600000);assert.deepEqual(await call(),{show:false});t.mock.timers.tick(3600000);assert.deepEqual(await call(),{show:true,text:null});assert.deepEqual(await call(),{show:false});assert.equal(writes,3);assert.equal(row.payload.foodPlan.message.suspendedSchedule[0].text,'Preservada');
+ t.mock.timers.tick(9*3600000);assert.deepEqual(await call(),{show:false});t.mock.timers.tick(3600000);assert.deepEqual(await call(),{show:true,text:welcome});assert.match(welcome,/Bom dia! Que bom te ver por aqui/);assert.deepEqual(await call(),{show:false});assert.equal(writes,3);assert.equal(row.payload.foodPlan.message.suspendedSchedule[0].text,'Preservada');
 });
