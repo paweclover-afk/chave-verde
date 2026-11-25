@@ -5,7 +5,7 @@
  function bind(list,onSave){
   const rows=()=>Array.from(list.children).filter(r=>r.dataset.routineId),ids=()=>rows().map(r=>r.dataset.routineId);
   for(const row of rows()){
-   row.tabIndex=0;row.setAttribute('aria-label',row.dataset.routineName+'. Segure por 2 segundos para arrastar. No teclado, use as setas.');
+   row.tabIndex=0;row.setAttribute('aria-label',row.dataset.routineName+'. Segure e arraste. No teclado, use as setas.');
    let suppressUntil=0;
    row.addEventListener('contextmenu',e=>e.preventDefault());row.addEventListener('dragstart',e=>e.preventDefault());
    row.addEventListener('click',e=>{if(Date.now()<suppressUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
@@ -19,7 +19,7 @@
     const up=e=>{if(touch&&Array.from(e.touches).some(t=>t.identifier===pointer)||!touch&&e.pointerId!==pointer)return;end(true);};
     const cancel=()=>end(false),hidden=()=>{if(document.hidden)cancel();};
     document.addEventListener(touch?'touchmove':'pointermove',moving,{passive:false});document.addEventListener(touch?'touchend':'pointerup',up);document.addEventListener(touch?'touchcancel':'pointercancel',cancel);root.addEventListener('blur',cancel);document.addEventListener('visibilitychange',hidden);
-    timer=setTimeout(()=>{if(!row.isConnected){end(false);return;}active=true;oldBody=document.body.style.overflow;oldHtml=document.documentElement.style.overflow;document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';row.classList.add('routine-dragging');root.navigator?.vibrate?.(25);},2000);
+    timer=setTimeout(()=>{if(!row.isConnected){end(false);return;}active=true;oldBody=document.body.style.overflow;oldHtml=document.documentElement.style.overflow;document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';row.classList.add('routine-dragging');root.navigator?.vibrate?.(25);},180);
    }
    const interactive=target=>target.closest('button,input,summary,details,a,select,textarea');
    row.addEventListener('touchstart',e=>{if(e.touches.length!==1||interactive(e.target))return;const t=e.touches[0];start(t.clientX,t.clientY,true,t.identifier);},{passive:true});
